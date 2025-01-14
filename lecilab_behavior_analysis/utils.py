@@ -91,3 +91,41 @@ def column_checker(df: pd.DataFrame, required_columns: set):
             "The dataframe must have the following columns: "
             + ", ".join(required_columns)
         )
+
+
+def get_text_from_df(df: pd.DataFrame, mouse_name: str) -> str:
+    # get the session
+    session = df.session.unique()
+    # get the date
+    date = df.date.unique()
+    # get the current training stage
+    current_training_stage = df.current_training_stage.unique()
+    # get the number of trials
+    n_trials = df.shape[0]
+    # get the number of correct trials
+    n_correct = int(df.correct.sum())
+    # get the performance
+    performance = n_correct / n_trials * 100
+    # get the water consumed
+    water = df.water.sum()
+
+    # write the text
+    text = f"""\
+    Mouse: {mouse_name}
+    Sessions: {session}
+    Dates: {date}
+    Training stages: {current_training_stage}
+    Number of trials: {n_trials}
+    Number of correct trials: {n_correct}
+    Performance: {performance:.2f}%
+    Water consumed: {water} μl
+    """
+
+    return text
+
+
+def load_example_data(mouse_name) -> pd.DataFrame:
+    outpath = "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
+    df = pd.read_csv(outpath + "/" + mouse_name + "/" + mouse_name + "_fakedata.csv", sep=";")
+
+    return df

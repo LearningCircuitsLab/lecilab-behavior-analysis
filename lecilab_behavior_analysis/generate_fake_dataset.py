@@ -44,11 +44,6 @@ def generate_fake_dataset(outfile: str) -> None:
         date = [starting_date + pd.DateOffset(days=session_counter)] * n_trials
         # generate the trial types
         correct_side = np.random.choice(["left", "right"], n_trials)
-        # generate the performance
-        prob_correct = np.min([0.5 + 0.05 * session_counter, 0.99])
-        correct = np.random.choice(
-            [True, False], n_trials, p=[prob_correct, 1 - prob_correct]
-        )
         # generate the holding time
         holding_time = np.random.choice([0.5, 1, 1.5, 2], n_trials)
         # stimulus modality
@@ -62,15 +57,29 @@ def generate_fake_dataset(outfile: str) -> None:
         if "hard" in current_training_stage_list[i]:
             difficulty = np.random.choice(["easy", "medium", "hard"], n_trials)
         else:
-            difficulty = "easy"
+            difficulty = ["easy"] * n_trials
+
+        # generate the performance and modify it according to the difficulty
+        prob_correct = np.min([0.5 + 0.03 * session_counter, 0.99])
+        correct = np.empty(n_trials)
+        prob_correctors = [1, 0.8, 0.6]
+        for k, dif in enumerate(["easy", "medium", "hard"]):
+            mask = [x==dif for x in difficulty]
+            pc = prob_correctors[k] * prob_correct
+            correct[mask] = np.random.choice(
+                [True, False], np.sum(mask), p=[pc, 1 - pc]
+            )
 
         session = [session_counter] * n_trials
+
+        water = [0] * n_trials
+        water = np.where(correct, 2, water)
 
         # create the dataframe
         df_session = pd.DataFrame(
             {
                 "current_training_stage": [current_training_stage_list[i]] * n_trials,
-                "water": [2] * n_trials,
+                "water": water,
                 "correct_side": correct_side,
                 "stimulus_modality": [stimulus_modality] * n_trials,
                 "difficulty": difficulty,
