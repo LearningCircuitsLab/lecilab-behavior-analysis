@@ -5,22 +5,27 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-from lecilab_behavior_analysis.utils import column_checker
+from lecilab_behavior_analysis.utils import column_checker, get_text_from_df
 
 
-def rasterized_calendar_plot(dates_df: pd.DataFrame) -> np.ndarray:
+def training_calendar_plot(dates_df: pd.DataFrame) -> plt.Figure:
     # make the calendar plot and convert it to an image
     column_checker(dates_df, required_columns={"trial"})
     cpfig, _ = calplot.calplot(
         data=dates_df.trial, yearlabel_kws={"fontname": "sans-serif"}
     )
-    canvas = FigureCanvasAgg(cpfig)
+
+    return cpfig
+
+
+def rasterize_plot(plot: plt.Figure) -> np.ndarray:
+    canvas = FigureCanvasAgg(plot)
     canvas.draw()
-    width, height = cpfig.get_size_inches() * cpfig.get_dpi()
+    width, height = plot.get_size_inches() * plot.get_dpi()
     image = np.frombuffer(canvas.tostring_rgb(), dtype="uint8").reshape(
         int(height), int(width), 3
     )
-    plt.close(cpfig)
+    plt.close(plot)
     return image
 
 
@@ -84,6 +89,7 @@ def performance_vs_trials_plot(
             data=stage_df, x="total_trial", y="performance_w", ax=ax, label=stage
         )
     ax.set_xlim(left=0)
+    ax.set_ylim(40, 100)
     ax.set_xlabel("Trial number")
     ax.set_ylabel("Performance")
     # horizontal line at 50%
@@ -125,6 +131,7 @@ def water_by_date_plot(water_df: pd.Series, ax: plt.Axes = None) -> plt.Axes:
         for label in ax_to_use.get_xticklabels():
             label.set_horizontalalignment("right")
         ax_to_use.spines["right"].set_visible(False)
+    ax_to_use.set_ylim(bottom=0)
     return ax_to_use
 
 
@@ -134,34 +141,9 @@ def session_summary_text(
     """
     summary of a particular session
     """
-    # if more than one session is there, raise an error
-    if df.date.nunique() > 1:
-        raise ValueError("The dataframe contains more than one session")
     if ax is None:
         ax = plt.gca()
-    # get the date
-    date = df.date.iloc[0]
-    # get the current training stage
-    current_training_stage = df.current_training_stage.iloc[0]
-    # get the number of trials
-    n_trials = df.shape[0]
-    # get the number of correct trials
-    n_correct = df.correct.sum()
-    # get the performance
-    performance = n_correct / n_trials * 100
-    # get the water consumed
-    water = df.water.sum()
-
-    # write the text
-    text = f"""\
-    Mouse: {mouse_name}
-    Date: {date}
-    Training stage: {current_training_stage}
-    Number of trials: {n_trials}
-    Number of correct trials: {n_correct}
-    Performance: {performance:.2f}%
-    Water consumed: {water} μl
-    """
+    text = get_text_from_df(df, mouse_name)
     ax.text(0, 0, text, fontsize=10)
     ax.axis("off")
     return ax
@@ -171,10 +153,14 @@ def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Ax
     if ax is None:
         ax = plt.gca()
     column_checker(df, required_columns={"correct_side", "correct"})
-    sns.countplot(data=df, x="correct_side", hue="correct", ax=ax)
+    sns.countplot(data=df, x="correct_side", hue="correct", ax=ax, hue_order=[False, True])
     ax.set_xlabel("Correct side")
     ax.set_ylabel("Number of trials")
-    ax.legend(title="Correct")
+    ax.set_ylim(top=ax.get_ylim()[1]*1.1)
+    ax.legend(["Error", "Correct"], bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=1, borderaxespad=0.0)
+    ax.get_legend().get_frame().set_linewidth(0.0)
+    ax.get_legend().set_frame_on(False)
+    # change labels of the legend
     ax.spines[["top", "right"]].set_visible(False)
     return ax
 
@@ -205,4 +191,120 @@ def repeat_or_alternate_performance_plot(
     ax.spines[["top", "right"]].set_visible(False)
     # x axis always starts at 0
     ax.set_xlim(left=0)
+    ax.set_ylim(40, 100)
+    # put the legend at the top in one row
+    ax.legend(bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0)
+    # remove box
+    ax.get_legend().get_frame().set_linewidth(0.0)
+    ax.get_legend().set_frame_on(False)
+
+    return ax
+
+
+def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    column_checker(df, required_columns={"leftward_evidence", "leftward_choices"})
+    sns.scatterplot(
+        data=df,
+        x="leftward_evidence",
+        y="leftward_choices",
+        # hue="difficulty",
+        ax=ax,
+    )
+    ax.set_xlabel("Leftward evidence")
+    ax.set_ylabel("P(Left)")
+    ax.set_xlim(-1.1, 1.1)
+    ax.set_ylim(-.1, 1.1)
+    ax.axhline(0.5, linestyle="--", color="gray")
+    ax.spines[["top", "right"]].set_visible(False)
+    return ax
+
+
+def summary_matrix_plot(
+    mat_df: pd.DataFrame,
+    mat_df_metadata: dict,
+    mouse_name: str,
+    ax: plt.Axes = None,
+    top_labels=["stimulus_modality"],
+    training_stage_inlegend=True,
+) -> plt.Axes:
+    """
+    Generates a matrix plot with information regarding
+    each particular session on the top
+    """
+    if ax is None:
+        ax = plt.gca()
+    sns.set_theme(style="white")
+    sp = sns.heatmap(
+        mat_df,
+        linewidth=0.001,
+        square=True,
+        cmap="coolwarm",
+        cbar_kws={"shrink": 0.2, "label": "% Leftward choices"},
+        ax=ax,
+        vmin=0,
+        vmax=1,
+    )
+    # TODO: check that the size is proportional (area vs radius)
+
+    # The protocols is the default that gets plotted,
+    # with the size of the dots proportional to the number of trials
+    training_stages = [
+        mat_df_metadata[session]["current_training_stage"]
+        for session in mat_df.columns
+    ]
+    trials_list = [
+        mat_df_metadata[session]["n_trials"] for session in mat_df.columns
+    ]
+    evidence_levels = mat_df.index
+    shift_up = 0.5
+    training_stages_done = []
+    for tr_stg in training_stages:
+        if tr_stg in training_stages_done:
+            continue
+        tr_stg_idx = [i for i, x in enumerate(training_stages) if x == tr_stg]
+        if training_stage_inlegend:
+            label=tr_stg
+        else:
+            label=None
+        ax.scatter(
+            [x + 0.5 for x in tr_stg_idx],
+            np.repeat(len(evidence_levels) + shift_up, len(tr_stg_idx)),
+            marker="o",
+            s=[trials_list[x] / 5 for x in tr_stg_idx],
+            label=label,
+        )
+        training_stages_done.append(tr_stg)
+    shift_up += 1
+
+    # label the rest of the sessions as given in the input
+    marker_list = ["*", "P", "h", "D", "X"]
+    for n_lab, t_label in enumerate(top_labels):
+        t_label_uniques = [
+            mat_df_metadata[session][t_label] for session in mat_df.columns
+        ]
+        for tlu in np.unique(t_label_uniques):
+            tlu_idx = [i for i, x in enumerate(t_label_uniques) if x == tlu]
+            ax.scatter(
+                [x + 0.5 for x in tlu_idx],
+                np.repeat(len(evidence_levels) + shift_up, len(tlu_idx)),
+                marker=marker_list[n_lab],
+                s=100,
+                label=tlu,
+            )
+        shift_up += 1
+
+    ax.legend(loc=(0, 1), borderaxespad=0.0, ncol=5, frameon=True)
+    ax.set_ylim([0, len(evidence_levels) + shift_up - 0.5])
+    ax.set_ylabel("Evidence level")
+    ax.set_xlabel("Session")
+    sp.set_yticklabels(sp.get_yticklabels(), rotation=0)
+    sp.set_xticklabels(
+        sp.get_xticklabels(), rotation=45, horizontalalignment="right"
+    )
+    sp.set_title(
+        mouse_name + "\n\n", fontsize=20, fontweight=0
+    )
+
     return ax

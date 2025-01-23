@@ -100,3 +100,97 @@ def column_checker(df: pd.DataFrame, required_columns: set):
             "The dataframe must have the following columns: "
             + ", ".join(required_columns)
         )
+
+
+def get_text_from_df(df: pd.DataFrame, mouse_name: str) -> str:
+    # get the session
+    session = df.session.unique()
+    # get the date
+    date = df.date.unique()
+    # get the current training stage
+    current_training_stage = df.current_training_stage.unique()
+    # get the number of trials
+    n_trials = df.shape[0]
+    # get the number of correct trials
+    n_correct = int(df.correct.sum())
+    # get the performance
+    performance = n_correct / n_trials * 100
+    # get the water consumed
+    water = df.water.sum()
+
+    # write the text
+    text = f"""\
+    Mouse: {mouse_name}
+    Sessions: {session}
+    Dates: {date}
+    Training stages: {current_training_stage}
+    Number of trials: {n_trials}
+    Number of correct trials: {n_correct}
+    Performance: {performance:.2f}%
+    Water consumed: {water} μl
+    """
+
+    return text
+
+
+def load_example_data(mouse_name) -> pd.DataFrame:
+    outpath = "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
+    df = pd.read_csv(outpath + "/" + mouse_name + "/" + mouse_name + "_fakedata.csv", sep=";")
+
+    return df
+
+
+def get_sound_stats(sound_dict: dict) -> dict:
+    """
+    This method returns a dictionary with the actual sound statistics
+    of two sound matrices like a cloud of tones
+
+    Args:
+        sound_dict (dict): Dictionary with the entries for the two sound matrices
+
+    Returns:
+        sound_stats (dict): Dictionary with the sound statistics
+    """
+    # get the sound statistics
+    high_mat_stats = analyze_sound_matrix(sound_dict["high_tones"])
+    low_mat_stats = analyze_sound_matrix(sound_dict["low_tones"])
+    # calculate the evidence strength for the high sound
+    total_high_evidence_strength = sound_evidence_strength(
+        high_mat_stats["number_of_tones"],
+        low_mat_stats["number_of_tones"])
+    
+    sound_stats = {
+        "high_tones": high_mat_stats,
+        "low_tones": low_mat_stats,
+        "total_evidence_strength": total_high_evidence_strength
+    }
+
+    return sound_stats
+
+
+def analyze_sound_matrix(matrix: pd.DataFrame) -> dict:
+    """
+    This method analyzes a sound matrix and returns a dictionary with the sound statistics
+
+    Args:
+        matrix (pd.DataFrame): Sound matrix to analyze
+
+    Returns:
+        sound_stats (dict): Dictionary with the matrix statistics
+    """
+    # calculate the number of 1s
+    evidences = np.sum(matrix.values)
+    # calculate the percentage of 1s
+    perc = evidences / matrix.size
+    # calculate the real probability
+    # of having at least one 1 in each column
+    colsums = matrix.sum(axis=0)
+    real_prob = np.sum(colsums > 0) / len(colsums)
+
+    return {"number_of_tones": evidences,
+            "total_percentage_of_tones": perc,
+            "percentage_of_timebins_with_evidence": real_prob}
+
+
+def sound_evidence_strength(x, y):
+    return (x - y) / (x + y)
