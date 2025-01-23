@@ -37,20 +37,29 @@ def get_block_size_truncexp_mean30() -> int:
     return int(block_size)
 
 
-def get_right_bias(side_and_correct_array: np.ndarray) -> float:
+def get_right_bias(side_and_correct_dict: dict) -> float:
     """
     This method calculates the right bias in the data.
 
     Args:
-        side_and_correct_array (np.ndarray): Array with the side (left or right) and correct answer (boolean)
-    """
-    if side_and_correct_array.shape[0] != 2:
-        raise ValueError("Input array must have exactly two rows")
+        dictionary with 'side' and 'correct' keys: the side ('left' or 'right') and correct answer (boolean)
 
-    first_pokes = side_and_correct_array[0, :]
-    correct_list = side_and_correct_array[1, :]
-    wrong_sides = first_pokes[correct_list == "False"]
-    if len(wrong_sides) == 0:
+    Returns:
+        float: bias to the right side, from -1 to 1
+    """
+    if len(side_and_correct_dict) != 2:
+        raise ValueError("Input dict must have exactly two keys")
+    if "side" not in side_and_correct_dict:
+        raise ValueError("Input dict must have 'side' key")
+    if "correct" not in side_and_correct_dict:
+        raise ValueError("Input dict must have 'correct' key")
+    
+    print(side_and_correct_dict)
+
+    first_pokes = side_and_correct_dict["side"]
+    correct_choices = side_and_correct_dict["correct"]
+    wrong_sides = first_pokes[~correct_choices]
+    if len(wrong_sides) == 0 or "ignore" in first_pokes:
         return 0
     wrong_side_proportion = len(wrong_sides) / len(first_pokes)
     wrong_right_proportion = (

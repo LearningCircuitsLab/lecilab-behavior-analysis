@@ -1,24 +1,17 @@
+import matplotlib.gridspec as gridspec
 import pandas as pd
-from lecilab_behavior_analysis.df_transforms import (
-    get_dates_df,
-    get_water_df,
-    get_repeat_or_alternate_series,
-    get_performance_through_trials,
-    get_repeat_or_alternate_performance,
-)
-from lecilab_behavior_analysis.plots import (
-    rasterized_calendar_plot,
-    trials_by_date_plot,
-    trials_by_session_hist,
-    water_by_date_plot,
-    performance_vs_trials_plot,
-    session_summary_text,
-    correct_left_and_right_plot,
-    repeat_or_alternate_performance_plot,
-)
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
-import matplotlib.gridspec as gridspec
+
+from lecilab_behavior_analysis.df_transforms import (
+    get_dates_df, get_performance_through_trials,
+    get_repeat_or_alternate_performance, get_repeat_or_alternate_series,
+    get_water_df)
+from lecilab_behavior_analysis.plots import (
+    correct_left_and_right_plot, performance_vs_trials_plot,
+    rasterized_calendar_plot, repeat_or_alternate_performance_plot,
+    session_summary_text, trials_by_date_plot, trials_by_session_hist,
+    water_by_date_plot)
 
 
 def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
@@ -90,16 +83,18 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     return fig
 
 
-def session_summary_figure(df: pd.DataFrame, mouse_name: str, **kwargs) -> Figure:
+def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> Figure:
     """
     summary of a particular session
     """
     # if more than one session is there, raise an error
-    if df.session.nunique() > 1 or df.date.nunique() > 1:
+    if df.date.nunique() > 1:
         raise ValueError("The dataframe contains more than one session")
 
     # create the main figure with GridSpec
-    fig = plt.figure(figsize=(10, 6))
+    width = kwargs.get("width", 10)
+    height = kwargs.get("height", 6)
+    fig = plt.figure(figsize=(width, height))
     rows_gs = gridspec.GridSpec(2, 1, height_ratios=[1, 1])
     # Create separate inner grids for each row with different width ratios
     top_gs = gridspec.GridSpecFromSubplotSpec(
@@ -119,10 +114,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str, **kwargs) -> Figur
 
     text_ax = session_summary_text(df, text_ax, mouse_name)
     # Add the performance vs trials plot
-    if "perf_window" in kwargs:
-        window = kwargs["perf_window"]
-    else:
-        window = 50
+    window = kwargs.get("perf_window", 50)
     df = get_performance_through_trials(df, window=window)
     df.columns
     perf_ax = performance_vs_trials_plot(df, perf_ax, legend=False)

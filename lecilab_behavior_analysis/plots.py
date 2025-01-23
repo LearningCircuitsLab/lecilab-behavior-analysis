@@ -1,9 +1,10 @@
-import pandas as pd
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg
 import calplot
 import numpy as np
+import pandas as pd
 import seaborn as sns
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+
 from lecilab_behavior_analysis.utils import column_checker
 
 
@@ -134,7 +135,7 @@ def session_summary_text(
     summary of a particular session
     """
     # if more than one session is there, raise an error
-    if df.session.nunique() > 1 or df.date.nunique() > 1:
+    if df.date.nunique() > 1:
         raise ValueError("The dataframe contains more than one session")
     if ax is None:
         ax = plt.gca()
