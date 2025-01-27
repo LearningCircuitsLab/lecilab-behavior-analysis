@@ -150,12 +150,16 @@ def get_sound_stats(sound_dict: dict) -> dict:
     """
     # if the entries are dictionaries, convert them to dataframes
     if isinstance(sound_dict["high_tones"], dict):
-        sound_dict["high_tones"] = pd.DataFrame(sound_dict["high_tones"])
+        high_mat = pd.DataFrame(sound_dict["high_tones"])
+    else:
+        high_mat = sound_dict["high_tones"]
     if isinstance(sound_dict["low_tones"], dict):
-        sound_dict["low_tones"] = pd.DataFrame(sound_dict["low_tones"])
+        low_mat = pd.DataFrame(sound_dict["low_tones"])
+    else:
+        low_mat = sound_dict["low_tones"]
     # get the sound statistics
-    high_mat_stats = analyze_sound_matrix(sound_dict["high_tones"])
-    low_mat_stats = analyze_sound_matrix(sound_dict["low_tones"])
+    high_mat_stats = analyze_sound_matrix(high_mat)
+    low_mat_stats = analyze_sound_matrix(low_mat)
     # calculate the evidence strength for the high sound
     total_high_evidence_strength = sound_evidence_strength(
         high_mat_stats["number_of_tones"],
