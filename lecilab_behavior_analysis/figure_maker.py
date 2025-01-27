@@ -9,8 +9,7 @@ from lecilab_behavior_analysis.df_transforms import (
     get_repeat_or_alternate_series, get_water_df, summary_matrix)
 from lecilab_behavior_analysis.plots import (
     correct_left_and_right_plot, performance_vs_trials_plot, psychometric_plot,
-    rasterize_plot, rasterized_calendar_plot,
-    repeat_or_alternate_performance_plot, session_summary_text,
+    rasterize_plot, repeat_or_alternate_performance_plot, session_summary_text,
     summary_matrix_plot, training_calendar_plot, trials_by_date_plot,
     trials_by_session_hist, water_by_date_plot)
 

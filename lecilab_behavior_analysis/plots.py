@@ -308,3 +308,22 @@ def summary_matrix_plot(
     )
 
     return ax
+
+
+def side_correct_performance_plot(df: pd.DataFrame, ax: plt.Axes, trials_to_show: int = 50) -> plt.Axes:
+    # used for real time plotting
+    column_checker(df, required_columns={"trial", "correct_side", "correct"})
+    ax.clear()
+    # select only the last X trials
+    df = df.tail(trials_to_show)
+    sns.scatterplot(data=df, x="trial", y="correct_side", hue="correct", ax=ax)
+    # make sure the y axis ticks are ascending, inverting the y axis
+    ax.invert_yaxis()
+    # plot the mean of the last 10 trials
+    ax.plot(pd.Series([int(x) for x in df.correct]).rolling(10).mean(), "r")
+    # add a horizontal line at 50%
+    ax.axhline(0.5, linestyle="--", color="gray")
+    # make the x axis to be at least 100 trials
+    ax.set_xlim(left=max(0, df.trial.min() - 1), right=max(trials_to_show, df.trial.max() + 1))
+
+    return ax

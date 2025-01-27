@@ -53,9 +53,6 @@ def get_right_bias(side_and_correct_dict: dict) -> float:
         raise ValueError("Input dict must have 'side' key")
     if "correct" not in side_and_correct_dict:
         raise ValueError("Input dict must have 'correct' key")
-    
-    print(side_and_correct_dict)
-
     first_pokes = side_and_correct_dict["side"]
     correct_choices = side_and_correct_dict["correct"]
     wrong_sides = first_pokes[~correct_choices]
@@ -69,7 +66,7 @@ def get_right_bias(side_and_correct_dict: dict) -> float:
         wrong_side_proportion * np.nansum(wrong_sides == "left") / len(wrong_sides)
     )
 
-    return wrong_right_proportion - wrong_left_proportion
+    return wrong_left_proportion - wrong_right_proportion
 
 
 def get_block_size_uniform_pm30(mean: int) -> int:
@@ -151,6 +148,11 @@ def get_sound_stats(sound_dict: dict) -> dict:
     Returns:
         sound_stats (dict): Dictionary with the sound statistics
     """
+    # if the entries are dictionaries, convert them to dataframes
+    if isinstance(sound_dict["high_tones"], dict):
+        sound_dict["high_tones"] = pd.DataFrame(sound_dict["high_tones"])
+    if isinstance(sound_dict["low_tones"], dict):
+        sound_dict["low_tones"] = pd.DataFrame(sound_dict["low_tones"])
     # get the sound statistics
     high_mat_stats = analyze_sound_matrix(sound_dict["high_tones"])
     low_mat_stats = analyze_sound_matrix(sound_dict["low_tones"])
