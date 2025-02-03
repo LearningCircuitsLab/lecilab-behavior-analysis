@@ -204,9 +204,8 @@ def sound_evidence_strength(x, y):
 
 def get_outpath():
     hostname = socket.gethostname()
-    if hostname == "lorena-ThinkPad-E550":
-        return "home/emma/Desktop/EloiJacomet/data"
-    elif hostname == "tectum":
-        return "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
-    else:
-        return "default/path"
+    paths = {
+        "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
+        "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
+    }
+    return paths.get(hostname, "default/path")
