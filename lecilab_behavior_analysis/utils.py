@@ -132,6 +132,7 @@ def get_text_from_df(df: pd.DataFrame, mouse_name: str) -> str:
 
 def load_example_data(mouse_name) -> pd.DataFrame:
     outpath = "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
+    outpath = "/home/emma/Desktop/EloiJacomet/data"
     df = pd.read_csv(outpath + "/" + mouse_name + "/" + mouse_name + "_fakedata.csv", sep=";")
 
     return df
