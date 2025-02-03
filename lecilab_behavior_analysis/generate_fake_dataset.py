@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from utils import get_outpath
 
 def generate_fake_dataset(outfile: str) -> None:
     """
@@ -99,8 +100,7 @@ def generate_fake_dataset(outfile: str) -> None:
 
 
 if __name__ == "__main__":
-    # outpath = "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
-    outpath = "/home/emma/Desktop/EloiJacomet/data"
+    outpath = get_outpath()
     mice = ["mouse1", "mouse2", "mouse3"]
     for mouse in mice:
         mouse_out_path = Path(outpath) / mouse

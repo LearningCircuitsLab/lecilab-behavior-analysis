@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import socket
 
 
 def get_session_performance(df, session: int) -> float:
@@ -131,8 +132,7 @@ def get_text_from_df(df: pd.DataFrame, mouse_name: str) -> str:
 
 
 def load_example_data(mouse_name) -> pd.DataFrame:
-    outpath = "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
-    outpath = "/home/emma/Desktop/EloiJacomet/data"
+    outpath = get_outpath()
     df = pd.read_csv(outpath + "/" + mouse_name + "/" + mouse_name + "_fakedata.csv", sep=";")
 
     return df
@@ -201,3 +201,12 @@ def analyze_sound_matrix(matrix: pd.DataFrame) -> dict:
 
 def sound_evidence_strength(x, y):
     return (x - y) / (x + y)
+
+def get_outpath():
+    hostname = socket.gethostname()
+    if hostname == "lorena-ThinkPad-E550":
+        return "home/emma/Desktop/EloiJacomet/data"
+    elif hostname == "tectum":
+        return "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
+    else:
+        return "default/path"
