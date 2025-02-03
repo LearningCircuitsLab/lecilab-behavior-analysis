@@ -22,11 +22,14 @@ def rasterize_plot(plot: plt.Figure) -> np.ndarray:
     canvas = FigureCanvasAgg(plot)
     canvas.draw()
     width, height = plot.get_size_inches() * plot.get_dpi()
-    image = np.frombuffer(canvas.tostring_rgb(), dtype="uint8").reshape(
-        int(height), int(width), 3
+    # Get ARGB buffer and reshape
+    argb = np.frombuffer(canvas.tostring_argb(), dtype="uint8").reshape(
+        int(height), int(width), 4  # 4 channels (A, R, G, B)
     )
+    # Remove alpha channel by keeping only R, G, B
+    rgb = argb[:, :, 1:]  # Drop the first (alpha) channel
     plt.close(plot)
-    return image
+    return rgb
 
 
 def trials_by_date_plot(dates_df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
