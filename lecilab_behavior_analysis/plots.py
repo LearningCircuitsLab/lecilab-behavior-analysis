@@ -335,6 +335,10 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     """
     Plot Time Between Trials and Reaction Time on the same plot with two different y-axes.
     """
+    # TODO Eloi: plot functions should not do any calculations on the dataframes. Look at df_transforms.py for inspiration on how this is structured.
+    
+    # TODO Eloi: where is this function used? The figure function should call it.
+    
     # Calculate Time Between Trials
     df['Time_Between_Trials'] = df['port2_out'].diff()
 
