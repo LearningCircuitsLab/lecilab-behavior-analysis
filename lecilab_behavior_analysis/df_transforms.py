@@ -125,6 +125,20 @@ def summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
 
     return mat_df, session_info
 
+def calculate_times(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculate Time Between Trials and Reaction Time.
+    """
+    # Check if the required columns are present
+    column_checker(df, required_columns={"port1_in", "port1_out", "port2_in", "port2_out", "port3_in", "port3_out"})
+    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    df['Time_Between_Trials'] = df.groupby('session')['port2_out'].diff()
+    df['Reaction_Time'] = df.apply(
+        lambda row: row['port1_in'] - row['port2_out'] if pd.notna(row['port1_in']) else row['port3_in'] - row['port2_out'],
+        axis=1
+    )
+
+    return df
 
 # if __name__ == "__main__":
 #     from lecilab_behavior_analysis.utils import load_example_data

@@ -335,39 +335,42 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     """
     Plot Time Between Trials and Reaction Time on the same plot with two different y-axes.
     """
-    # TODO Eloi: plot functions should not do any calculations on the dataframes. Look at df_transforms.py for inspiration on how this is structured.
+    # Check if the dataframe has the necessary columns
+    column_checker(df, required_columns={"Time_Between_Trials", "Reaction_Time"})
     
-    # TODO Eloi: where is this function used? The figure function should call it.
-    
-    # Calculate Time Between Trials
-    df['Time_Between_Trials'] = df['port2_out'].diff()
-
-    # Calculate Reaction Time
-    df['Reaction_Time'] = np.where(df['port1_in'].notna(), df['port1_in'] - df['port2_out'], df['port3_in'] - df['port2_out'])
-
     if ax is None:
-        fig, ax1 = plt.subplots(figsize=(10, 6))
+        fig, ax1 = plt.subplots(figsize=(12, 6))
     else:
         fig = ax.figure
         ax1 = ax
 
     ax2 = ax1.twinx()
 
-    # Plot Time Between Trials
+# Plot Time Between Trials
     ax1.plot(df.index, df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
     ax1.set_xlabel("Trial")
-    ax1.set_ylabel("Time Between Trials (ms)", color="tab:blue")
-    ax1.tick_params(axis="y", labelcolor="tab:blue")
-    ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
+    ax1.set_ylabel("Time Between Trials (TBT) [ms]")
+    ax1.tick_params(axis="y", labelcolor="k")
 
     # Plot Reaction Time
-    ax2.plot(df.index, df["Reaction_Time"], color="tab:red", label="Reaction Time")
-    ax2.set_ylabel("Reaction Time (ms)", color="tab:red")
-    ax2.tick_params(axis="y", labelcolor="tab:red")
+    ax2.plot(df.index, df["Reaction_Time"], color="tab:orange", label="Reaction Time")
+    ax2.set_ylabel("Reaction Time (RT) [ms]")
+    ax2.tick_params(axis="y", labelcolor="k")
 
     # Add legends
-    ax1.legend(loc="upper left")
-    ax2.legend(loc="upper right")
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    handles = handles1 + handles2
+    labels = ["TBT", "RT"]
+    ax1.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False)
+
+    # Remove spines
+    ax1.spines["top"].set_visible(False)
+    ax2.spines["top"].set_visible(False)
     
     fig.tight_layout()
     return ax1
+
+    fig.tight_layout()
+    return ax1
+

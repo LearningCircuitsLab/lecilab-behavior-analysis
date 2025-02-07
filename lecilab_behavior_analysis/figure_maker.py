@@ -6,12 +6,12 @@ from matplotlib.figure import Figure
 from lecilab_behavior_analysis.df_transforms import (
     get_dates_df, get_performance_by_difficulty,
     get_performance_through_trials, get_repeat_or_alternate_performance,
-    get_repeat_or_alternate_series, get_water_df, summary_matrix)
+    get_repeat_or_alternate_series, get_water_df, summary_matrix, calculate_times)
 from lecilab_behavior_analysis.plots import (
     correct_left_and_right_plot, performance_vs_trials_plot, psychometric_plot,
     rasterize_plot, repeat_or_alternate_performance_plot, session_summary_text,
     summary_matrix_plot, training_calendar_plot, trials_by_date_plot,
-    trials_by_session_hist, water_by_date_plot)
+    trials_by_session_hist, water_by_date_plot, plot_time_between_trials_and_reaction_time)
 
 
 def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
@@ -106,13 +106,16 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     return fig
 
 
-def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> Figure:
+def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> plt.Figure:
     """
-    summary of a particular session
+    Summary of a particular session.
     """
     # if more than one session is there, raise an error
     if df.date.nunique() > 1:
         raise ValueError("The dataframe contains more than one session")
+
+    # Calculate necessary times
+    df = calculate_times(df)
 
     # create the main figure with GridSpec
     width = kwargs.get("width", 10)
@@ -132,6 +135,8 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     lrc_ax = fig.add_subplot(top_gs[0, 2])
     roap_ax = fig.add_subplot(bot_gs[0, 0])
     psych_ax = fig.add_subplot(bot_gs[0, 1])
+    time_reaction_ax = fig.add_subplot(bot_gs[0, 2])  # Añadir un nuevo eje para el nuevo plot
+
     # TODO: Response-time by trial (scatter with histogram) For side and trial start
     # TODO: Psychometric with actual values and fit
     # TODO: separate optogenetic and control if available in several plots
@@ -148,6 +153,9 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     roap_ax = repeat_or_alternate_performance_plot(df, roap_ax)
     psych_df = get_performance_by_difficulty(df)
     psych_ax = psychometric_plot(psych_df, psych_ax)
+
+    # Añadir el nuevo plot
+    plot_time_between_trials_and_reaction_time(df, ax=time_reaction_ax)
 
     fig.tight_layout()
 
