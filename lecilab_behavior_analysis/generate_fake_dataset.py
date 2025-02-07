@@ -40,6 +40,8 @@ def generate_fake_dataset(outfile: str) -> None:
             "Port2_OUT",
             "Port3_IN",
             "Port3_OUT",
+            # TODO Eloi: The variables below should not exist in the dataframe, they are calculated
+            # later, for example when one makes a figure.
             "Reaction_Time",
             "Time_Between_Trials",
         ]
@@ -84,6 +86,8 @@ def generate_fake_dataset(outfile: str) -> None:
 
         water = [0] * n_trials
         water = np.where(correct, 2, water)
+
+        # TODO Eloi: Respect the naming convention of the variables
         Port1_IN = []
         Port1_OUT = []
         Port2_IN = []

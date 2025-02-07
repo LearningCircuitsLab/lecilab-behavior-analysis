@@ -153,6 +153,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
 
     return fig
 
+# TODO Eloi: this is a plot, not a "figure". A figure is a container for plots. Plots are in another file.
 def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     """
     Plot Time Between Trials and Reaction Time on the same plot with two different y-axes.
