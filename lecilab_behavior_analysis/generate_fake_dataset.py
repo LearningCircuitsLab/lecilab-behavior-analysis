@@ -34,16 +34,12 @@ def generate_fake_dataset(outfile: str) -> None:
             "holding_time",
             "date",
             "trial",
-            "Port1_IN",
-            "Port1_OUT",
-            "Port2_IN",
-            "Port2_OUT",
-            "Port3_IN",
-            "Port3_OUT",
-            # TODO Eloi: The variables below should not exist in the dataframe, they are calculated
-            # later, for example when one makes a figure.
-            "Reaction_Time",
-            "Time_Between_Trials",
+            "port1_in",
+            "port1_out",
+            "port2_in",
+            "port2_out",
+            "port3_in",
+            "port3_out",
         ]
     )
 
@@ -86,47 +82,39 @@ def generate_fake_dataset(outfile: str) -> None:
 
         water = [0] * n_trials
         water = np.where(correct, 2, water)
-
-        # TODO Eloi: Respect the naming convention of the variables
-        Port1_IN = []
-        Port1_OUT = []
-        Port2_IN = []
-        Port2_OUT = []
-        Port3_IN = []
-        Port3_OUT = []
-        Reaction_Time = []
-        Time_Between_Trials = [np.nan]
+        
+        port1_in = []
+        port1_out = []
+        port2_in = []
+        port2_out = []
+        port3_in = []
+        port3_out = []
 
         #Create the timestamps for Port1, Port2 and Port3
         session_time = 0
         for trial in range(n_trials):
             session_time += random.randint(10, 50)
-            Port2_IN.append(session_time)
-            session_time += random.randint(10, 50) #Time from beggining of Trial(Port2_IN) to Port2_OUT
-            # Port2_OUT
-            Port2_OUT.append(session_time)
-            session_time += random.randint(10, 50)#Time from beggining of Trial(Port2_IN) to Port2_OUT
+            port2_in.append(session_time)
+            session_time += random.randint(10, 50)
+            # port2_out
+            port2_out.append(session_time)
+            session_time += random.randint(40, 90)
 
             #Decision of Port 1 or Port 3 depending on the correct side
             if (correct_side[trial] == "left" and correct[trial] == True) or (correct_side[trial]== "right" and correct[trial] == False):
-                # Port1_IN y Port1_OUT
-                Port1_IN.append(session_time)
+                # port1_in y port1_out
+                port1_in.append(session_time)
                 session_time += random.randint(10, 50)
-                Port1_OUT.append(session_time)
-                Port3_IN.append(np.nan)
-                Port3_OUT.append(np.nan)
-                Reaction_Time.append(Port1_IN[trial] - Port2_OUT[trial])
+                port1_out.append(session_time)
+                port3_in.append(np.nan)
+                port3_out.append(np.nan)
             else:
-                # Port3_IN y Port3_OUT
-                Port3_IN.append(session_time)
+                # port3_in y port3_out
+                port3_in.append(session_time)
                 session_time += random.randint(10, 50)
-                Port3_OUT.append(session_time)
-                Port1_IN.append(np.nan)
-                Port1_OUT.append(np.nan)
-                Reaction_Time.append(Port3_IN[trial] - Port2_OUT[trial])
-
-        for trial in range(1, n_trials):    
-            Time_Between_Trials.append(Port2_OUT[trial]-Port2_OUT[trial-1])
+                port3_out.append(session_time)
+                port1_in.append(np.nan)
+                port1_out.append(np.nan)
 
         # create the dataframe
         df_session = pd.DataFrame(
@@ -141,14 +129,12 @@ def generate_fake_dataset(outfile: str) -> None:
                 "holding_time": holding_time,
                 "date": date,
                 "trial": trials,
-                "Port1_IN" : Port1_IN,
-                "Port1_OUT": Port1_OUT,
-                "Port2_IN": Port2_IN,
-                "Port2_OUT": Port2_OUT,
-                "Port3_IN": Port3_IN,
-                "Port3_OUT": Port3_OUT,
-                "Reaction_Time": Reaction_Time,
-                "Time_Between_Trials": Time_Between_Trials
+                "port1_in" : port1_in,
+                "port1_out": port1_out,
+                "port2_in": port2_in,
+                "port2_out": port2_out,
+                "port3_in": port3_in,
+                "port3_out": port3_out,
             }
         )
 

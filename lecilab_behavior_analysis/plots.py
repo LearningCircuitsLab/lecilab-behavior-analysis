@@ -330,3 +330,40 @@ def side_correct_performance_plot(df: pd.DataFrame, ax: plt.Axes, trials_to_show
     ax.set_xlim(left=max(0, df.trial.min() - 1), right=max(trials_to_show, df.trial.max() + 1))
 
     return ax
+
+def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    """
+    Plot Time Between Trials and Reaction Time on the same plot with two different y-axes.
+    """
+    # Calculate Time Between Trials
+    df['Time_Between_Trials'] = df['port2_out'].diff()
+
+    # Calculate Reaction Time
+    df['Reaction_Time'] = np.where(df['port1_in'].notna(), df['port1_in'] - df['port2_out'], df['port3_in'] - df['port2_out'])
+
+    if ax is None:
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+    else:
+        fig = ax.figure
+        ax1 = ax
+
+    ax2 = ax1.twinx()
+
+    # Plot Time Between Trials
+    ax1.plot(df.index, df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
+    ax1.set_xlabel("Trial")
+    ax1.set_ylabel("Time Between Trials (ms)", color="tab:blue")
+    ax1.tick_params(axis="y", labelcolor="tab:blue")
+    ax1.grid(True, which='both', linestyle='--', linewidth=0.5)
+
+    # Plot Reaction Time
+    ax2.plot(df.index, df["Reaction_Time"], color="tab:red", label="Reaction Time")
+    ax2.set_ylabel("Reaction Time (ms)", color="tab:red")
+    ax2.tick_params(axis="y", labelcolor="tab:red")
+
+    # Add legends
+    ax1.legend(loc="upper left")
+    ax2.legend(loc="upper right")
+    
+    fig.tight_layout()
+    return ax1

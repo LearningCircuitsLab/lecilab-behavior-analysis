@@ -152,35 +152,3 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     fig.tight_layout()
 
     return fig
-
-# TODO Eloi: this is a plot, not a "figure". A figure is a container for plots. Plots are in another file.
-def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
-    """
-    Plot Time Between Trials and Reaction Time on the same plot with two different y-axes.
-    """
-    if ax is None:
-        fig, ax1 = plt.subplots(figsize=(10, 6))
-    else:
-        fig = ax.figure
-        ax1 = ax
-
-    ax2 = ax1.twinx()
-
-    # Plot Time Between Trials
-    ax1.plot(df.index, df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
-    ax1.set_xlabel("Trial")
-    ax1.set_ylabel("Time Between Trials (ms)", color="tab:blue")
-    ax1.tick_params(axis="y", labelcolor="tab:blue")
-
-    # Plot Reaction Time
-    ax2.plot(df.index, df["Reaction_Time"], color="tab:red", label="Reaction Time")
-    ax2.set_ylabel("Reaction Time (ms)", color="tab:red")
-    ax2.tick_params(axis="y", labelcolor="tab:red")
-
-    # Add legends
-    ax1.legend(loc="upper left")
-    ax2.legend(loc="upper right")
-
-    fig.tight_layout()
-    return ax1
-
