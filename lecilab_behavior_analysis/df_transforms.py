@@ -84,7 +84,7 @@ def side_and_difficulty_to_numeric(row: pd.Series) -> float:
 
 
 
-def summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
+def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
     column_checker(df, required_columns={"session"})
     # Initialize lists to save important data
     leftward_evidence_list = []
@@ -125,6 +125,8 @@ def summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
 
     return mat_df, session_info
 
+
+# TODO Eloi: the name of the function should be explicit about what it does. It is too vague now.
 def calculate_times(df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate Time Between Trials and Reaction Time.

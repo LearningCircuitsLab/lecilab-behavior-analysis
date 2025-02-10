@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 from lecilab_behavior_analysis.df_transforms import (
     get_dates_df, get_performance_by_difficulty,
     get_performance_through_trials, get_repeat_or_alternate_performance,
-    get_repeat_or_alternate_series, get_water_df, summary_matrix, calculate_times)
+    get_repeat_or_alternate_series, get_water_df, get_training_summary_matrix, calculate_times)
 from lecilab_behavior_analysis.plots import (
     correct_left_and_right_plot, performance_vs_trials_plot, psychometric_plot,
     rasterize_plot, repeat_or_alternate_performance_plot, session_summary_text,
@@ -81,7 +81,7 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     ax_perf = performance_vs_trials_plot(df, ax=ax_perf, legend=False)
 
     # Summary plot
-    summat_df, summat_info = summary_matrix(df)
+    summat_df, summat_info = get_training_summary_matrix(df)
     ax_summat = summary_matrix_plot(
         mat_df=summat_df,
         mat_df_metadata=summat_info,
@@ -155,6 +155,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     psych_ax = psychometric_plot(psych_df, psych_ax)
 
     # Añadir el nuevo plot
+    # TODO Eloi: the function returns an axis object that you are not catching
     plot_time_between_trials_and_reaction_time(df, ax=time_reaction_ax)
 
     fig.tight_layout()
