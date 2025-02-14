@@ -126,8 +126,7 @@ def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
     return mat_df, session_info
 
 
-# TODO Eloi: the name of the function should be explicit about what it does. It is too vague now.
-def calculate_times(df: pd.DataFrame) -> pd.DataFrame:
+def calculate_time_between_trials_and_rection_time(df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
     """
     Calculate Time Between Trials and Reaction Time.
     """

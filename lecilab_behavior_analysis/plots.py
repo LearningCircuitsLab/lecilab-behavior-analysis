@@ -5,7 +5,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-from lecilab_behavior_analysis.utils import column_checker, get_text_from_df
+from lecilab_behavior_analysis.utils import (column_checker, get_text_from_df)
 
 
 def training_calendar_plot(dates_df: pd.DataFrame) -> plt.Figure:
@@ -337,32 +337,18 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     """
     # Check if the dataframe has the necessary columns
     column_checker(df, required_columns={"Time_Between_Trials", "Reaction_Time"})
-    
-    # TODO Eloi: This is not what we want to do if no axis is passed. Check the other functions.
-    # Exercise. Try to see what happens if plt.gca() fails (e.g. if no figure is there for instance).
-    # if things fail, then you can use the following code to create a new figure and axis. If it works,
-    # change the other functions so that they implement this as well. To not repeate code, you can create
-    # a new function that takes care of this and call it in the other functions. Find a way to deal with 
-    # the return value(s) of the function.
-    if ax is None:
-        fig, ax1 = plt.subplots(figsize=(12, 6))
-    else:
-        fig = ax.figure
-        ax1 = ax
 
-    # TODO Eloi: This is dangerous, as you are only returning ax1 below.
-    # Whatever code calling this function will not have access to ax2.
-    # check water_by_date plot for inspiration
+    fig, ax1 = plt.subplots()
     ax2 = ax1.twinx()
 
     # Plot Time Between Trials
-    ax1.plot(df.index, df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
-    ax1.set_xlabel("Trial")
+    ax1.plot(df["trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
+    ax1.set_xlabel("Trial number")
     ax1.set_ylabel("Time Between Trials (TBT) [ms]")
     ax1.tick_params(axis="y", labelcolor="k")
 
     # Plot Reaction Time
-    ax2.plot(df.index, df["Reaction_Time"], color="tab:orange", label="Reaction Time")
+    ax2.plot(df["trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
     ax2.set_ylabel("Reaction Time (RT) [ms]")
     ax2.tick_params(axis="y", labelcolor="k")
 
@@ -376,7 +362,5 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     # Remove spines
     ax1.spines["top"].set_visible(False)
     ax2.spines["top"].set_visible(False)
-    
-    # TODO Eloi: tight layout should be called when making the full figure, not here
-    fig.tight_layout()
-    return ax1
+
+    return ax1, ax2
