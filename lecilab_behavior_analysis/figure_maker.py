@@ -124,7 +124,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
         1, 3, subplot_spec=rows_gs[0], width_ratios=[2, 2, 1]
     )
     bot_gs = gridspec.GridSpecFromSubplotSpec(
-        1, 3, subplot_spec=rows_gs[1], width_ratios=[1, 1, 1]
+        1, 3, subplot_spec=rows_gs[1], width_ratios=[1, 1, 2]
     )
 
     text_ax = fig.add_subplot(top_gs[0, 0])
@@ -134,7 +134,10 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     psych_ax = fig.add_subplot(bot_gs[0, 1])
     reaction_time_ax = fig.add_subplot(bot_gs[0, 2])
 
-    # TODO: Response-time by trial (scatter with histogram) For side and trial start
+    # TODO Eloi: Include a histogram on the side of the plot
+    # Look here: https://seaborn.pydata.org/generated/seaborn.jointplot.html
+
+
     # TODO: Psychometric with actual values and fit
     # TODO: separate optogenetic and control if available in several plots
     # TODO: Performance by trial with blocks if available
@@ -153,6 +156,6 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     df = calculate_time_between_trials_and_rection_time(df, window=window)
     reaction_time_ax = plot_time_between_trials_and_reaction_time(df, ax=reaction_time_ax)
 
-    fig.tight_layout()
+    fig.tight_layout()    
 
     return fig
