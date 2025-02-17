@@ -338,14 +338,15 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     # Check if the dataframe has the necessary columns
     column_checker(df, required_columns={"Time_Between_Trials", "Reaction_Time"})
 
-    fig, ax1 = plt.subplots()
-    ax2 = ax1.twinx()
+    if ax is None:
+        ax = plt.gca()
+    ax2 = ax.twinx()
 
     # Plot Time Between Trials
-    ax1.plot(df["trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
-    ax1.set_xlabel("Trial number")
-    ax1.set_ylabel("Time Between Trials (TBT) [ms]")
-    ax1.tick_params(axis="y", labelcolor="k")
+    ax.plot(df["trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
+    ax.set_xlabel("Trial number")
+    ax.set_ylabel("Time Between Trials (TBT) [ms]")
+    ax.tick_params(axis="y", labelcolor="k")
 
     # Plot Reaction Time
     ax2.plot(df["trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
@@ -353,14 +354,14 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     ax2.tick_params(axis="y", labelcolor="k")
 
     # Add legends
-    handles1, labels1 = ax1.get_legend_handles_labels()
+    handles1, labels1 = ax.get_legend_handles_labels()
     handles2, labels2 = ax2.get_legend_handles_labels()
     handles = handles1 + handles2
     labels = ["TBT", "RT"]
-    ax1.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False)
+    ax.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False)
 
     # Remove spines
-    ax1.spines["top"].set_visible(False)
+    ax.spines["top"].set_visible(False)
     ax2.spines["top"].set_visible(False)
 
-    return ax1, ax2
+    return ax, ax2
