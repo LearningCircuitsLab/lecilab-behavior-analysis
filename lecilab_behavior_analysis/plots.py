@@ -333,35 +333,79 @@ def side_correct_performance_plot(df: pd.DataFrame, ax: plt.Axes, trials_to_show
 
 def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     """
-    Plot Time Between Trials and Reaction Time on the same plot with two different y-axes.
+    Plot Time Between Trials (TBT) and Reaction Time (RT) on the same plot with histograms on the y-axes.
     """
     # Check if the dataframe has the necessary columns
     column_checker(df, required_columns={"Time_Between_Trials", "Reaction_Time"})
 
-    if ax is None:
-        ax = plt.gca()
-    ax2 = ax.twinx()
+    # Drop NaN or Inf values to avoid errors in plotting
+    df = df.dropna(subset=['Reaction_Time', 'Time_Between_Trials'])
+    df = df[(df['Reaction_Time'] != float('inf')) & (df['Time_Between_Trials'] != float('inf'))]
+
+    # Create a 1x3 grid layout for two histograms and the main plot in the center
+    fig = plt.figure(figsize=(14, 8))  # Increased figure size for better visibility
+    grid = plt.GridSpec(1, 3, width_ratios=[0.5, 5, 0.5], wspace=0.0)  # Adjust width ratios and wspace to align the plots
+
+    # Right plot for Reaction Time (RT) KDE plot
+    ax_right = fig.add_subplot(grid[0, 2])
+    if df['Reaction_Time'].nunique() > 1:
+        sns.kdeplot(y=df['Reaction_Time'], ax=ax_right, color="tab:orange", fill=True)
+    else:
+        sns.histplot(y=df['Reaction_Time'], ax=ax_right, color="tab:orange")
+
+    ax_right.invert_xaxis()  # Flip the x-axis to make the plot point towards the main plot
+    ax_right.set_xlabel("")
+    ax_right.yaxis.set_label_position('right')  # Force y-label on the right
+    ax_right.set_ylabel("Reaction Time (RT) [ms]", rotation=270)
+
+    ax_right.tick_params(right=True, left=False, labelleft=False, labelright=True, bottom=False, labelbottom=False)
+    ax_right.spines['left'].set_visible(False)
+    ax_right.spines['right'].set_visible(False)
+    ax_right.spines['top'].set_visible(False)
+
+    # Center plot for the main Time Between Trials and Reaction Time plot
+    ax_center = fig.add_subplot(grid[0, 1])
+    ax2_center = ax_center.twinx()
 
     # Plot Time Between Trials
-    ax.plot(df["trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
-    ax.set_xlabel("Trial number")
-    ax.set_ylabel("Time Between Trials (TBT) [ms]")
-    ax.tick_params(axis="y", labelcolor="k")
+    ax_center.plot(df["trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
+    ax_center.set_xlabel("Trial number")
 
     # Plot Reaction Time
-    ax2.plot(df["trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
-    ax2.set_ylabel("Reaction Time (RT) [ms]")
-    ax2.tick_params(axis="y", labelcolor="k")
+    ax2_center.plot(df["trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
+    ax2_center.set_ylabel("")
+    ax2_center.tick_params(left=False, right=False, top=False, bottom=False, labelleft=False, labelright=False, labeltop=False, labelbottom=False)
 
     # Add legends
-    handles1, labels1 = ax.get_legend_handles_labels()
-    handles2, labels2 = ax2.get_legend_handles_labels()
+    handles1, labels1 = ax_center.get_legend_handles_labels()
+    handles2, labels2 = ax2_center.get_legend_handles_labels()
     handles = handles1 + handles2
     labels = ["TBT", "RT"]
-    ax.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False)
+    ax_center.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False)
 
-    # Remove spines
-    ax.spines["top"].set_visible(False)
-    ax2.spines["top"].set_visible(False)
+    # Remove lateral and topspines for the center plot
+    ax_center.spines["top"].set_visible(False)
+    ax_center.spines["right"].set_visible(False)
+    ax_center.spines["left"].set_visible(False)
+    ax2_center.spines["top"].set_visible(False)
+    ax2_center.spines["right"].set_visible(False)
+    ax2_center.spines["left"].set_visible(False)
 
-    return ax, ax2
+    # Left plot for Time Between Trials (TBT) KDE plot
+    ax_left = fig.add_subplot(grid[0, 0])
+    if df['Time_Between_Trials'].nunique() > 1:
+        sns.kdeplot(y=df['Time_Between_Trials'], ax=ax_left, color="tab:blue", fill=True)
+    else:
+        sns.histplot(y=df['Time_Between_Trials'], ax=ax_left, color="tab:blue")
+
+    ax_left.set_xlabel("")
+    ax_left.set_ylabel("Time Between Trials (TBT) [ms]")
+    ax_left.spines['left'].set_visible(False)
+    ax_left.spines['right'].set_visible(False)
+    ax_left.spines['top'].set_visible(False)
+    ax_left.tick_params(left=True, right=False, labelright=False, labelleft=True, bottom=False, labelbottom=False)
+
+    # Ensure layout is adjusted
+    plt.tight_layout()
+
+    return ax_center, ax2_center, ax_right, ax_left
