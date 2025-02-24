@@ -132,11 +132,6 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     lrc_ax = fig.add_subplot(top_gs[0, 2])
     roap_ax = fig.add_subplot(bot_gs[0, 0])
     psych_ax = fig.add_subplot(bot_gs[0, 1])
-    reaction_time_ax = fig.add_subplot(bot_gs[0, 2])
-
-    # TODO Eloi: Include a histogram on the side of the plot
-    # Look here: https://seaborn.pydata.org/generated/seaborn.jointplot.html
-
 
     # TODO: Psychometric with actual values and fit
     # TODO: separate optogenetic and control if available in several plots
@@ -154,8 +149,20 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     psych_df = get_performance_by_difficulty(df)
     psych_ax = psychometric_plot(psych_df, psych_ax)
     df = calculate_time_between_trials_and_rection_time(df, window=window)
-    reaction_time_ax = plot_time_between_trials_and_reaction_time(df, ax=reaction_time_ax)
+    reaction_time_image = rasterize_plot(plot_time_between_trials_and_reaction_time(df), dpi=600)
+    # Manually place the image using add_axes with figure-relative coordinates
+    # Coordinates in (x0, y0, width, height) format, relative to the figure
+    x0, y0 = 0.53, 0.015  # Positioning the image in the bottom-right corner
+    img_width = 0.5  # Image width (50% of the figure width)
+    img_height = 0.5  # Image height (50% of the figure height)
 
-    fig.tight_layout()    
-
+    # Add an axes to the figure where the image will be placed
+    ax_image = fig.add_axes([x0, y0, img_width, img_height])
+    
+    # Place the rasterized image within the defined axes
+    ax_image.imshow(reaction_time_image, aspect='auto')
+    
+    # Turn off the axis for clean presentation
+    ax_image.axis("off")
+    fig.tight_layout()
     return fig
