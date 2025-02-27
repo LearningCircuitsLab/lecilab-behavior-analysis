@@ -149,6 +149,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     psych_df = get_performance_by_difficulty(df)
     psych_ax = psychometric_plot(psych_df, psych_ax)
     df = calculate_time_between_trials_and_rection_time(df, window=window)
+    fig.tight_layout()
     reaction_time_image = rasterize_plot(plot_time_between_trials_and_reaction_time(df), dpi=600)
     # Manually place the image using add_axes with figure-relative coordinates
     # Coordinates in (x0, y0, width, height) format, relative to the figure
@@ -164,5 +165,4 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     
     # Turn off the axis for clean presentation
     ax_image.axis("off")
-    fig.tight_layout()
     return fig

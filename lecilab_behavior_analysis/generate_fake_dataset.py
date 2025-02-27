@@ -34,12 +34,12 @@ def generate_fake_dataset(outfile: str) -> None:
             "holding_time",
             "date",
             "trial",
-            "port1_in",
-            "port1_out",
-            "port2_in",
-            "port2_out",
-            "port3_in",
-            "port3_out",
+            "Port1In",
+            "Port1Out",
+            "Port2In",
+            "Port2Out",
+            "Port3In",
+            "Port3Out",
         ]
     )
 
@@ -83,38 +83,38 @@ def generate_fake_dataset(outfile: str) -> None:
         water = [0] * n_trials
         water = np.where(correct, 2, water)
         
-        port1_in = []
-        port1_out = []
-        port2_in = []
-        port2_out = []
-        port3_in = []
-        port3_out = []
+        Port1In = []
+        Port1Out = []
+        Port2In = []
+        Port2Out = []
+        Port3In = []
+        Port3Out = []
 
         #Create the timestamps for Port1, Port2 and Port3
         session_time = 0
         for trial in range(n_trials):
             session_time += random.randint(10, 50)
-            port2_in.append(session_time)
+            Port2In.append(session_time)
             session_time += random.randint(10, 50)
-            # port2_out
-            port2_out.append(session_time)
+            # Port2Out
+            Port2Out.append(session_time)
             session_time += random.randint(40, 90)
 
             #Decision of Port 1 or Port 3 depending on the correct side
             if (correct_side[trial] == "left" and correct[trial] == True) or (correct_side[trial]== "right" and correct[trial] == False):
-                # port1_in y port1_out
-                port1_in.append(session_time)
+                # Port1In y Port1Out
+                Port1In.append(session_time)
                 session_time += random.randint(10, 50)
-                port1_out.append(session_time)
-                port3_in.append(np.nan)
-                port3_out.append(np.nan)
+                Port1Out.append(session_time)
+                Port3In.append(np.nan)
+                Port3Out.append(np.nan)
             else:
-                # port3_in y port3_out
-                port3_in.append(session_time)
+                # Port3In y Port3Out
+                Port3In.append(session_time)
                 session_time += random.randint(10, 50)
-                port3_out.append(session_time)
-                port1_in.append(np.nan)
-                port1_out.append(np.nan)
+                Port3Out.append(session_time)
+                Port1In.append(np.nan)
+                Port1Out.append(np.nan)
 
         # create the dataframe
         df_session = pd.DataFrame(
@@ -129,12 +129,12 @@ def generate_fake_dataset(outfile: str) -> None:
                 "holding_time": holding_time,
                 "date": date,
                 "trial": trials,
-                "port1_in" : port1_in,
-                "port1_out": port1_out,
-                "port2_in": port2_in,
-                "port2_out": port2_out,
-                "port3_in": port3_in,
-                "port3_out": port3_out,
+                "Port1In" : Port1In,
+                "Port1Out": Port1Out,
+                "Port2In": Port2In,
+                "Port2Out": Port2Out,
+                "Port3In": Port3In,
+                "Port3Out": Port3Out,
             }
         )
 
