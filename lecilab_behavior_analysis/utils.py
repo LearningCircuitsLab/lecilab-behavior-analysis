@@ -133,7 +133,7 @@ def get_text_from_df(df: pd.DataFrame, mouse_name: str) -> str:
 
 def load_example_data(mouse_name) -> pd.DataFrame:
     outpath = get_outpath()
-    df = pd.read_csv(outpath + "/" + mouse_name + "/" + mouse_name + "_fakedata.csv", sep=";")
+    df = pd.read_csv(outpath + "/example_data/" + mouse_name + "/" + mouse_name + "_fakedata.csv", sep=";")
 
     return df
 
@@ -165,7 +165,7 @@ def get_sound_stats(sound_dict: dict) -> dict:
     total_high_evidence_strength = sound_evidence_strength(
         high_mat_stats["number_of_tones"],
         low_mat_stats["number_of_tones"])
-    
+
     sound_stats = {
         "high_tones": high_mat_stats,
         "low_tones": low_mat_stats,
@@ -202,10 +202,11 @@ def analyze_sound_matrix(matrix: pd.DataFrame) -> dict:
 def sound_evidence_strength(x, y):
     return (x - y) / (x + y)
 
+
 def get_outpath():
     hostname = socket.gethostname()
     paths = {
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
-        "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data"
+        "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
     }
     return paths.get(hostname, "default/path")

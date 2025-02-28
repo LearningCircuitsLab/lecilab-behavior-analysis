@@ -149,6 +149,6 @@ if __name__ == "__main__":
     outpath = get_outpath()
     mice = ["mouse1", "mouse2", "mouse3"]
     for mouse in mice:
-        mouse_out_path = Path(outpath) / mouse
+        mouse_out_path = Path(outpath) / "example_data" / mouse
         mouse_out_path.mkdir(parents=True, exist_ok=True)
         generate_fake_dataset(mouse_out_path / f"{mouse}_fakedata.csv")
