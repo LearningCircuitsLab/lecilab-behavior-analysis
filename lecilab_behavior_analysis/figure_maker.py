@@ -21,7 +21,9 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     # TODO: add a plot to show the evolution of weight
     
     # create the main figure with GridSpec
-    fig = plt.figure(figsize=(10, 9))
+    width = kwargs.get("width", 10)
+    height = kwargs.get("height", 6)
+    fig = plt.figure(figsize=(width, height))
     rows_gs = gridspec.GridSpec(3, 1, height_ratios=[.5, 1, .7])
     # Create separate inner grids for each row with different width ratios
     top_gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[0])
