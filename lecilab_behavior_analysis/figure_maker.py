@@ -18,7 +18,7 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     """
     Information about the trials done in a session and the water consumption
     """
-    # TODO: add the heatmap that I did in postdoc
+    # TODO: add a plot to show the evolution of weight
     
     # create the main figure with GridSpec
     fig = plt.figure(figsize=(10, 9))
