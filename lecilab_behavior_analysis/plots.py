@@ -357,9 +357,9 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     ax_right.invert_xaxis()  # Flip the x-axis to make the plot point towards the main plot
     ax_right.set_xlabel("")
     ax_right.yaxis.set_label_position('right')  # Force y-label on the right
-    ax_right.set_ylabel("Reaction Times (RT) [ms]", rotation=270, fontsize=24, labelpad=15)
+    ax_right.set_ylabel("Reaction Times (RT) [ms]", rotation=270, fontsize=28, labelpad=30)
 
-    ax_right.tick_params(right=True, left=False, labelleft=False, labelright=True, bottom=False, labelbottom=False, labelsize=24, width=2)
+    ax_right.tick_params(right=True, left=False, labelleft=False, labelright=True, bottom=False, labelbottom=False, labelsize=25, width=2)
     ax_right.spines['left'].set_visible(False)
     ax_right.spines['right'].set_visible(False)
     ax_right.spines['top'].set_visible(False)
@@ -371,20 +371,20 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
 
     # Plot Time Between Trials
     ax_center.plot(df["trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
-    ax_center.set_xlabel("Trial number", fontsize=24)
-    ax_center.tick_params(labelsize=20, width=2)
+    ax_center.set_xlabel("Trial number", fontsize=28, labelpad=10)
+    ax_center.tick_params(labelsize=28, width=2, length=10)
 
     # Plot Reaction Time
     ax2_center.plot(df["trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
     ax2_center.set_ylabel("")
-    ax2_center.tick_params(left=False, right=False, top=False, bottom=False, labelleft=False, labelright=False, labeltop=False, labelbottom=False, labelsize=20, width=3)    
+    ax2_center.tick_params(left=False, right=False, top=False, bottom=False, labelleft=False, labelright=False, labeltop=False, labelbottom=False, labelsize=20)    
 
     # Add legends
     handles1, labels1 = ax_center.get_legend_handles_labels()
     handles2, labels2 = ax2_center.get_legend_handles_labels()
     handles = handles1 + handles2
     labels = ["TBT", "RT"]
-    ax_center.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False, fontsize=20)
+    ax_center.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False, fontsize=20, )
 
     # Remove lateral and topspines for the center plot
     ax_center.spines["top"].set_visible(False)
@@ -403,12 +403,12 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
         sns.histplot(y=df['Time_Between_Trials'], ax=ax_left, color="tab:blue")
 
     ax_left.set_xlabel("")
-    ax_left.set_ylabel("Time Between Trials (TBT) [ms]", fontsize=24)
+    ax_left.set_ylabel("Time Between Trials (TBT) [ms]", fontsize=28)
     ax_left.spines['left'].set_visible(False)
     ax_left.spines['right'].set_visible(False)
     ax_left.spines['top'].set_visible(False)
     ax_left.spines['bottom'].set_linewidth(2)
-    ax_left.tick_params(left=True, right=False, labelright=False, labelleft=True, bottom=False, labelbottom=False, labelsize=24, width=2)
+    ax_left.tick_params(left=True, right=False, labelright=False, labelleft=True, bottom=False, labelbottom=False, labelsize=25, width=2)
 
     # Ensure layout is adjusted
     plt.tight_layout()

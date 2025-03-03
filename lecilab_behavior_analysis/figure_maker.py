@@ -134,7 +134,13 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     lrc_ax = fig.add_subplot(top_gs[0, 2])
     roap_ax = fig.add_subplot(bot_gs[0, 0])
     psych_ax = fig.add_subplot(bot_gs[0, 1])
-
+    reaction_time_ax = fig.add_subplot(bot_gs[0, 2])
+    fig.tight_layout()
+    original_pos = reaction_time_ax.get_position()
+    #Altering the bottom right subplot bbox to remove the padding between subplots and the figure border to adapt the rasterized image later that already includes axis
+    #The default pading = 0.2 and so the pading between subplots is 0.05
+    reaction_time_ax.set_position(pos=[original_pos.x0-0.05, original_pos.y0-0.075, original_pos.width+0.05, original_pos.height+0.075])
+    
     # TODO: Psychometric with actual values and fit
     # TODO: separate optogenetic and control if available in several plots
     # TODO: Performance by trial with blocks if available
@@ -151,20 +157,9 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     psych_df = get_performance_by_difficulty(df)
     psych_ax = psychometric_plot(psych_df, psych_ax)
     df = calculate_time_between_trials_and_rection_time(df, window=window)
-    fig.tight_layout()
-    reaction_time_image = rasterize_plot(plot_time_between_trials_and_reaction_time(df), dpi=600)
-    # Manually place the image using add_axes with figure-relative coordinates
-    # Coordinates in (x0, y0, width, height) format, relative to the figure
-    x0, y0 = 0.53, 0.015  # Positioning the image in the bottom-right corner
-    img_width = 0.5  # Image width (50% of the figure width)
-    img_height = 0.5  # Image height (50% of the figure height)
-
-    # Add an axes to the figure where the image will be placed
-    ax_image = fig.add_axes([x0, y0, img_width, img_height])
-    
-    # Place the rasterized image within the defined axes
-    ax_image.imshow(reaction_time_image, aspect='auto')
-    
+    reaction_time_image = rasterize_plot(plot_time_between_trials_and_reaction_time(df), dpi=300)
+    reaction_time_ax.imshow(reaction_time_image, aspect='auto')
     # Turn off the axis for clean presentation
-    ax_image.axis("off")
+    reaction_time_ax.axis("off")
+
     return fig
