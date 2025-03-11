@@ -23,6 +23,7 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     # create the main figure with GridSpec
     width = kwargs.get("width", 10)
     height = kwargs.get("height", 6)
+    summary_matrix_plot_requested = kwargs.get("summary_matrix_plot", False)
     fig = plt.figure(figsize=(width, height))
     rows_gs = gridspec.GridSpec(3, 1, height_ratios=[.5, 1, .7])
     # Create separate inner grids for each row with different width ratios
@@ -40,7 +41,8 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     ax_perf = fig.add_subplot(med_gs[0, 0])
     # change the width of the ax_perf
     # ax_perf.set_position([0.1, 0.1, 0.2, 0.2])
-    ax_summat = fig.add_subplot(bot_gs[0, 0])
+    if summary_matrix_plot_requested:
+        ax_summat = fig.add_subplot(bot_gs[0, 0])
 
     # add a vertical space between the medium and bottom row
     fig.subplots_adjust(hspace=.5)
@@ -83,22 +85,23 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     ax_perf = performance_vs_trials_plot(df, ax=ax_perf, legend=False)
 
     # Summary plot
-    summat_df, summat_info = get_training_summary_matrix(df)
-    ax_summat = summary_matrix_plot(
-        mat_df=summat_df,
-        mat_df_metadata=summat_info,
-        mouse_name="",
-        ax=ax_summat,
-        training_stage_inlegend=False,
-    )
-    # put legend to the right in one column
-    ax_summat.legend(
-        bbox_to_anchor=(1.35, .9),
-        # loc="upper right",
-        borderaxespad=0.0,
-        fontsize=7,
-        ncol=1,
-    )
+    if summary_matrix_plot_requested:
+        summat_df, summat_info = get_training_summary_matrix(df)
+        ax_summat = summary_matrix_plot(
+            mat_df=summat_df,
+            mat_df_metadata=summat_info,
+            mouse_name="",
+            ax=ax_summat,
+            training_stage_inlegend=False,
+        )
+        # put legend to the right in one column
+        ax_summat.legend(
+            bbox_to_anchor=(1.35, .9),
+            # loc="upper right",
+            borderaxespad=0.0,
+            fontsize=7,
+            ncol=1,
+        )
 
     # Add title within the figure
     fig.suptitle(title, fontsize=12, y=0.90)
