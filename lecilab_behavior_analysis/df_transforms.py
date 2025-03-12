@@ -3,6 +3,25 @@ import numpy as np
 from typing import Tuple
 from lecilab_behavior_analysis.utils import column_checker
 
+def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fill missing data in the dataframe.
+    """
+    columns_to_fill = ["stimulus_modality", "current_training_stage"]
+    for column in columns_to_fill:
+        try:
+            df[column] = df[column].fillna("not saved")
+        except KeyError:
+            df[column] = "not saved"
+    # Fill missing values in the "correct" column
+    try:
+        df["correct"] = df["correct"].fillna(True)
+    except KeyError:
+        df["correct"] = True
+
+    return df
+
+
 def get_dates_df(df: pd.DataFrame) -> pd.DataFrame:
     column_checker(df, required_columns={"date", "current_training_stage"})
     dates_df = df.groupby(["date", "current_training_stage"]).count().reset_index()

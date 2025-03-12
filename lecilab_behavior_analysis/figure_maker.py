@@ -6,7 +6,8 @@ from matplotlib.figure import Figure
 from lecilab_behavior_analysis.df_transforms import (
     get_dates_df, get_performance_by_difficulty,
     get_performance_through_trials, get_repeat_or_alternate_performance,
-    get_repeat_or_alternate_series, get_water_df, get_training_summary_matrix, calculate_time_between_trials_and_rection_time)
+    get_repeat_or_alternate_series, get_water_df, get_training_summary_matrix,
+    calculate_time_between_trials_and_rection_time, fill_missing_data)
 from lecilab_behavior_analysis.plots import (
     correct_left_and_right_plot, performance_vs_trials_plot, psychometric_plot,
     rasterize_plot, repeat_or_alternate_performance_plot, session_summary_text,
@@ -46,6 +47,9 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
 
     # add a vertical space between the medium and bottom row
     fig.subplots_adjust(hspace=.5)
+
+    # fill information in df if it is missing
+    df = fill_missing_data(df)
 
     # generate the dates dataframe
     dates_df = get_dates_df(df)
