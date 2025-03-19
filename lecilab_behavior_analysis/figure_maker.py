@@ -3,23 +3,16 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
-from lecilab_behavior_analysis.df_transforms import (
-    get_dates_df, get_performance_by_difficulty,
-    get_performance_through_trials, get_repeat_or_alternate_performance,
-    get_repeat_or_alternate_series, get_water_df, get_training_summary_matrix,
-    calculate_time_between_trials_and_rection_time, fill_missing_data)
-from lecilab_behavior_analysis.plots import (
-    correct_left_and_right_plot, performance_vs_trials_plot, psychometric_plot,
-    rasterize_plot, repeat_or_alternate_performance_plot, session_summary_text,
-    summary_matrix_plot, training_calendar_plot, trials_by_date_plot,
-    trials_by_session_hist, water_by_date_plot, plot_time_between_trials_and_reaction_time)
+import lecilab_behavior_analysis.df_transforms as dft
 
+import lecilab_behavior_analysis.plots as plots
 
 def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     """
     Information about the trials done in a session and the water consumption
     """
     # TODO: add a plot to show the evolution of weight
+    # TODO: add a "day plot" with the favourite entries in the day
     
     # create the main figure with GridSpec
     width = kwargs.get("width", 10)
@@ -49,19 +42,20 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     fig.subplots_adjust(hspace=.5)
 
     # fill information in df if it is missing
-    df = fill_missing_data(df)
+    df = dft.fill_missing_data(df)
 
-    # generate the dates dataframe
-    dates_df = get_dates_df(df)
+    # add a column with the date for the day
+    df = dft.add_day_column_to_df(df)
 
     # generate the calendar plot
-    cal_image = rasterize_plot(training_calendar_plot(dates_df))
+    dates_df = dft.get_dates_df(df)
+    cal_image = plots.rasterize_plot(plots.training_calendar_plot(dates_df))
     # paste the calendar plot
     ax_cal.imshow(cal_image)
     ax_cal.axis("off")
 
     # do the barplot
-    ax_bar = trials_by_date_plot(dates_df, ax=ax_bar)
+    ax_bar = plots.trials_by_date_plot(dates_df, ax=ax_bar)
     # get the legend and move it to the top right, and change the text size
     ax_bar.legend(
         bbox_to_anchor=(1.1, 1.2),
@@ -77,21 +71,21 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     # ax_hist = trials_by_session_hist(dates_df, ax=ax_hist, ylim=ax_bar.get_ylim())
 
     # overlay water consumption in the bar plot
-    water_df = get_water_df(df)
-    ax_bar = water_by_date_plot(water_df, ax=ax_bar)
+    water_df = dft.get_water_df(df)
+    ax_bar = plots.water_by_date_plot(water_df, ax=ax_bar)
 
     # Add the performance vs trials plot
     if "perf_window" in kwargs:
         window = kwargs["perf_window"]
     else:
         window = 50
-    df = get_performance_through_trials(df, window=window)
-    ax_perf = performance_vs_trials_plot(df, ax=ax_perf, legend=False)
+    df = dft.get_performance_through_trials(df, window=window)
+    ax_perf = plots.performance_vs_trials_plot(df, ax=ax_perf, legend=False)
 
     # Summary plot
     if summary_matrix_plot_requested:
-        summat_df, summat_info = get_training_summary_matrix(df)
-        ax_summat = summary_matrix_plot(
+        summat_df, summat_info = dft.get_training_summary_matrix(df)
+        ax_summat = plots.summary_matrix_plot(
             mat_df=summat_df,
             mat_df_metadata=summat_info,
             mouse_name="",
@@ -120,8 +114,8 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     Summary of a particular session.
     """
     # if more than one session is there, raise an error
-    if df.date.nunique() > 1:
-        raise ValueError("The dataframe contains more than one session")
+    # if df.date.nunique() > 1:
+    #     raise ValueError("The dataframe contains more than one session")
 
     # create the main figure with GridSpec
     width = kwargs.get("width", 10)
@@ -152,21 +146,22 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     # TODO: separate optogenetic and control if available in several plots
     # TODO: Performance by trial with blocks if available
 
-    text_ax = session_summary_text(df, text_ax, mouse_name)
+    text_ax = plots.session_summary_text(df, text_ax, mouse_name)
     # Add the performance vs trials plot
     window = kwargs.get("perf_window", 50)
-    df = get_performance_through_trials(df, window=window)
-    perf_ax = performance_vs_trials_plot(df, perf_ax, legend=False)
-    lrc_ax = correct_left_and_right_plot(df, lrc_ax)
-    df["repeat_or_alternate"] = get_repeat_or_alternate_series(df.correct_side)
-    df = get_repeat_or_alternate_performance(df, window=window)
-    roap_ax = repeat_or_alternate_performance_plot(df, roap_ax)
-    psych_df = get_performance_by_difficulty(df)
-    psych_ax = psychometric_plot(psych_df, psych_ax)
-    df = calculate_time_between_trials_and_rection_time(df, window=window)
-    reaction_time_image = rasterize_plot(plot_time_between_trials_and_reaction_time(df), dpi=300)
-    reaction_time_ax.imshow(reaction_time_image, aspect='auto')
-    # Turn off the axis for clean presentation
-    reaction_time_ax.axis("off")
+    df = dft.get_performance_through_trials(df, window=window)
+    perf_ax = plots.performance_vs_trials_plot(df, perf_ax, legend=False)
+    lrc_ax = plots.correct_left_and_right_plot(df, lrc_ax)
+    df["repeat_or_alternate"] = dft.get_repeat_or_alternate_series(df.correct_side)
+    df = dft.get_repeat_or_alternate_performance(df, window=window)
+    roap_ax = plots.repeat_or_alternate_performance_plot(df, roap_ax)
+    psych_df = dft.get_performance_by_difficulty(df)
+    psych_ax = plots.psychometric_plot(psych_df, psych_ax)
+
+    # df = calculate_time_between_trials_and_reaction_time(df, window=window)
+    # reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
+    # reaction_time_ax.imshow(reaction_time_image, aspect='auto')
+    # # Turn off the axis for clean presentation
+    # reaction_time_ax.axis("off")
 
     return fig
