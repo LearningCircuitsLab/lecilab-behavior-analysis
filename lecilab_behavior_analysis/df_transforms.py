@@ -7,7 +7,7 @@ def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Fill missing data in the dataframe.
     """
-    columns_to_fill = ["stimulus_modality", "current_training_stage"]
+    columns_to_fill = ["stimulus_modality", "current_training_stage", "difficulty", "correct_side"]
     for column in columns_to_fill:
         try:
             df[column] = df[column].fillna("not saved")
@@ -93,11 +93,15 @@ def side_and_difficulty_to_numeric(row: pd.Series) -> float:
             numval = 2
         case "hard":
             numval = 1
+        case _:
+            numval = 0
     match row.correct_side:
         case "left":
             pass
         case "right":
             numval *= -1
+        case _:
+            numval = 0
     
     return round(numval / 3, 3)
 
@@ -158,6 +162,17 @@ def calculate_time_between_trials_and_rection_time(df: pd.DataFrame, window: int
         axis=1
     )
 
+    return df
+
+
+def add_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a day column to the dataframe.
+    """
+    # Check if the required columns are present
+    column_checker(df, required_columns={"date"})
+    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    df['year_month_day'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
     return df
 
 # if __name__ == "__main__":

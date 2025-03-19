@@ -1,6 +1,11 @@
 import numpy as np
 import pandas as pd
 import socket
+from typing import List
+import subprocess
+
+
+IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
 
 def get_session_performance(df, session: int) -> float:
@@ -210,3 +215,77 @@ def get_outpath():
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
     }
     return paths.get(hostname, "default/path")
+
+
+def get_idibaps_cluster_credentials():
+    hostname = socket.gethostname()
+    if hostname == "tectum":
+        return {
+            "username": "hvergara",
+            "host": "cluster",
+            "port": 4022,
+        }
+    else:
+        raise ValueError("Unknown host")
+
+
+def get_server_projects() -> List[str]:
+    credentials = get_idibaps_cluster_credentials()    
+    return get_folders_from_server(credentials, IDIBAPS_TV_PROJECTS)
+
+
+def get_folders_from_server(credentials: dict, path: str) -> List[str]:
+    # Create a single SSH connection to the remote server
+    ssh_command = (
+        f"ssh -p {credentials['port']} {credentials['username']}@{credentials["host"]} "
+        f"'ls {path}'"
+    )
+    result = subprocess.run(
+        ssh_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    # Decode the output and split it into a list of folder names
+    if result.returncode == 0:
+        folders = result.stdout.decode("utf-8").strip().split("\n")
+    else:
+        print(f"Error: {result.stderr.decode('utf-8')}")
+        folders = []
+    # Filter out any unwanted folders (e.g., .git)
+    folders = [folder for folder in folders if not folder.startswith(".")]
+
+    return folders
+
+
+def get_animals_in_project(project_name: str) -> List[str]:
+    credentials = get_idibaps_cluster_credentials()
+    folders = get_folders_from_server(
+        credentials,
+        f"{IDIBAPS_TV_PROJECTS}{project_name}/sessions/",
+    )
+
+    # filter out any unwanted folders (e.g., .csv)
+    folders = [folder for folder in folders if not folder.endswith(".csv")]
+
+    return folders
+
+
+def rsync_session_data(
+    project_name: str,
+    animal: str,
+    credentials: dict,
+    local_path: str,
+) -> bool:
+    """
+    This method syncs the session data from the server to the local machine.
+    """
+    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions/{animal}/{animal}.csv"
+    rsync_command = f"rsync -avz -e 'ssh -p {credentials['port']}' {remote_path} {local_path}"
+    result = subprocess.run(rsync_command, shell=True)
+    if result.returncode != 0:
+        print(f"Error syncing data for {animal}: {result.stderr.decode('utf-8')}")
+    return result.returncode == 0
+
+
+if __name__ == "__main__":
+    # Example usage
+    print(get_server_projects())
+    print(get_animals_in_project("visual_and_COT_data"))
