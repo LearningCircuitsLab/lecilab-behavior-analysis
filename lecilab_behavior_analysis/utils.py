@@ -238,7 +238,7 @@ def get_server_projects() -> List[str]:
 def get_folders_from_server(credentials: dict, path: str) -> List[str]:
     # Create a single SSH connection to the remote server
     ssh_command = (
-        f"ssh -p {credentials['port']} {credentials['username']}@{credentials["host"]} "
+        f"ssh -p {credentials['port']} {credentials['username']}@{credentials['host']} "
         f"'ls {path}'"
     )
     result = subprocess.run(
