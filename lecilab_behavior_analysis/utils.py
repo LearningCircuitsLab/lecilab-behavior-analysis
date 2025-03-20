@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 import socket
-from typing import List
+from typing import List, Dict, Tuple
 import subprocess
+import matplotlib.pyplot as plt
 
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
@@ -283,6 +284,16 @@ def rsync_session_data(
     if result.returncode != 0:
         print(f"Error syncing data for {animal}: {result.stderr.decode('utf-8')}")
     return result.returncode == 0
+
+
+def list_to_colors(ids: np.array, cmap: str) -> Tuple[List[tuple], Dict]:
+    unique_cts = pd.unique(ids)
+    colormap = plt.get_cmap(cmap)
+    colors = [colormap(i) for i in range(len(unique_cts))]
+    # Create a color dictionary
+    color_dict = {unique_cts[i]: colors[i] for i in range(len(unique_cts))}
+    # Set the colors for each current_training_stage
+    return [color_dict[x] for x in list(ids)], color_dict
 
 
 if __name__ == "__main__":

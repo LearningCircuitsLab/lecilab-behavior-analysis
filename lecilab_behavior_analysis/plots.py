@@ -5,7 +5,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-from lecilab_behavior_analysis.utils import (column_checker, get_text_from_df)
+from lecilab_behavior_analysis.utils import (column_checker, get_text_from_df, list_to_colors)
 
 
 def training_calendar_plot(dates_df: pd.DataFrame) -> plt.Figure:
@@ -33,7 +33,7 @@ def rasterize_plot(plot: plt.Figure, dpi: int = 300) -> np.ndarray:
     return rgb
 
 
-def trials_by_date_plot(dates_df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+def trials_by_session_plot(dates_df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     column_checker(dates_df, required_columns={"trial"})
     if dates_df.index.name != "date":
         raise ValueError("The dataframe must have [date] as index")
@@ -53,6 +53,23 @@ def trials_by_date_plot(dates_df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes
         label.set_horizontalalignment("right")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    return ax
+
+
+def trials_by_day_plot(
+    dates_df: pd.DataFrame, ax: plt.Axes = None, cmap: str = "tab10"
+) -> plt.Axes:
+    array_of_training_stages = np.array([x[1] for x in dates_df.columns])
+    color_list, color_dict = list_to_colors(ids=array_of_training_stages, cmap=cmap)
+    ax = dates_df.plot(kind="bar", stacked=True, edgecolor="black", color=color_list, ax=ax)
+    # remove the legend
+    ax.get_legend().remove()
+    # create a new legend
+    labels, leg_cols = zip(*color_dict.items())
+    handles = [plt.Rectangle((0, 0), 1, 1, color=color) for color in leg_cols]
+    ax.legend(handles, labels, bbox_to_anchor=(0.5, 1.25), loc="upper center", ncol=3, borderaxespad=0.0)
+    ax.get_legend().get_frame().set_linewidth(0.0)
+    
     return ax
 
 
@@ -78,9 +95,6 @@ def performance_vs_trials_plot(
     """
     # check if the dataframe has the necessary columns
     column_checker(df, required_columns={"total_trial", "performance_w"})
-
-    if ax is None:
-        ax = plt.gca()
 
     # if there is no "current_training_stage" column, generate a fake one
     if "current_training_stage" not in df.columns:
@@ -109,10 +123,8 @@ def performance_vs_trials_plot(
 
 
 def water_by_date_plot(water_df: pd.Series, ax: plt.Axes = None) -> plt.Axes:
-    if ax is None:
-        ax = plt.gca()
-    if water_df.index.name != "date":
-        raise ValueError("The dataframe must have [date] as index")
+    # if water_df.index.name != "date":
+    #     raise ValueError("The dataframe must have [date] as index")
     # check if there is someting plotted in the axis already
     items_in_axis = (
         len(ax.patches) + len(ax.lines) + len(ax.collections) + len(ax.texts)
@@ -145,8 +157,6 @@ def session_summary_text(
     """
     summary of a particular session
     """
-    if ax is None:
-        ax = plt.gca()
     text = get_text_from_df(df, mouse_name)
     ax.text(0, 0, text, fontsize=10)
     ax.axis("off")

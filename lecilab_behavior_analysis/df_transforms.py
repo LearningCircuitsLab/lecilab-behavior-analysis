@@ -15,7 +15,7 @@ def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
             df[column] = "not saved"
     # Fill missing values in the "correct" column
     try:
-        df["correct"] = df["correct"].fillna(True)
+        df["correct"] = df["correct"].infer_objects(copy=False)
     except KeyError:
         df["correct"] = True
 
@@ -31,9 +31,9 @@ def get_dates_df(df: pd.DataFrame) -> pd.DataFrame:
     return dates_df
 
 
-def get_water_df(df: pd.DataFrame) -> pd.DataFrame:
-    column_checker(df, required_columns={"date", "water"})
-    water_df = df.groupby("date")["water"].sum()
+def get_water_df(df: pd.DataFrame, grouping_column: str = "date") -> pd.DataFrame:
+    column_checker(df, required_columns={grouping_column, "water"})
+    water_df = df.groupby(grouping_column)["water"].sum()
     return water_df
 
 
@@ -173,6 +173,17 @@ def add_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
     column_checker(df, required_columns={"date"})
     df = df.copy()  # Make a copy to avoid modifying the original DataFrame
     df['year_month_day'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
+    return df
+
+
+def add_trial_of_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a trial of the day column to the dataframe.
+    """
+    # Check if the required columns are present
+    column_checker(df, required_columns={"year_month_day", "trial"})
+    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    df['trial_of_day'] = df.groupby('year_month_day')['trial'].transform(lambda x: x - x.min() + 1)
     return df
 
 # if __name__ == "__main__":

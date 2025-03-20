@@ -4,8 +4,8 @@ from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
 import lecilab_behavior_analysis.df_transforms as dft
-
 import lecilab_behavior_analysis.plots as plots
+import lecilab_behavior_analysis.utils as utils
 
 def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     """
@@ -19,6 +19,7 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     height = kwargs.get("height", 6)
     summary_matrix_plot_requested = kwargs.get("summary_matrix_plot", False)
     fig = plt.figure(figsize=(width, height))
+    # Create a GridSpec with 3 rows and 1 column
     rows_gs = gridspec.GridSpec(3, 1, height_ratios=[.5, 1, .7])
     # Create separate inner grids for each row with different width ratios
     top_gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[0])
@@ -55,15 +56,20 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     ax_cal.axis("off")
 
     # do the barplot
-    ax_bar = plots.trials_by_date_plot(dates_df, ax=ax_bar)
+    bp_df = df.groupby(["year_month_day", "date", "current_training_stage"]).count()
+    # pivot the dataframe so that the individual "date" indexes are stacked
+    bp_df = bp_df.pivot_table(index="year_month_day", columns=["date", "current_training_stage"], values="trial")
+    # Plot the stacked barplot, coloring by current_training_stage
+    ax_bar = plots.trials_by_day_plot(bp_df, ax=ax_bar, cmap="tab10")
+    # ax_bar = plots.trials_by_session_plot(dates_df, ax=ax_bar)
     # get the legend and move it to the top right, and change the text size
-    ax_bar.legend(
-        bbox_to_anchor=(1.1, 1.2),
-        loc="upper right",
-        borderaxespad=0.0,
-        fontsize=7,
-        ncol=len(dates_df.current_training_stage.unique()),
-    )
+    # ax_bar.legend(
+    #     bbox_to_anchor=(1.1, 1.2),
+    #     loc="upper right",
+    #     borderaxespad=0.0,
+    #     fontsize=7,
+    #     ncol=len(dates_df.current_training_stage.unique()),
+    # )
     # remove box
     ax_bar.get_legend().get_frame().set_linewidth(0.0)
 
@@ -71,7 +77,7 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     # ax_hist = trials_by_session_hist(dates_df, ax=ax_hist, ylim=ax_bar.get_ylim())
 
     # overlay water consumption in the bar plot
-    water_df = dft.get_water_df(df)
+    water_df = dft.get_water_df(df, grouping_column="year_month_day")
     ax_bar = plots.water_by_date_plot(water_df, ax=ax_bar)
 
     # Add the performance vs trials plot
@@ -103,8 +109,6 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
 
     # Add title within the figure
     fig.suptitle(title, fontsize=12, y=0.90)
-
-    # fig.tight_layout()
 
     return fig
 
