@@ -4,14 +4,13 @@ import socket
 from typing import List, Dict, Tuple
 import subprocess
 import matplotlib.pyplot as plt
-
+import ast
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
 
 def get_session_performance(df, session: int) -> float:
     """
-    TODO: move this to a different package
     This method calculates the performance of a session.
     """
 
@@ -24,6 +23,23 @@ def get_session_number_of_trials(df, session: int) -> int:
     """
 
     return df[df.session == session].shape[0]
+
+
+def get_start_and_end_times(df):
+    """
+    Get the start and end times of the session.
+    """
+    # ensure that there is only one session in the dataframe
+    if df['session'].nunique() != 1:
+        raise ValueError("The dataframe contains more than one session.")
+    # get the start time of the session as the start of the first trial
+    start_time = df.loc[df['trial'] == np.min(df.trial), 'TRIAL_START'].values[0]
+    # get the end time of the session as the end of the last trial
+    end_time = df.loc[df['trial'] == np.max(df.trial), 'TRIAL_END'].values[0]
+    # convert the start and end times to datetime
+    start_time = pd.to_datetime(start_time, unit='s')
+    end_time = pd.to_datetime(end_time, unit='s')
+    return start_time, end_time
 
 
 def get_block_size_truncexp_mean30() -> int:
@@ -293,8 +309,25 @@ def list_to_colors(ids: np.array, cmap: str) -> Tuple[List[tuple], Dict]:
     # Create a color dictionary
     color_dict = {unique_cts[i]: colors[i] for i in range(len(unique_cts))}
     # Set the colors for each current_training_stage
-    return [color_dict[x] for x in list(ids)], color_dict
+    color_list = [color_dict[x] for x in list(ids)]
+    return color_list, color_dict
 
+
+def is_this_a_miss_trial(series: pd.Series) -> bool:
+    """
+    checks if STATE_stimulus_state_END is the last state
+    """
+    try:
+        end_of_stimulus_state = np.max(ast.literal_eval(series["STATE_stimulus_state_END"]))
+        end_of_trial = series["TRIAL_END"]
+        if np.round(end_of_stimulus_state, 6) == np.round(end_of_trial, 6):
+            return True
+        else:
+            return False
+    except ValueError:
+        # if the value is not a list, return False
+        return False
+    
 
 if __name__ == "__main__":
     # Example usage

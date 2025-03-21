@@ -342,7 +342,7 @@ def side_correct_performance_plot(df: pd.DataFrame, ax: plt.Axes, trials_to_show
 
     return ax
 
-def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = None) -> plt.figure:
     """
     Plot Time Between Trials (TBT) and Reaction Time (RT) on the same plot with histograms on the y-axes.
     """

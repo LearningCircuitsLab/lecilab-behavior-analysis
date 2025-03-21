@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from typing import Tuple
-from lecilab_behavior_analysis.utils import column_checker
+import lecilab_behavior_analysis.utils as utils
 
 def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -23,7 +23,7 @@ def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_dates_df(df: pd.DataFrame) -> pd.DataFrame:
-    column_checker(df, required_columns={"date", "current_training_stage"})
+    utils.column_checker(df, required_columns={"date", "current_training_stage"})
     dates_df = df.groupby(["date", "current_training_stage"]).count().reset_index()
     # set as index the date
     dates_df.set_index("date", inplace=True)
@@ -32,7 +32,7 @@ def get_dates_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_water_df(df: pd.DataFrame, grouping_column: str = "date") -> pd.DataFrame:
-    column_checker(df, required_columns={grouping_column, "water"})
+    utils.column_checker(df, required_columns={grouping_column, "water"})
     water_df = df.groupby(grouping_column)["water"].sum()
     return water_df
 
@@ -51,7 +51,7 @@ def get_repeat_or_alternate_series(series: pd.Series) -> pd.Series:
 
 
 def get_performance_through_trials(df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
-    column_checker(df, required_columns={"session", "trial", "correct"})
+    utils.column_checker(df, required_columns={"session", "trial", "correct"})
     # sort the df by "session" and "trial"
     df = df.sort_values(["session", "trial"])
     # add a column with the total number of trials
@@ -75,7 +75,7 @@ def get_repeat_or_alternate_performance(
 
 
 def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
-    column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
+    utils.column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
     pbd_df = df.groupby(["difficulty", "correct_side"]).correct.mean().unstack().reset_index()
     # melt the dataframe
     pbd_df = pbd_df.melt(id_vars=["difficulty"])
@@ -108,7 +108,7 @@ def side_and_difficulty_to_numeric(row: pd.Series) -> float:
 
 
 def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
-    column_checker(df, required_columns={"session"})
+    utils.column_checker(df, required_columns={"session"})
     # Initialize lists to save important data
     leftward_evidence_list = []
     leftward_choices_list = []
@@ -154,7 +154,7 @@ def calculate_time_between_trials_and_rection_time(df: pd.DataFrame, window: int
     Calculate Time Between Trials and Reaction Time.
     """
     # Check if the required columns are present
-    column_checker(df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
+    utils.column_checker(df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
     df = df.copy()  # Make a copy to avoid modifying the original DataFrame
     df['Time_Between_Trials'] = df.groupby('session')['Port2Out'].diff()
     df['Reaction_Time'] = df.apply(
@@ -170,7 +170,7 @@ def add_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
     Add a day column to the dataframe.
     """
     # Check if the required columns are present
-    column_checker(df, required_columns={"date"})
+    utils.column_checker(df, required_columns={"date"})
     df = df.copy()  # Make a copy to avoid modifying the original DataFrame
     df['year_month_day'] = pd.to_datetime(df['date']).dt.strftime('%Y-%m-%d')
     return df
@@ -181,10 +181,37 @@ def add_trial_of_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
     Add a trial of the day column to the dataframe.
     """
     # Check if the required columns are present
-    column_checker(df, required_columns={"year_month_day", "trial"})
+    utils.column_checker(df, required_columns={"year_month_day", "trial"})
     df = df.copy()  # Make a copy to avoid modifying the original DataFrame
     df['trial_of_day'] = df.groupby('year_month_day')['trial'].transform(lambda x: x - x.min() + 1)
     return df
+
+
+def add_trial_misses(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a trial misses column to the dataframe.
+    """
+    # Check if the required columns are present
+    utils.column_checker(df, required_columns={"STATE_stimulus_state_END", "TRIAL_END"})
+    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    df["miss_trial"] = df.apply(utils.is_this_a_miss_trial, axis=1)
+
+    return df
+
+
+def get_start_and_end_of_sessions_df(df: pd.DataFrame) -> pd.DataFrame:
+    list_of_occupancy = []
+    for mouse in pd.unique(df['subject']):
+        mouse_df = df[df['subject'] == mouse]
+        for session in mouse_df['session'].unique():
+            session_df = mouse_df[mouse_df['session'] == session]
+            list_of_occupancy.append((mouse, session, utils.get_start_and_end_times(session_df)))
+    # create a dataframe from the list of occupancy
+    occupancy_df = pd.DataFrame(list_of_occupancy, columns=['subject', 'session', 'start_end_times'])
+    # split the start_end_times column into two columns
+    occupancy_df[['start_time', 'end_time']] = occupancy_df['start_end_times'].apply(pd.Series)
+    # drop the start_end_times column
+    return occupancy_df.drop(columns=['start_end_times'])
 
 # if __name__ == "__main__":
 #     from lecilab_behavior_analysis.utils import load_example_data

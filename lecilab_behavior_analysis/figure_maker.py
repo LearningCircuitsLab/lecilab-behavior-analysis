@@ -162,10 +162,10 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     psych_df = dft.get_performance_by_difficulty(df)
     psych_ax = plots.psychometric_plot(psych_df, psych_ax)
 
-    # df = calculate_time_between_trials_and_reaction_time(df, window=window)
-    # reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
-    # reaction_time_ax.imshow(reaction_time_image, aspect='auto')
-    # # Turn off the axis for clean presentation
-    # reaction_time_ax.axis("off")
+    df = calculate_time_between_trials_and_reaction_time(df, window=window)
+    reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
+    reaction_time_ax.imshow(reaction_time_image, aspect='auto')
+    # Turn off the axis for clean presentation
+    reaction_time_ax.axis("off")
 
     return fig
