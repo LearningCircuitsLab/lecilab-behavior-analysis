@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import ast
 from typing import Tuple
 import lecilab_behavior_analysis.utils as utils
 
@@ -149,18 +150,20 @@ def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
     return mat_df, session_info
 
 
-def calculate_time_between_trials_and_rection_time(df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
+def calculate_time_between_trials_and_reaction_time(df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
     """
     Calculate Time Between Trials and Reaction Time.
     """
     # Check if the required columns are present
     utils.column_checker(df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
     df = df.copy()  # Make a copy to avoid modifying the original DataFrame
-    df['Time_Between_Trials'] = df.groupby('session')['Port2Out'].diff()
-    df['Reaction_Time'] = df.apply(
-        lambda row: row['Port1In'] - row['Port2Out'] if pd.notna(row['Port1In']) else row['Port3In'] - row['Port2Out'],
-        axis=1
-    )
+    for date in pd.unique(df['date']):
+        date_df = df[df['date'] == date]
+        port2outs = date_df['Port2Out'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
+        date_df['Time_Between_Trials'] = port2outs.diff()
+        df.loc[df['date'] == date, 'Time_Between_Trials'] = date_df['Time_Between_Trials']
+    # Calculate the reaction time
+    df['Reaction_Time'] = df.apply(utils.trial_reaction_time, axis=1)
 
     return df
 
