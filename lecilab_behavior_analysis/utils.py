@@ -180,6 +180,9 @@ def get_sound_stats(sound_dict: dict) -> dict:
         low_mat = pd.DataFrame(sound_dict["low_tones"])
     else:
         low_mat = sound_dict["low_tones"]
+    # make the matrices binary
+    high_mat = (high_mat > 0).astype(int)
+    low_mat = (low_mat > 0).astype(int)
     # get the sound statistics
     high_mat_stats = analyze_sound_matrix(high_mat)
     low_mat_stats = analyze_sound_matrix(low_mat)

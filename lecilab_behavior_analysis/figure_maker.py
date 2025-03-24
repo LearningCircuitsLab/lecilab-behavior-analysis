@@ -139,12 +139,12 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     lrc_ax = fig.add_subplot(top_gs[0, 2])
     roap_ax = fig.add_subplot(bot_gs[0, 0])
     psych_ax = fig.add_subplot(bot_gs[0, 1])
-    reaction_time_ax = fig.add_subplot(bot_gs[0, 2])
+    # reaction_time_ax = fig.add_subplot(bot_gs[0, 2])
     fig.tight_layout()
-    original_pos = reaction_time_ax.get_position()
+    # original_pos = reaction_time_ax.get_position()
     #Altering the bottom right subplot bbox to remove the padding between subplots and the figure border to adapt the rasterized image later that already includes axis
     #The default pading = 0.2 and so the pading between subplots is 0.05
-    reaction_time_ax.set_position(pos=[original_pos.x0-0.05, original_pos.y0-0.075, original_pos.width+0.05, original_pos.height+0.075])
+    # reaction_time_ax.set_position(pos=[original_pos.x0-0.05, original_pos.y0-0.075, original_pos.width+0.05, original_pos.height+0.075])
     
     # TODO: Psychometric with actual values and fit
     # TODO: separate optogenetic and control if available in several plots
@@ -162,10 +162,10 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     psych_df = dft.get_performance_by_difficulty(df)
     psych_ax = plots.psychometric_plot(psych_df, psych_ax)
 
-    df = dft.calculate_time_between_trials_and_reaction_time(df, window=window)
-    reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
-    reaction_time_ax.imshow(reaction_time_image, aspect='auto')
-    # Turn off the axis for clean presentation
-    reaction_time_ax.axis("off")
+    # df = dft.calculate_time_between_trials_and_reaction_time(df, window=window)
+    # reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
+    # reaction_time_ax.imshow(reaction_time_image, aspect='auto')
+    # # Turn off the axis for clean presentation
+    # reaction_time_ax.axis("off")
 
     return fig

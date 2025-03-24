@@ -62,6 +62,7 @@ def trials_by_day_plot(
     array_of_training_stages = np.array([x[1] for x in dates_df.columns])
     color_list, color_dict = list_to_colors(ids=array_of_training_stages, cmap=cmap)
     ax = dates_df.plot(kind="bar", stacked=True, edgecolor="black", color=color_list, ax=ax)
+    ax.set_ylabel("Number of trials")
     # remove the legend
     ax.get_legend().remove()
     # create a new legend
