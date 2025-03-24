@@ -102,13 +102,25 @@ def performance_vs_trials_plot(
         df["current_training_stage"] = "All"
 
     # plot the performance
-    for stage in df["current_training_stage"].unique():
-        stage_df = df[df["current_training_stage"] == stage]
-        sns.lineplot(
-            data=stage_df, x="total_trial", y="performance_w", ax=ax, label=stage
-        )
+    # for stage in df["current_training_stage"].unique():
+    #     stage_df = df[df["current_training_stage"] == stage]
+    #     sns.lineplot(
+    #         data=stage_df, x="total_trial", y="performance_w", ax=ax, label=stage
+    #     )
+    sns.lineplot(
+        data=df,
+        x="total_trial",
+        y="performance_w",
+        hue="current_training_stage",
+        ax=ax,
+    )
+    if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
+        for sc in kwargs["session_changes"][1:]:
+            tt = df.loc[sc]["total_trial"]
+            ax.axvline(tt, linestyle="--", color="gray")
     ax.set_xlim(left=0)
-    ax.set_ylim(40, 100)
+    if "ylim" in kwargs:
+        ax.set_ylim(kwargs["ylim"])
     ax.set_xlabel("Trial number")
     ax.set_ylabel("Performance")
     # horizontal line at 50%
@@ -181,7 +193,7 @@ def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Ax
 
 
 def repeat_or_alternate_performance_plot(
-    df: pd.DataFrame, ax: plt.Axes = None
+    df: pd.DataFrame, ax: plt.Axes = None, **kwargs
 ) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
@@ -206,7 +218,8 @@ def repeat_or_alternate_performance_plot(
     ax.spines[["top", "right"]].set_visible(False)
     # x axis always starts at 0
     ax.set_xlim(left=0)
-    ax.set_ylim(40, 100)
+    if "ylim" in kwargs:
+        ax.set_ylim(kwargs["ylim"])
     # put the legend at the top in one row
     ax.legend(bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0)
     # remove box

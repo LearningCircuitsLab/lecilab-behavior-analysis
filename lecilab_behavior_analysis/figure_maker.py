@@ -154,7 +154,10 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     # Add the performance vs trials plot
     window = kwargs.get("perf_window", 50)
     df = dft.get_performance_through_trials(df, window=window)
-    perf_ax = plots.performance_vs_trials_plot(df, perf_ax, legend=False)
+    # find the index of the session changes
+    session_changes = df[df.session != df.session.shift(1)].index
+    # add a vertical line to the performance plot
+    perf_ax = plots.performance_vs_trials_plot(df, perf_ax, legend=False, session_changes=session_changes)
     lrc_ax = plots.correct_left_and_right_plot(df, lrc_ax)
     df["repeat_or_alternate"] = dft.get_repeat_or_alternate_series(df.correct_side)
     df = dft.get_repeat_or_alternate_performance(df, window=window)
