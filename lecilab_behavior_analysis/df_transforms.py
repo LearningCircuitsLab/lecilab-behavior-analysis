@@ -45,9 +45,17 @@ def get_repeat_or_alternate_series(series: pd.Series) -> pd.Series:
     is the same as the previous one or not.
 
     Meant to be used for the trial side column (correct_side)
+    Or the columns with the first choice of the mouse
     """
     prev_choices = series.shift(1, fill_value=np.nan)
-    repeat_or_alternate = np.where(series == prev_choices, "repeat", "alternate")
+    repeat_or_alternate = np.where(
+        series.isna() | prev_choices.isna(),
+        np.nan,
+        np.where(
+            series == prev_choices,
+            "repeat",
+            "alternate"))
+
     return pd.Series(repeat_or_alternate, index=series.index)
 
 
@@ -215,6 +223,32 @@ def get_start_and_end_of_sessions_df(df: pd.DataFrame) -> pd.DataFrame:
     occupancy_df[['start_time', 'end_time']] = occupancy_df['start_end_times'].apply(pd.Series)
     # drop the start_end_times column
     return occupancy_df.drop(columns=['start_end_times'])
+
+
+def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Analyze the dataframe adding new columns and filling missing data.
+    """
+    df = fill_missing_data(df)
+    df = add_day_column_to_df(df)
+    df = add_trial_of_day_column_to_df(df)
+    df = add_trial_misses(df)
+    df = add_mouse_first_choice(df)
+
+    return df
+
+
+def add_mouse_first_choice(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add the first choice made by the mouse in each trial.
+    """
+
+    utils.column_checker(df, required_columns={"Port1In", "Port3In", "STATE_stimulus_state_START"})
+    df = df.copy()
+    df['first_choice'] = df.apply(utils.first_poke_after_stimulus_state, axis=1)
+    
+    return df
+
 
 # if __name__ == "__main__":
 #     from lecilab_behavior_analysis.utils import load_example_data

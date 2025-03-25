@@ -438,3 +438,18 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     plt.tight_layout()
 
     return fig
+
+
+def bias_vs_trials_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    column_checker(df, required_columns={"total_trial", "bias"})
+    sns.lineplot(data=df, x="total_trial", y="bias", ax=ax)
+    ax.set_xlabel("Trial number")
+    ax.set_ylabel("Bias")
+    # set y ticks label to be -1, 0, 1
+    ax.set_yticks([-1, 0, 1])
+    ax.set_yticklabels(["left", "alternate", "right"])
+    ax.axhline(0, linestyle="--", color="gray")
+    ax.spines[["top", "right"]].set_visible(False)
+    return ax

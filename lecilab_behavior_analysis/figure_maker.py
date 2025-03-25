@@ -125,21 +125,26 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     width = kwargs.get("width", 10)
     height = kwargs.get("height", 6)
     fig = plt.figure(figsize=(width, height))
-    rows_gs = gridspec.GridSpec(2, 1, height_ratios=[1, 1])
+    rows_gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, 1])
     # Create separate inner grids for each row with different width ratios
     top_gs = gridspec.GridSpecFromSubplotSpec(
         1, 3, subplot_spec=rows_gs[0], width_ratios=[2, 2, 1]
     )
-    bot_gs = gridspec.GridSpecFromSubplotSpec(
+    mid_gs = gridspec.GridSpecFromSubplotSpec(
         1, 3, subplot_spec=rows_gs[1], width_ratios=[1, 1, 2]
+    )
+    bot_gs = gridspec.GridSpecFromSubplotSpec(
+        1, 2, subplot_spec=rows_gs[2], width_ratios=[1, 1]
     )
 
     text_ax = fig.add_subplot(top_gs[0, 0])
     perf_ax = fig.add_subplot(top_gs[0, 1])
     lrc_ax = fig.add_subplot(top_gs[0, 2])
-    roap_ax = fig.add_subplot(bot_gs[0, 0])
-    psych_ax = fig.add_subplot(bot_gs[0, 1])
-    # reaction_time_ax = fig.add_subplot(bot_gs[0, 2])
+    roap_ax = fig.add_subplot(mid_gs[0, 0])
+    psych_ax = fig.add_subplot(mid_gs[0, 1])
+    # reaction_time_ax = fig.add_subplot(mid_gs[0, 2])
+    bias_ax = fig.add_subplot(bot_gs[0, 0])
+
     fig.tight_layout()
     # original_pos = reaction_time_ax.get_position()
     #Altering the bottom right subplot bbox to remove the padding between subplots and the figure border to adapt the rasterized image later that already includes axis
@@ -171,4 +176,13 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     # # Turn off the axis for clean presentation
     # reaction_time_ax.axis("off")
 
-    return fig
+    # add the bias plot
+    # get the first choice of the mouse
+    df = dft.add_mouse_first_choice(df)
+    # is it repeating or alternating?
+    df["roa_choice"] = dft.get_repeat_or_alternate_series(df.first_choice)
+    # turn bias into a number (-1 for left, 1 for right, 0 for alternating)
+    df['bias'] = df.apply(utils.calc_bias, axis=1)
+    bias_ax = plots.bias_vs_trials_plot(df, bias_ax)
+
+    return fig, df

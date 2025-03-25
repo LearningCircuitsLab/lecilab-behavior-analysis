@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import socket
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 import subprocess
 import matplotlib.pyplot as plt
 import ast
@@ -355,6 +355,65 @@ def trial_reaction_time(series: pd.Series) -> float:
         port3_in = np.nan
     
     return np.nanmin([port1_in, port3_in]) - out_time
+
+
+def first_poke_after_stimulus_state(series: pd.Series) -> Union[str, None]:
+    # convert the series to a dictionary
+    ser_dict = series.to_dict()
+    try:
+        stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+    except ValueError:
+        # if the value is not a list, return None
+        return None
+    if len(stim_state_array) == 0:
+        return None
+    start_time = min(stim_state_array)
+    port1_in = get_dictionary_event_as_list(ser_dict, "Port1In")
+    port3_in = get_dictionary_event_as_list(ser_dict, "Port3In")   
+    
+    port1_in_after = [i for i in port1_in if i > start_time]
+    port3_in_after = [i for i in port3_in if i > start_time]
+    
+    if len(port1_in_after) == 0 and len(port3_in_after) == 0:
+        return None
+    elif len(port1_in_after) == 0:
+        return "right"
+    elif len(port3_in_after) == 0:
+        return "left"
+    
+    if np.min(port1_in_after) < np.min(port3_in_after):
+        return "left"
+    elif np.min(port3_in_after) < np.min(port1_in_after):
+        return "right"
+    else:
+        return None
+
+
+def get_dictionary_event_as_list(ser_dict: Dict, event: str) -> List:
+    # check if the keys are in the dict
+    if event in ser_dict.keys():
+        try:
+            event_list = ast.literal_eval(ser_dict[event])
+            if type(event_list) is float:
+                event_list = [event_list]
+        except ValueError:
+            # if the value is not a list, return an empty list
+            event_list = []
+    else:
+        event_list = []
+    return event_list
+
+
+def calc_bias(row: pd.Series) -> float:
+    if row['roa_choice'] == 'alternate':
+        return 0
+    elif row['roa_choice'] == 'repeat':
+        if row['first_choice'] == 'left':
+            return -1
+        elif row['first_choice'] == 'right':
+            return 1
+    else:
+        return np.nan
 
 
 if __name__ == "__main__":
