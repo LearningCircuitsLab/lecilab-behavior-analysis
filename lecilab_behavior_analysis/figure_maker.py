@@ -185,4 +185,4 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     df['bias'] = df.apply(utils.calc_bias, axis=1)
     bias_ax = plots.bias_vs_trials_plot(df, bias_ax)
 
-    return fig, df
+    return fig
