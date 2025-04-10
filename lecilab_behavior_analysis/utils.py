@@ -122,7 +122,10 @@ def column_checker(df: pd.DataFrame, required_columns: set):
         )
 
 
-def get_text_from_df(df: pd.DataFrame, mouse_name: str) -> str:
+def get_text_from_subset_df(df: pd.DataFrame) -> str:
+    # make sure that there is only one subject in the dataframe
+    if df.subject.nunique() != 1:
+        raise ValueError("The dataframe contains more than one subject.")
     # get the session
     session = df.session.unique()
     # get the date
@@ -137,6 +140,8 @@ def get_text_from_df(df: pd.DataFrame, mouse_name: str) -> str:
     performance = n_correct / n_trials * 100
     # get the water consumed
     water = df.water.sum()
+    # get the subject
+    mouse_name = df.subject.unique()[0]
 
     # write the text
     text = f"""\
@@ -148,6 +153,33 @@ def get_text_from_df(df: pd.DataFrame, mouse_name: str) -> str:
     Number of correct trials: {n_correct}
     Performance: {performance:.2f}%
     Water consumed: {water} μl
+    """
+
+    return text
+
+
+def get_text_from_subject_df(df: pd.DataFrame) -> str:
+    # make sure that there is only one subject in the dataframe
+    if df.subject.nunique() != 1:
+        raise ValueError("The dataframe contains more than one subject.")
+    column_checker(df, {"subject", "session", "water", "year_month_day"})
+    # get the subject
+    mouse_name = df.subject.unique()[0]
+    # get the average water consumed per day
+    days_of_training = df.year_month_day.nunique()
+    avg_water_per_day = df.water.sum() / days_of_training if days_of_training > 0 else 0
+    # get the number of trials per day on average
+    avg_trials_per_day = df.shape[0] / days_of_training if days_of_training > 0 else 0
+    # get the number of sessions per day on average
+    n_sessions = df.session.nunique()
+    avg_sessions_per_day = n_sessions / days_of_training if days_of_training > 0 else 0
+
+    # write the text
+    text = f"""\
+        {mouse_name}
+        {avg_sessions_per_day:.2f} sessions per day
+        {avg_trials_per_day:.0f} trials per day
+        {avg_water_per_day:.0f} μl of water per day
     """
 
     return text
@@ -242,8 +274,8 @@ def get_idibaps_cluster_credentials():
     if hostname == "tectum":
         return {
             "username": "hvergara",
-            "host": "cluster",
-            "port": 4022,
+            "host": "mini",
+            # "port": 443,
         }
     else:
         raise ValueError("Unknown host")
@@ -257,7 +289,7 @@ def get_server_projects() -> List[str]:
 def get_folders_from_server(credentials: dict, path: str) -> List[str]:
     # Create a single SSH connection to the remote server
     ssh_command = (
-        f"ssh -p {credentials['port']} {credentials['username']}@{credentials['host']} "
+        f"ssh {credentials['username']}@{credentials['host']} "
         f"'ls {path}'"
     )
     result = subprocess.run(
@@ -298,7 +330,7 @@ def rsync_session_data(
     This method syncs the session data from the server to the local machine.
     """
     remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions/{animal}/{animal}.csv"
-    rsync_command = f"rsync -avz -e 'ssh -p {credentials['port']}' {remote_path} {local_path}"
+    rsync_command = f"rsync -avz {remote_path} {local_path}"
     result = subprocess.run(rsync_command, shell=True)
     if result.returncode != 0:
         print(f"Error syncing data for {animal}: {result.stderr.decode('utf-8')}")

@@ -7,40 +7,48 @@ import lecilab_behavior_analysis.df_transforms as dft
 import lecilab_behavior_analysis.plots as plots
 import lecilab_behavior_analysis.utils as utils
 
-def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
+def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     """
     Information about the trials done in a session and the water consumption
     """
     # TODO: add a plot to show the evolution of weight
     # TODO: add a "day plot" with the favourite entries in the day
+
+    # make sure there is only one subject in the dataframe
+    if df.subject.nunique() > 1:
+        raise ValueError(
+            f"The dataframe contains more than one subject: {df.subject.unique()}."
+        )
     
     # create the main figure with GridSpec
-    width = kwargs.get("width", 10)
-    height = kwargs.get("height", 6)
+    width = kwargs.get("width", 15)
+    height = kwargs.get("height", 10)
     summary_matrix_plot_requested = kwargs.get("summary_matrix_plot", False)
     fig = plt.figure(figsize=(width, height))
     # Create a GridSpec with 3 rows and 1 column
-    rows_gs = gridspec.GridSpec(3, 1, height_ratios=[.5, 1, .7])
+    rows_gs = gridspec.GridSpec(4, 1, height_ratios=[.7, 1, 1, 1])
     # Create separate inner grids for each row with different width ratios
-    top_gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[0])
-    med_gs = gridspec.GridSpecFromSubplotSpec(
-        1, 2, subplot_spec=rows_gs[1], width_ratios=[1.5, 3]
-    )
-    bot_gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[2])
-    # Create the top axis spanning both columns
-    ax_cal = fig.add_subplot(top_gs[0, 0])
+    gs1 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[0], width_ratios=[1, 4])
+    gs2 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[1], width_ratios=[1.5, 3])
+    gs3 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[2], width_ratios=[1.5, 3])
+    gs4 = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[3])
+    # Create the top axis
+    ax_name = fig.add_subplot(gs1[0, 0])
+    ax_cal = fig.add_subplot(gs1[0, 1])
     # Create the medium axes
-    ax_bar = fig.add_subplot(med_gs[0, 1])
+    ax_bar = fig.add_subplot(gs2[0, 1])
     # ax_hist = fig.add_subplot(med_gs[0, 1])
     # Create the bottom axis
-    ax_perf = fig.add_subplot(med_gs[0, 0])
+    ax_perf = fig.add_subplot(gs2[0, 0])
     # change the width of the ax_perf
     # ax_perf.set_position([0.1, 0.1, 0.2, 0.2])
+    # performance by decision
+    ax_pbd = fig.add_subplot(gs3[0, 0])
     if summary_matrix_plot_requested:
-        ax_summat = fig.add_subplot(bot_gs[0, 0])
+        ax_summat = fig.add_subplot(gs4[0, 0])
 
     # add a vertical space between the medium and bottom row
-    fig.subplots_adjust(hspace=.5)
+    # fig.subplots_adjust(hspace=.5)
 
     # fill information in df if it is missing
     df = dft.fill_missing_data(df)
@@ -48,10 +56,13 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     # add a column with the date for the day
     df = dft.add_day_column_to_df(df)
 
+    # write the subject name and some info
+    ax_name = plots.summary_text_plot(df, kind="subject", ax=ax_name, fontsize=15)
+
     # generate the calendar plot
     dates_df = dft.get_dates_df(df)
-    cal_image = plots.rasterize_plot(plots.training_calendar_plot(dates_df))
-    # paste the calendar plot
+    cal_image = plots.rasterize_plot(plots.training_calendar_plot(dates_df), dpi=300)
+    # paste the calendar plot filling the entire axis
     ax_cal.imshow(cal_image)
     ax_cal.axis("off")
 
@@ -88,6 +99,10 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
     df = dft.get_performance_through_trials(df, window=window)
     ax_perf = plots.performance_vs_trials_plot(df, ax=ax_perf, legend=False)
 
+    df = dft.get_repeat_or_alternate_performance(df)
+    df_pbd = dft.get_performance_by_decision_df(df)
+    ax_pbd = plots.performance_by_decision_plot(df_pbd, ax=ax_pbd)
+
     # Summary plot
     if summary_matrix_plot_requested:
         summat_df, summat_info = dft.get_training_summary_matrix(df)
@@ -107,8 +122,7 @@ def subject_progress_figure(df: pd.DataFrame, title: str, **kwargs) -> Figure:
             ncol=1,
         )
 
-    # Add title within the figure
-    fig.suptitle(title, fontsize=12, y=0.90)
+    plt.tight_layout()
 
     return fig
 
@@ -155,7 +169,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     # TODO: separate optogenetic and control if available in several plots
     # TODO: Performance by trial with blocks if available
 
-    text_ax = plots.session_summary_text(df, text_ax, mouse_name)
+    text_ax = plots.summary_text_plot(df, kind="session", ax=text_ax)
     # Add the performance vs trials plot
     window = kwargs.get("perf_window", 50)
     df = dft.get_performance_through_trials(df, window=window)

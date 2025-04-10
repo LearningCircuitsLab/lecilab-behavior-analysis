@@ -225,10 +225,19 @@ def get_start_and_end_of_sessions_df(df: pd.DataFrame) -> pd.DataFrame:
     return occupancy_df.drop(columns=['start_end_times'])
 
 
+def reformat_df_columns(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    df['visual_stimulus'] = df['visual_stimulus'].apply(ast.literal_eval)
+    # TODO: fix issues with this when there are no values
+
+    return df
+
+
 def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
     """
     Analyze the dataframe adding new columns and filling missing data.
     """
+    # df = reformat_df_columns(df)
     df = fill_missing_data(df)
     df = add_day_column_to_df(df)
     df = add_trial_of_day_column_to_df(df)
@@ -249,6 +258,28 @@ def add_mouse_first_choice(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
+
+def get_performance_by_decision_df(df: pd.DataFrame, trial_group_size: int = 500) -> pd.DataFrame:
+    """
+    Get the performance by decision dataframe.
+    """
+    # check that there is only one subject
+    if df['subject'].nunique() > 1:
+        raise ValueError("The dataframe should contain only one subject.")
+    utils.column_checker(df, required_columns={"correct_side", "repeat_or_alternate", "correct", "total_trial"})
+    # bin the data into groups of trial_group_size
+    df = df.copy()  # Create a copy to avoid SettingWithCopyWarning
+    df['trial_group'] = df['total_trial'] // trial_group_size * trial_group_size
+    # group by the trial group and calculate the mean of the correct column
+    df_binned = df.groupby(['correct_side', 'repeat_or_alternate', 'trial_group'])[['correct']].mean().reset_index()
+    # performance in between 0 and 100
+    df_binned['correct'] = df_binned['correct'] * 100
+    # get the different combinations of correct side and repeat or alternate
+    df_binned['correct_side_repeat_or_alternate'] = df_binned['correct_side'] + '_' + df_binned['repeat_or_alternate']
+    # get only the 4 combinations and remove nans etc
+    df_binned = df_binned[df_binned['correct_side_repeat_or_alternate'].isin(['left_repeat', 'left_alternate', 'right_repeat', 'right_alternate'])]
+
+    return df_binned
 
 # if __name__ == "__main__":
 #     from lecilab_behavior_analysis.utils import load_example_data

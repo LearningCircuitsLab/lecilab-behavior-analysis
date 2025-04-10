@@ -5,7 +5,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-from lecilab_behavior_analysis.utils import (column_checker, get_text_from_df, list_to_colors)
+from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
 
 
 def training_calendar_plot(dates_df: pd.DataFrame) -> plt.Figure:
@@ -22,7 +22,7 @@ def rasterize_plot(plot: plt.Figure, dpi: int = 300) -> np.ndarray:
     plot.set_dpi(dpi)
     canvas = FigureCanvasAgg(plot)
     canvas.draw()
-    width, height = plot.get_size_inches() * plot.get_dpi()
+    width, height = plot.get_size_inches() * dpi
     # Get ARGB buffer and reshape
     argb = np.frombuffer(canvas.tostring_argb(), dtype="uint8").reshape(
         int(height), int(width), 4  # 4 channels (A, R, G, B)
@@ -63,6 +63,7 @@ def trials_by_day_plot(
     color_list, color_dict = list_to_colors(ids=array_of_training_stages, cmap=cmap)
     ax = dates_df.plot(kind="bar", stacked=True, edgecolor="black", color=color_list, ax=ax)
     ax.set_ylabel("Number of trials")
+    ax.set_xlabel("")
     # remove the legend
     ax.get_legend().remove()
     # create a new legend
@@ -164,14 +165,25 @@ def water_by_date_plot(water_df: pd.Series, ax: plt.Axes = None) -> plt.Axes:
     return ax_to_use
 
 
-def session_summary_text(
-    df: pd.DataFrame, ax: plt.Axes = None, mouse_name: str = ""
+def summary_text_plot(
+    df: pd.DataFrame, kind: str = "session", ax: plt.Axes = None, **kwargs
 ) -> plt.Axes:
     """
-    summary of a particular session
+    summary of a particular session or subject
     """
-    text = get_text_from_df(df, mouse_name)
-    ax.text(0, 0, text, fontsize=10)
+    if ax is None:
+        ax = plt.gca()
+    if kind == "session":
+        text = get_text_from_subset_df(df)
+    elif kind == "subject":
+        text = get_text_from_subject_df(df)
+    else:
+        raise ValueError("kind must be 'session' or 'subject'")
+    if "fontsize" in kwargs:
+        fontsize = kwargs["fontsize"]
+    else:
+        fontsize = 10
+    ax.text(0, 0, text, fontsize=fontsize)
     ax.axis("off")
     return ax
 
@@ -452,4 +464,52 @@ def bias_vs_trials_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     ax.set_yticklabels(["left", "alternate", "right"])
     ax.axhline(0, linestyle="--", color="gray")
     ax.spines[["top", "right"]].set_visible(False)
+    return ax
+
+
+def performance_by_decision_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    column_checker(df, required_columns={"correct", "correct_side_repeat_or_alternate", "trial_group"})
+    # if kwargs has a color_dict, use it to set the colors
+    if "color_dict" in kwargs:
+        color_dict = kwargs["color_dict"]
+    else:
+        color_dict = {
+            "left_repeat": (0.121, 0.466, 0.705, 1),  # tab:blue with alpha=0.8
+            "left_alternate": (0.121, 0.466, 0.705, 0.4),  # tab:orange with alpha=0.8
+            "right_repeat": (1.0, 0.498, 0.054, 1),  # tab:purple with alpha=0.8
+            "right_alternate": (1.0, 0.498, 0.054, 0.4),  # tab:red with alpha=0.8
+        }
+
+    # Create a custom palette using the color_dict
+    palette = {key: color for key, color in color_dict.items()}
+
+    sns.lineplot(data=df, x='trial_group', y='correct', hue='correct_side',
+                 style="repeat_or_alternate",
+                 errorbar=None, ax=ax)#, palette=palette)
+    # rotate the x-axis labels and align them to the end
+    # for label in ax.get_xticklabels():
+    #     label.set_rotation(45)
+    #     label.set_horizontalalignment('right')
+    # ax.set_title('Performance by "decision"', pad=20)
+    ax.set_xlabel('Trials')
+    ax.set_ylabel('Performance')
+    # Filter legend to only include entries with handles (skip titles like "correct_side")
+    handles, labels = ax.get_legend_handles_labels()
+    # clean handles and labels to only include the ones that are not titles
+    for handle, label in zip(handles, labels):
+        if label not in ["left", "right", "repeat", "alternate"]:
+            handles.remove(handle)
+            labels.remove(label)
+    # Recreate legend with only handle-associated labels
+    ax.legend(handles=handles, labels=labels, frameon=False, title='')
+
+    # remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    # start the x axis at min value
+    ax.set_xlim(left=df["trial_group"].min())
+
     return ax
