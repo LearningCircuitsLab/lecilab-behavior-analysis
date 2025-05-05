@@ -513,3 +513,123 @@ def performance_by_decision_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs
     ax.set_xlim(left=df["trial_group"].min())
 
     return ax
+
+
+def triangle_polar_plot(df_bias: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    column_checker(df_bias, required_columns={"subject", "bias_angle", "percentage"})
+    if ax is None:
+        ax = plt.subplot(111, polar=True)
+    # Plot each subject in a polar plot
+    for subject in df_bias['subject'].unique():
+        subject_data = df_bias[df_bias['subject'] == subject]
+        
+        # Extract the angles and distances
+        angles = subject_data['bias_angle'].values
+        percentages = subject_data['percentage'].values
+        
+        # Close the triangle by repeating the first point
+        angles = np.append(angles, angles[0])
+        percentages = np.append(percentages, percentages[0])
+        
+        # Plot the triangle
+        ax.plot(angles, percentages, marker='o', linestyle='-', label=subject)
+        
+    # Set title and formatting
+    # ax.set_title(f"Animal biases", va='bottom', fontsize=16)
+    ax.set_rlabel_position(-22.5)  # Adjust label position
+    ax.grid(True)
+
+    # make the circular 0.33 grid thicker
+    ax.yaxis.grid(True, color='gray', linestyle='--', linewidth=0.5)
+    # plot the 0.33 grid
+    ax.set_yticks([0.25, 0.5])
+
+    ax.set_xticks([2*np.pi/4, 5*np.pi/4, 7*np.pi/4])
+    ax.set_xticklabels(['Alternate', 'Left', 'Right'], fontsize=14)
+
+    # Show the legend outside the plot
+    plt.legend(loc='upper right', bbox_to_anchor=(1.4, .8), ncol=1)
+    # remove border of legend box
+    plt.setp(ax.get_legend().get_frame(), linewidth=0)  # Set legend frame color and linewidth
+
+    return ax
+
+
+def plot_percentage_of_occupancy_per_day(daily_percentages: pd.Series, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    # Plot the percentage of time for each day
+    daily_percentages.plot(kind='line', ax=ax)
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Percentage of time (%)')
+    ax.set_title('Percentage of time that task is running per day')
+    ax.tick_params(axis='x', rotation=45)
+    ax.set_ylim(0, 100)
+    ax.grid(True)
+    return ax
+
+
+def plot_training_times_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    # Plot the heatmap vector
+    sns.heatmap(heatmap_vector.reshape(1, -1), cmap='YlGnBu', cbar=True,
+                xticklabels=60, vmin=0, vmax=np.max(heatmap_vector), ax=ax)
+    ax.set_xlabel('Hour of the Day')
+    ax.set_ylabel('Event Occurrences')
+    ax.set_title('Training times')
+    # Set the x-ticks to show every hour
+    ax.set_xticks(np.arange(0, 1440, 60))
+    ax.set_xticklabels([f'{i//60:02d}:00' for i in range(0, 1440, 60)], rotation=45)
+    ax.set_yticks([])
+    ax.set_ylabel('')
+    ax.grid(False)
+    plt.tight_layout()
+    
+    return ax
+
+
+def plot_training_times_clock_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        _, ax = plt.subplots(figsize=(3, 3), subplot_kw={'projection': 'polar'})
+    # Create a polar plot
+    theta = np.linspace(0, 2 * np.pi, 1440)  # 1440 minutes in a day
+
+    # Plot the heatmap as a polar bar plot
+    ax.bar(theta, heatmap_vector, width=2 * np.pi / 1440, color=plt.cm.YlGnBu(heatmap_vector / np.max(heatmap_vector)), edgecolor='none')
+
+    # shade in light gray from 20:00 to 8:00 and put it behind the bars
+    # get the maximum value of the plot radius
+    max_radius = ax.get_ylim()[1]
+    ax.fill_between(theta, 0, max_radius, where=(theta >= 20 * np.pi / 12) | (theta <= 8 * np.pi / 12), color='lightgray', alpha=0.5, zorder=0)
+
+    # Customize the plot to resemble a clock
+    try:
+        ax.set_theta_zero_location('N')  # Set midnight at the top
+        ax.set_theta_direction(-1)  # Set clockwise direction
+    except AttributeError:
+        print("initialize your figure with subplot_kw={'projection': 'polar'} to make it circular")
+    
+    ax.set_xticks(np.linspace(0, 2 * np.pi, 12, endpoint=False))  # Hourly ticks
+    ax.set_xticklabels([f'{i}:00' for i in range(0, 24, 2)])  # Label every 2 hours
+    ax.set_yticks([])  # Remove radial ticks
+    ax.set_title('Training Times', pad=25)
+    
+    return ax
+
+
+def plot_transition_matrix(transition_matrix: pd.DataFrame, figsize: tuple = (5, 5)) -> None:
+    # plot the heatmap of the transition matrix with clustering
+    # if ax is None:
+    #     ax = plt.gca()
+
+    # sns.heatmap(transition_matrix, annot=True, fmt='d', cmap='YlGnBu')
+    fig = sns.clustermap(transition_matrix, annot=True, fmt='d', cmap='YlGnBu', cbar=True,
+                   xticklabels=transition_matrix.columns, yticklabels=transition_matrix.index,
+                   figsize=figsize, dendrogram_ratio=(0.2, 0.2), cbar_kws={"shrink": .8})
+    # get the axis of the clustermap
+    ax = fig.ax_heatmap
+    # set the title and labels
+    ax.set_title('Transition Matrix Heatmap', fontsize=16)
+    ax.set_xlabel('To Item')
+    ax.set_ylabel('From Item')

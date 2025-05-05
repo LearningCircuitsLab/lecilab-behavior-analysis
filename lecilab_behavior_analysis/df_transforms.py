@@ -48,23 +48,88 @@ def get_repeat_or_alternate_series(series: pd.Series) -> pd.Series:
     Or the columns with the first choice of the mouse
     """
     prev_choices = series.shift(1, fill_value=np.nan)
+    return repeat_or_alternate_series_comparison(series, prev_choices)
+
+
+def repeat_or_alternate_series_comparison(
+    series: pd.Series, comparison_series: pd.Series
+) -> pd.Series:
+    """
+    Given a series of values, return a series of the same length
+    with "repeat" or "alternate" depending on whether the value
+    is the same between the two series or not.
+    """
     repeat_or_alternate = np.where(
-        series.isna() | prev_choices.isna(),
+        series.isna() | comparison_series.isna(),
         np.nan,
         np.where(
-            series == prev_choices,
+            series == comparison_series,
             "repeat",
             "alternate"))
 
     return pd.Series(repeat_or_alternate, index=series.index)
 
 
+def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    The previous side port can come from two sources.
+    One, from the previous trial, where the animal was drinking water
+    (note, this should not necessarily be true as the animal can go to the
+    other port afterwards without going through the middle, but if a trial has
+    started before that happens, this function will take care of it)
+    Second, from side port pokes previous to the initiation of the stimulus. This
+    second condition can happen from two sources. Initial pokes before poking on
+    the center, or poking in the center just brief enough to not trigger the
+    stimulus state. In some cases this is not punished.
+    """
+    df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
+    # Get side port pokes before the stimulus state
+    df["last_choice_before_stimulus"] = df.apply(utils.get_last_poke_before_stimulus_state, axis=1)
+    # Get the last port from the previous trial
+    if "last_choice" not in df.columns:
+        df = add_mouse_last_choice(df)
+    
+    # Check if there are side ports pokes before the stimulus state,
+    # and if not, return the previous trial data. If there are, return the
+    # last side port pokes of current trial
+    df['roa_choice'] = np.nan
+    df['roa_choice'] = df['roa_choice'].astype(object)
+    for mouse in df['subject'].unique():
+        for session in df[df.subject == mouse]['session'].unique():
+            df_mouse_session = df[np.logical_and(df['subject'] == mouse, df['session'] == session)]
+            # compute which one is the last choice that they made
+            last_choice_before_stimulus = df_mouse_session['last_choice_before_stimulus']
+            last_choice_in_previous = df_mouse_session['last_choice'].shift(1, fill_value=np.nan)
+            # define a lambda function that gets these two series and:
+            # 1. if the last_choice_before_stimulus is not null, return it
+            # 2. if the last_choice_before_stimulus is null, return the last_choice_in_previous
+            # 3. if both are null, return np.nan
+            lambda_func = lambda x, y: x if pd.notna(x) else (y if pd.notna(y) else np.nan)
+            # apply the lambda function to the two series
+            last_choice = last_choice_before_stimulus.combine(last_choice_in_previous, lambda_func)
+            series_to_append = repeat_or_alternate_series_comparison(
+                # first choice of each trial
+                df_mouse_session['first_choice'],
+                # last choice in the previous trial
+                last_choice,
+                )
+            # add the new column to the original dataframe, as the series have the index
+            # equal to the original dataframe
+            df.loc[df_mouse_session.index, 'roa_choice'] = series_to_append
+
+    return df
+
+
 def get_performance_through_trials(df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
     utils.column_checker(df, required_columns={"session", "trial", "correct"})
+    # make sure only one subject is present
+    if df["subject"].nunique() > 1:
+        raise ValueError("The dataframe should contain only one subject.")
     # sort the df by "session" and "trial"
     df = df.sort_values(["session", "trial"])
-    # add a column with the total number of trials
-    df["total_trial"] = np.arange(1, df.shape[0] + 1)
+    # add a column with the total number of trials if it doesn't exist
+    if "total_trial" not in df.columns:
+        df["total_trial"] = np.arange(1, df.shape[0] + 1)
     # calculate the performance as a mean of the last X trials
     df["performance_w"] = df.correct.rolling(window=window).mean() * 100
 
@@ -72,8 +137,9 @@ def get_performance_through_trials(df: pd.DataFrame, window: int = 25) -> pd.Dat
 
 
 def get_repeat_or_alternate_performance(
-    df: pd.DataFrame, window: int = 25
+    df_in: pd.DataFrame, window: int = 25
 ) -> pd.DataFrame:
+    df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
     if "repeat_or_alternate" not in df.columns:
         df["repeat_or_alternate"] = get_repeat_or_alternate_series(df.correct_side)
 
@@ -158,13 +224,13 @@ def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
     return mat_df, session_info
 
 
-def calculate_time_between_trials_and_reaction_time(df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
+def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
     """
     Calculate Time Between Trials and Reaction Time.
     """
     # Check if the required columns are present
     utils.column_checker(df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
-    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    df = in_df.copy()  # Make a copy to avoid modifying the original DataFrame
     for date in pd.unique(df['date']):
         date_df = df[df['date'] == date]
         port2outs = date_df['Port2Out'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
@@ -221,8 +287,45 @@ def get_start_and_end_of_sessions_df(df: pd.DataFrame) -> pd.DataFrame:
     occupancy_df = pd.DataFrame(list_of_occupancy, columns=['subject', 'session', 'start_end_times'])
     # split the start_end_times column into two columns
     occupancy_df[['start_time', 'end_time']] = occupancy_df['start_end_times'].apply(pd.Series)
+    # Calculate the duration of each event in minutes
+    occupancy_df['duration'] = (occupancy_df['end_time'] - occupancy_df['start_time']).dt.total_seconds() / 60
+    # Group by date and calculate the total duration of events for each day
+    occupancy_df['date'] = occupancy_df['start_time'].dt.date
     # drop the start_end_times column
     return occupancy_df.drop(columns=['start_end_times'])
+
+
+def get_daily_occupancy_percentages(occupancy_df: pd.DataFrame) -> pd.DataFrame:
+    daily_durations = occupancy_df.groupby('date')['duration'].sum()
+    # Calculate the percentage of the day that the events occupy (1440 minutes in a day)
+    return (daily_durations / 1440) * 100
+
+
+def get_occupancy_heatmap(occupancy_df: pd.DataFrame, window_size: int = 30) -> np.ndarray:
+    utils.column_checker(occupancy_df, required_columns={"start_time", "end_time"})
+    # Create a vector to represent the heatmap (1440 minutes in a day)
+    heatmap_vector = np.zeros(1440)
+
+    # Populate the heatmap vector with event occurrences
+    for start, end in zip(occupancy_df['start_time'], occupancy_df['end_time']):
+        start_minute_of_day = start.hour * 60 + start.minute
+        end_minute_of_day = end.hour * 60 + end.minute
+        
+        if start_minute_of_day <= end_minute_of_day:
+            heatmap_vector[start_minute_of_day:end_minute_of_day] += 1
+        else:
+            heatmap_vector[start_minute_of_day:] += 1
+            heatmap_vector[:end_minute_of_day] += 1
+
+    # add the window size to the beginning and end of the vector
+    heatmap_vector = np.concatenate((heatmap_vector[len(heatmap_vector)-window_size:], heatmap_vector, heatmap_vector[:window_size]))
+    # apply the moving average
+    heatmap_vector = np.convolve(heatmap_vector, np.ones(window_size)/window_size, mode='same')
+    # cut the vector to the original size
+    heatmap_vector = heatmap_vector[window_size:len(heatmap_vector)-window_size]
+
+    return heatmap_vector
+
 
 
 def reformat_df_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -243,6 +346,15 @@ def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
     df = add_trial_of_day_column_to_df(df)
     df = add_trial_misses(df)
     df = add_mouse_first_choice(df)
+    df = add_mouse_last_choice(df)
+
+    # add a column with the total number of trials
+    for subject in pd.unique(df['subject']):
+        subject_df = df[df['subject'] == subject].copy()
+        # add a column with the total number of trials
+        subject_df["total_trial"] = np.arange(1, subject_df.shape[0] + 1)
+        # add the total trial column to the original dataframe
+        df.loc[df['subject'] == subject, "total_trial"] = subject_df["total_trial"]
 
     return df
 
@@ -255,6 +367,18 @@ def add_mouse_first_choice(df: pd.DataFrame) -> pd.DataFrame:
     utils.column_checker(df, required_columns={"Port1In", "Port3In", "STATE_stimulus_state_START"})
     df = df.copy()
     df['first_choice'] = df.apply(utils.first_poke_after_stimulus_state, axis=1)
+    
+    return df
+
+
+def add_mouse_last_choice(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add the last choice made by the mouse in each trial.
+    """
+
+    utils.column_checker(df, required_columns={"Port1In", "Port3In"})
+    df = df.copy()
+    df['last_choice'] = df.apply(utils.get_last_poke_of_trial, axis=1)
     
     return df
 
@@ -280,6 +404,42 @@ def get_performance_by_decision_df(df: pd.DataFrame, trial_group_size: int = 500
     df_binned = df_binned[df_binned['correct_side_repeat_or_alternate'].isin(['left_repeat', 'left_alternate', 'right_repeat', 'right_alternate'])]
 
     return df_binned
+
+
+def get_triangle_polar_plot_df(df: pd.DataFrame) -> pd.DataFrame:
+    utils.column_checker(df, required_columns={"roa_choice_numeric", "subject"})
+    # get the bias for each animal
+    df_bias = df.groupby(['subject'])['roa_choice_numeric'].value_counts().reset_index(name='count')
+    # transform the bias to be in the range of 0 to 2pi
+    df_bias['bias_angle'] = df_bias['roa_choice_numeric'].replace({
+        0: 2 * np.pi / 4,
+        -1: 5 * np.pi / 4,
+        1: 7 * np.pi / 4
+    })
+    # transform counts into percentages
+    df_bias['percentage'] = df_bias['count'] / df_bias.groupby(['subject'])['count'].transform('sum')
+
+    return df_bias
+
+
+def create_transition_matrix(events: list) -> pd.DataFrame:
+    # Initialize a matrix with zeros
+    items = list(set(events))
+    items.sort()  # Sort the items to ensure consistent ordering
+    n = len(items)
+    transition_matrix = np.zeros((n, n), dtype=int)
+    
+    # Map items to their indices in the matrix
+    item_index = {item: i for i, item in enumerate(items)}
+    
+    # Count transitions from one item to the next
+    for i in range(len(events) - 1):
+        from_item = events[i]
+        to_item = events[i + 1]
+        transition_matrix[item_index[from_item], item_index[to_item]] += 1
+    
+    # Return the transition matrix as a pandas DataFrame for better readability
+    return pd.DataFrame(transition_matrix, index=items, columns=items)
 
 # if __name__ == "__main__":
 #     from lecilab_behavior_analysis.utils import load_example_data

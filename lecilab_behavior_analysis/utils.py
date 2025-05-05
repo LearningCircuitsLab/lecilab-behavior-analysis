@@ -399,7 +399,7 @@ def first_poke_after_stimulus_state(series: pd.Series) -> Union[str, None]:
         return None
     if len(stim_state_array) == 0:
         return None
-    start_time = min(stim_state_array)
+    start_time = max(stim_state_array)
     port1_in = get_dictionary_event_as_list(ser_dict, "Port1In")
     port3_in = get_dictionary_event_as_list(ser_dict, "Port3In")   
     
@@ -416,6 +416,64 @@ def first_poke_after_stimulus_state(series: pd.Series) -> Union[str, None]:
     if np.min(port1_in_after) < np.min(port3_in_after):
         return "left"
     elif np.min(port3_in_after) < np.min(port1_in_after):
+        return "right"
+    else:
+        return None
+    
+
+def get_last_poke_of_trial(series: pd.Series) -> Union[str, None]:
+    # convert the series to a dictionary
+    ser_dict = series.to_dict()
+    port1_in = get_dictionary_event_as_list(ser_dict, "Port1In")
+    port3_in = get_dictionary_event_as_list(ser_dict, "Port3In")   
+    
+    if len(port1_in) == 0 and len(port3_in) == 0:
+        return None
+    elif len(port1_in) == 0:
+        return "right"
+    elif len(port3_in) == 0:
+        return "left"
+    
+    if np.max(port1_in) > np.max(port3_in):
+        return "left"
+    elif np.max(port3_in) > np.max(port1_in):
+        return "right"
+    else:
+        return None
+
+
+def get_last_poke_before_stimulus_state(series: pd.Series) -> Union[str, None]:
+    """
+    Sometimes the animal can poke in the center port and not wait long enough
+    to get the stimulus state. If trial is not aborted due to selected settings,
+    the animal can keep poking.
+    """
+    # convert the series to a dictionary
+    ser_dict = series.to_dict()
+    try:
+        stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+    except ValueError:
+        # if the value is not a list, return None
+        return None
+    if len(stim_state_array) == 0:
+        return None
+    start_time = max(stim_state_array)
+    port1_in = get_dictionary_event_as_list(ser_dict, "Port1In")
+    port3_in = get_dictionary_event_as_list(ser_dict, "Port3In")   
+    
+    port1_in_before = [i for i in port1_in if i < start_time]
+    port3_in_before = [i for i in port3_in if i < start_time]
+    
+    if len(port1_in_before) == 0 and len(port3_in_before) == 0:
+        return None
+    elif len(port1_in_before) == 0:
+        return "right"
+    elif len(port3_in_before) == 0:
+        return "left"
+    
+    if np.max(port1_in_before) > np.max(port3_in_before):
+        return "left"
+    elif np.max(port3_in_before) > np.max(port1_in_before):
         return "right"
     else:
         return None
@@ -436,7 +494,7 @@ def get_dictionary_event_as_list(ser_dict: Dict, event: str) -> List:
     return event_list
 
 
-def calc_bias(row: pd.Series) -> float:
+def get_repeat_or_alternate_to_numeric(row: pd.Series) -> float:
     if row['roa_choice'] == 'alternate':
         return 0
     elif row['roa_choice'] == 'repeat':
