@@ -399,7 +399,7 @@ def first_poke_after_stimulus_state(series: pd.Series) -> Union[str, None]:
         return None
     if len(stim_state_array) == 0:
         return None
-    start_time = max(stim_state_array)
+    start_time = min(stim_state_array)
     port1_in = get_dictionary_event_as_list(ser_dict, "Port1In")
     port3_in = get_dictionary_event_as_list(ser_dict, "Port3In")   
     
@@ -457,7 +457,7 @@ def get_last_poke_before_stimulus_state(series: pd.Series) -> Union[str, None]:
         return None
     if len(stim_state_array) == 0:
         return None
-    start_time = max(stim_state_array)
+    start_time = min(stim_state_array)
     port1_in = get_dictionary_event_as_list(ser_dict, "Port1In")
     port3_in = get_dictionary_event_as_list(ser_dict, "Port3In")   
     
