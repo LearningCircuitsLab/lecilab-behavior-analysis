@@ -85,7 +85,7 @@ def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
     df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
     # Get side port pokes before the stimulus state
     df["last_choice_before_stimulus"] = df.apply(utils.get_last_poke_before_stimulus_state, axis=1)
-    # Get the last port from the previous trial
+    # Get the last port in each trial
     if "last_choice" not in df.columns:
         df = add_mouse_last_choice(df)
     
@@ -375,7 +375,6 @@ def add_mouse_last_choice(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add the last choice made by the mouse in each trial.
     """
-
     utils.column_checker(df, required_columns={"Port1In", "Port3In"})
     df = df.copy()
     df['last_choice'] = df.apply(utils.get_last_poke_of_trial, axis=1)
@@ -420,6 +419,52 @@ def get_triangle_polar_plot_df(df: pd.DataFrame) -> pd.DataFrame:
     df_bias['percentage'] = df_bias['count'] / df_bias.groupby(['subject'])['count'].transform('sum')
 
     return df_bias
+
+
+def get_bias_evolution_df(df: pd.DataFrame, groupby: str) -> pd.DataFrame:
+    """
+    Gets how the bias of the animals (alternating, right bias, or left bias)
+    evolves over time.
+
+    Arguments:
+    df: DataFrame with the data
+    groupby: str, the column to group by. Can be 'session' or 'trial_group'
+
+    Returns:
+    df: DataFrame with the bias evolution
+    """
+    utils.column_checker(df, required_columns={"roa_choice_numeric", "subject", groupby})
+    df_anchev = df.copy()
+    df_anchev = df_anchev.groupby(['subject', groupby])['roa_choice_numeric'].value_counts().reset_index(name='count')
+    # transform counts into percentages
+    df_anchev['percentage'] = df_anchev['count'] / df_anchev.groupby(['subject', groupby])['count'].transform('sum')
+
+    # pivot or melt the dataframe so that each subject and session has a y value, that will be the percentage when the bias
+    # is 0, and the x value will be the differences between the percentages when the bias is 1 and -1
+    df_bias_pivot = df_anchev.pivot(index=['subject', groupby], columns='roa_choice_numeric', values='percentage')
+
+    # fill the NaN values with 0
+    df_bias_pivot = df_bias_pivot.fillna(0)
+    # calculate the difference between the percentages when the bias is 1 and -1
+    df_bias_pivot['left_right_bias'] = df_bias_pivot[1] - df_bias_pivot[-1]
+    df_bias_pivot['alternating_bias'] = df_bias_pivot[0]
+    # reset index
+    return df_bias_pivot.reset_index()
+
+
+def points_to_lines_for_bias_evolution(df: pd.DataFrame, groupby: str) -> pd.DataFrame:
+    # if more than one subject, raise an error
+    if df['subject'].nunique() > 1:
+        raise ValueError("The dataframe should contain only one subject.")
+    utils.column_checker(df, required_columns={groupby})
+    # convert the xs and ys points to lines by duplicating the endpoint using the next trial group
+    dfbps = df.copy()
+    dfbps[groupby] = dfbps[groupby].shift(1)
+    # add the two dataframes together
+    df_bias_pivot_merged = pd.concat([df, dfbps], ignore_index=True)
+    df_bias_pivot_merged.dropna(inplace=True)
+    
+    return df_bias_pivot_merged
 
 
 def create_transition_matrix(events: list) -> pd.DataFrame:

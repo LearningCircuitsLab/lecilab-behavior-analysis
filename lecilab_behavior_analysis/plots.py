@@ -4,6 +4,10 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
+import networkx as nx
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 
 from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
 
@@ -555,6 +559,45 @@ def triangle_polar_plot(df_bias: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     return ax
 
 
+def plot_decision_evolution_triangle(df: pd.DataFrame, hue: str, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    column_checker(df, required_columns={"left_right_bias", "alternating_bias", hue})
+    if ax is None:
+        ax = plt.gca()
+    if "palette" in kwargs:
+        palette = kwargs["palette"]
+    else:
+        palette = sns.color_palette("viridis", as_cmap=True)
+    # plot the trajectory of the left_right_bias and alternating_bias through the sessions,
+    # without averaging the same values
+    sns.lineplot(data=df, x='left_right_bias', y='alternating_bias', ax=ax,
+                 hue=hue, palette=palette, legend=False,
+                 linewidth=3, alpha=0.8)
+    # connect the points in the order of the session
+    # plt.plot(df_bias_pivot['xs'], df_bias_pivot['ys'], marker='o', linestyle='-')
+
+    # plot a triangle between -1 and 1 in the x axis and 0 and 1 in the y axis
+    triangle = np.array([[0, 1], [1, 0], [-1, 0], [0, 1]])
+    ax.plot(triangle[:, 0], triangle[:, 1], color='black', linestyle='--')
+    # draw a dashed circle in 0, 0.5 of radius 0.1, no linestyle, fill it with black and alpha 0.1
+    circle = plt.Circle((0, 0.5), 0.1, color='black', fill=True, alpha=0.1)
+    ax.add_artist(circle)
+    # label the triangle vertices
+    ax.text(0, 1.05, 'Alternating', ha='center', va='center')
+    ax.text(1.05, -0.05, 'Right', ha='center', va='center')
+    ax.text(-1.05, -0.05, 'Left', ha='center', va='center')
+    # remove spines and ticks
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlabel('')
+    ax.set_ylabel('')
+
+    return ax
+
+
 def plot_percentage_of_occupancy_per_day(daily_percentages: pd.Series, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
@@ -618,7 +661,7 @@ def plot_training_times_clock_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes =
     return ax
 
 
-def plot_transition_matrix(transition_matrix: pd.DataFrame, figsize: tuple = (5, 5)) -> None:
+def plot_transition_matrix(transition_matrix: pd.DataFrame, figsize: tuple = (5, 5)) -> plt.Figure:
     # plot the heatmap of the transition matrix with clustering
     # if ax is None:
     #     ax = plt.gca()
@@ -633,3 +676,65 @@ def plot_transition_matrix(transition_matrix: pd.DataFrame, figsize: tuple = (5,
     ax.set_title('Transition Matrix Heatmap', fontsize=16)
     ax.set_xlabel('To Item')
     ax.set_ylabel('From Item')
+
+    return fig
+
+
+def plot_transition_network_with_curved_edges(transition_matrix: pd.DataFrame, threshold: int = 0, figsize: tuple = (10, 10)) -> plt.Figure:
+    # Create a directed graph from the transition matrix
+    G = nx.from_pandas_adjacency(transition_matrix, create_using=nx.DiGraph)
+    pos = nx.spring_layout(G, seed=42)  # Fixed layout for consistency
+
+    # Calculate total edge weight and filter edges above the threshold
+    total_weight = sum(G[u][v]['weight'] for u, v in G.edges())
+    min_weight = threshold * total_weight / 100  # Calculate the minimum weight based on % threshold
+
+    # Edge attributes: Filter edges above the threshold and scale them
+    filtered_edges = [(u, v) for u, v in G.edges() if G[u][v]['weight'] >= min_weight]
+    edge_weights = [G[u][v]['weight'] for u, v in filtered_edges]
+    
+    # Normalize edge properties for filtered edges
+    if edge_weights:
+        max_weight = max(edge_weights)
+    else:
+        max_weight = 1  # Prevent division by zero if no edges remain
+    
+    edge_widths = [2 + (5 * G[u][v]['weight'] / max_weight) for u, v in filtered_edges]
+    edge_alphas = [0.3 + (0.7 * G[u][v]['weight'] / max_weight) for u, v in filtered_edges]
+    
+    # Apply a colormap to the edges based on normalized weights
+    norm = mcolors.Normalize(vmin=min(edge_weights, default=0), vmax=max_weight)
+    edge_colors = [cm.YlGnBu(norm(G[u][v]['weight'])) for u, v in filtered_edges]
+    
+    # Create a figure
+    plt.figure(figsize=figsize)
+
+    # Draw larger, fully opaque nodes
+    nx.draw_networkx_nodes(G, pos, node_size=1000, node_color='lightblue', alpha=1.0)
+    
+    # Draw curved edges with varying properties, terminating early at the nodes
+    for i, (u, v) in enumerate(filtered_edges):
+        # Curve edges if they're bidirectional
+        if G.has_edge(v, u) and (u, v) != (v, u):
+            curve_scale = 0.2  # Add curvature for bidirectional edges
+        else:
+            curve_scale = 0
+        
+        nx.draw_networkx_edges(
+            G, pos, edgelist=[(u, v)], width=edge_widths[i], alpha=edge_alphas[i], edge_color=[edge_colors[i]],
+            connectionstyle=f"arc3,rad={curve_scale}", arrows=True, arrowsize=15, arrowstyle='-|>',
+            min_source_margin=10, min_target_margin=10,  # Terminate arrows earlier at the node edges
+        )
+    
+    # Draw labels
+    nx.draw_networkx_labels(G, pos, font_size=10, font_weight='bold')
+    
+    # Add a colorbar
+    sm = plt.cm.ScalarMappable(cmap='YlGnBu', norm=norm)
+    sm.set_array([])
+    cbar = plt.colorbar(sm, ax=plt.gca(), orientation='vertical', fraction=0.046, pad=0.04)
+    cbar.set_label('Transition Frequency', fontsize=12)
+
+    plt.title(f'Transition Network (Edges above {threshold}% of total weight)', fontsize=16)
+    
+    return plt.gcf()

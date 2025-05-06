@@ -12,7 +12,6 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     Information about the trials done in a session and the water consumption
     """
     # TODO: add a plot to show the evolution of weight
-    # TODO: add a "day plot" with the favourite entries in the day
 
     # make sure there is only one subject in the dataframe
     if df.subject.nunique() > 1:
@@ -28,13 +27,14 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     # Create a GridSpec with 3 rows and 1 column
     rows_gs = gridspec.GridSpec(4, 1, height_ratios=[.7, 1, 1, 1])
     # Create separate inner grids for each row with different width ratios
-    gs1 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[0], width_ratios=[1, 4])
+    gs1 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=rows_gs[0], width_ratios=[1, 4, 1])
     gs2 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[1], width_ratios=[1.5, 3])
-    gs3 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[2], width_ratios=[1.5, 3])
+    gs3 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=rows_gs[2], width_ratios=[1.5, 1, 3])
     gs4 = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[3])
     # Create the top axis
     ax_name = fig.add_subplot(gs1[0, 0])
     ax_cal = fig.add_subplot(gs1[0, 1])
+    ax_training_time = fig.add_subplot(gs1[0, 2])
     # Create the medium axes
     ax_bar = fig.add_subplot(gs2[0, 1])
     # ax_hist = fig.add_subplot(med_gs[0, 1])
@@ -44,6 +44,10 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     # ax_perf.set_position([0.1, 0.1, 0.2, 0.2])
     # performance by decision
     ax_pbd = fig.add_subplot(gs3[0, 0])
+    # evolution of the bias
+    ax_bias = fig.add_subplot(gs3[0, 1])
+
+    # summary plot if requested
     if summary_matrix_plot_requested:
         ax_summat = fig.add_subplot(gs4[0, 0])
 
@@ -66,21 +70,21 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     ax_cal.imshow(cal_image)
     ax_cal.axis("off")
 
+    # add the training time plot
+    # Plot the percentage of time that the task is running per day and the heatmap of the occupancy during the day
+    occupancy_df = dft.get_start_and_end_of_sessions_df(df)
+    occupancy_heatmap = dft.get_occupancy_heatmap(occupancy_df, window_size=30)
+    fig.delaxes(ax_training_time)  # Remove the default second subplot
+    ax_training_time = fig.add_subplot(gs1[0, 2], projection='polar')  # Add a polar subplot
+    plots.plot_training_times_clock_heatmap(occupancy_heatmap, ax=ax_training_time)
+
     # do the barplot
     bp_df = df.groupby(["year_month_day", "date", "current_training_stage"]).count()
     # pivot the dataframe so that the individual "date" indexes are stacked
     bp_df = bp_df.pivot_table(index="year_month_day", columns=["date", "current_training_stage"], values="trial")
     # Plot the stacked barplot, coloring by current_training_stage
     ax_bar = plots.trials_by_day_plot(bp_df, ax=ax_bar, cmap="tab10")
-    # ax_bar = plots.trials_by_session_plot(dates_df, ax=ax_bar)
-    # get the legend and move it to the top right, and change the text size
-    # ax_bar.legend(
-    #     bbox_to_anchor=(1.1, 1.2),
-    #     loc="upper right",
-    #     borderaxespad=0.0,
-    #     fontsize=7,
-    #     ncol=len(dates_df.current_training_stage.unique()),
-    # )
+
     # remove box
     ax_bar.get_legend().get_frame().set_linewidth(0.0)
 
@@ -102,6 +106,20 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     df = dft.get_repeat_or_alternate_performance(df)
     df_pbd = dft.get_performance_by_decision_df(df)
     ax_pbd = plots.performance_by_decision_plot(df_pbd, ax=ax_pbd)
+
+    # add the bias plot showing 20 steps
+    # get what the animal is doing, if it is alternating or repeating to the left or to the right
+    df = dft.add_mouse_first_choice(df)
+    df = dft.add_mouse_last_choice(df)
+    df = dft.add_port_where_animal_comes_from(df)
+    # get a metric to see the bias in choices (including alternation)
+    df['roa_choice_numeric'] = df.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
+    # evolution of bias by trial group
+    trial_group_size = df.shape[0] // 20
+    df['trial_group'] = df['total_trial'] // trial_group_size * trial_group_size
+    df_bias_evolution = dft.get_bias_evolution_df(df, groupby='trial_group')
+    df_bias_evolution = dft.points_to_lines_for_bias_evolution(df_bias_evolution, groupby='trial_group')
+    ax_bias = plots.plot_decision_evolution_triangle(df_bias_evolution, ax=ax_bias, hue='trial_group')
 
     # Summary plot
     if summary_matrix_plot_requested:
@@ -196,7 +214,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     # is it repeating or alternating?
     df["roa_choice"] = dft.get_repeat_or_alternate_series(df.first_choice)
     # turn bias into a number (-1 for left, 1 for right, 0 for alternating)
-    df['bias'] = df.apply(utils.calc_bias, axis=1)
+    df['bias'] = df.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
     bias_ax = plots.bias_vs_trials_plot(df, bias_ax)
 
     return fig
