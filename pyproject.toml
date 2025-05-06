@@ -9,6 +9,7 @@ dynamic = ["version"]
 dependencies = [
   "calplot",
   "seaborn",
+  "networkx",
 ]
 
 license = {text = "BSD-3-Clause"}
