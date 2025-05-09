@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import ast
-from typing import Tuple
+from typing import Tuple, Union
 import lecilab_behavior_analysis.utils as utils
 
 def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -421,27 +421,32 @@ def get_triangle_polar_plot_df(df: pd.DataFrame) -> pd.DataFrame:
     return df_bias
 
 
-def get_bias_evolution_df(df: pd.DataFrame, groupby: str) -> pd.DataFrame:
+def get_bias_evolution_df(df: pd.DataFrame, groupby: Union[str, list[str]]) -> pd.DataFrame:
     """
     Gets how the bias of the animals (alternating, right bias, or left bias)
     evolves over time.
 
     Arguments:
     df: DataFrame with the data
-    groupby: str, the column to group by. Can be 'session' or 'trial_group'
+    groupby: str or list, the column(s) to group by. Can be 'session' or 'trial_group'
 
     Returns:
     df: DataFrame with the bias evolution
     """
-    utils.column_checker(df, required_columns={"roa_choice_numeric", "subject", groupby})
+    groupby_items = ["subject"]
+    if isinstance(groupby, str):
+        groupby_items.append(groupby)
+    elif isinstance(groupby, list):
+        groupby_items.extend(groupby)
+    utils.column_checker(df, required_columns=set(groupby_items + ["roa_choice_numeric"]))
     df_anchev = df.copy()
-    df_anchev = df_anchev.groupby(['subject', groupby])['roa_choice_numeric'].value_counts().reset_index(name='count')
+    df_anchev = df_anchev.groupby(groupby_items)['roa_choice_numeric'].value_counts().reset_index(name='count')
     # transform counts into percentages
-    df_anchev['percentage'] = df_anchev['count'] / df_anchev.groupby(['subject', groupby])['count'].transform('sum')
+    df_anchev['percentage'] = df_anchev['count'] / df_anchev.groupby(groupby_items)['count'].transform('sum')
 
     # pivot or melt the dataframe so that each subject and session has a y value, that will be the percentage when the bias
     # is 0, and the x value will be the differences between the percentages when the bias is 1 and -1
-    df_bias_pivot = df_anchev.pivot(index=['subject', groupby], columns='roa_choice_numeric', values='percentage')
+    df_bias_pivot = df_anchev.pivot(index=groupby_items, columns='roa_choice_numeric', values='percentage')
 
     # fill the NaN values with 0
     df_bias_pivot = df_bias_pivot.fillna(0)
@@ -485,6 +490,16 @@ def create_transition_matrix(events: list) -> pd.DataFrame:
     
     # Return the transition matrix as a pandas DataFrame for better readability
     return pd.DataFrame(transition_matrix, index=items, columns=items)
+
+
+def add_visual_stimulus_difference(df_in: pd.DataFrame) -> pd.DataFrame:
+    df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
+    utils.column_checker(df_in, required_columns={"visual_stimulus"})
+    df['visual_stimulus'] = df['visual_stimulus'].apply(ast.literal_eval)
+    df["visual_stim_difference"] = df["visual_stimulus"].apply(lambda x: x[0] - x[1])
+    # bin the data every 0.1
+    df["vis_stim_dif_bin"] = np.round((df["visual_stim_difference"] // 0.1) * 0.1, 1)
+    return df
 
 # if __name__ == "__main__":
 #     from lecilab_behavior_analysis.utils import load_example_data
