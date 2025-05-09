@@ -265,6 +265,7 @@ def get_outpath():
     paths = {
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
+        "localhost": "/home/kudongdong/data/LeciLab/behavioral_data"
     }
     return paths.get(hostname, "default/path")
 
