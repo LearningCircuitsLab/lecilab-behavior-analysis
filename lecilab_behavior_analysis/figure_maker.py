@@ -27,7 +27,7 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     # Create a GridSpec with 3 rows and 1 column
     rows_gs = gridspec.GridSpec(4, 1, height_ratios=[.7, 1, 1, 1])
     # Create separate inner grids for each row with different width ratios
-    gs1 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=rows_gs[0], width_ratios=[1, 4, 1])
+    gs1 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=rows_gs[0], width_ratios=[1, 3, 1])
     gs2 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[1], width_ratios=[1.5, 3])
     gs3 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=rows_gs[2], width_ratios=[1.5, 1, 3])
     gs4 = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[3])
@@ -65,7 +65,7 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
 
     # generate the calendar plot
     dates_df = dft.get_dates_df(df)
-    cal_image = plots.rasterize_plot(plots.training_calendar_plot(dates_df), dpi=300)
+    cal_image = plots.rasterize_plot(plots.training_calendar_plot(dates_df), dpi=600)
     # paste the calendar plot filling the entire axis
     ax_cal.imshow(cal_image)
     ax_cal.axis("off")
