@@ -278,7 +278,6 @@ def get_idibaps_cluster_credentials():
             # "port": 443,
         }
     elif hostname == "localhost":
-        print("I am Nuo Dong!!!!")
         return {
             "username": "kudongdong",
             "host": "mini",
