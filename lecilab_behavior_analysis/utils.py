@@ -17,12 +17,27 @@ def get_session_performance(df, session: int) -> float:
     return df[df.session == session].correct.mean()
 
 
+def get_day_performance(df, day: str) -> float:
+    """
+    This method calculates the performance of a day.
+    """
+
+    return df[df.year_month_day == day].correct.mean()
+
+
 def get_session_number_of_trials(df, session: int) -> int:
     """
     This method calculates the number of trials in a session.
     """
 
     return df[df.session == session].shape[0]
+
+
+def get_day_number_of_trials(df, day: str) -> int:
+    """
+    This method calculates the number of trials in a day.
+    """
+    return df[df.year_month_day == day].shape[0]
 
 
 def get_start_and_end_times(df):
