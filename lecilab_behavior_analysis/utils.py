@@ -280,7 +280,8 @@ def get_outpath():
     paths = {
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
-        "localhost": "/home/kudongdong/data/LeciLab/behavioral_data"
+        "localhost": "/home/kudongdong/data/LeciLab/behavioral_data",
+        "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data"
     }
     return paths.get(hostname, "default/path")
 
@@ -294,6 +295,11 @@ def get_idibaps_cluster_credentials():
             # "port": 443,
         }
     elif hostname == "localhost":
+        return {
+            "username": "kudongdong",
+            "host": "mini",
+        }
+    elif hostname == "setup2":
         return {
             "username": "kudongdong",
             "host": "mini",
