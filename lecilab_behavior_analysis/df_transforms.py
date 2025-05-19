@@ -224,15 +224,15 @@ def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
     return mat_df, session_info
 
 
-def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
+def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate Time Between Trials and Reaction Time.
     """
     # Check if the required columns are present
-    utils.column_checker(df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
+    utils.column_checker(in_df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
     df = in_df.copy()  # Make a copy to avoid modifying the original DataFrame
     for date in pd.unique(df['date']):
-        date_df = df[df['date'] == date]
+        date_df = df[df['date'] == date].copy()
         port2outs = date_df['Port2Out'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
         date_df['Time_Between_Trials'] = port2outs.diff()
         df.loc[df['date'] == date, 'Time_Between_Trials'] = date_df['Time_Between_Trials']

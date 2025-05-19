@@ -117,8 +117,11 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     # get a metric to see the bias in choices (including alternation)
     df['roa_choice_numeric'] = df.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
     # evolution of bias by trial group
-    trial_group_size = df.shape[0] // 20
+    trial_group_size = df.shape[0] // 40
     df['trial_group'] = df['total_trial'] // trial_group_size * trial_group_size
+    # remove the last group if it is smaller than the others
+    if df['trial_group'].nunique() > 1:
+        df = df[df['trial_group'] < df['trial_group'].max() * 0.7]
     df_bias_evolution = dft.get_bias_evolution_df(df, groupby='trial_group')
     df_bias_evolution = dft.points_to_lines_for_bias_evolution(df_bias_evolution, groupby='trial_group')
     ax_bias = plots.plot_decision_evolution_triangle(df_bias_evolution, ax=ax_bias, hue='trial_group')

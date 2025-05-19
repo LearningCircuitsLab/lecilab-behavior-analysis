@@ -373,13 +373,20 @@ def side_correct_performance_plot(df: pd.DataFrame, ax: plt.Axes, trials_to_show
 
     return ax
 
-def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = None) -> plt.figure:
+
+def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) -> plt.figure:
     """
     Plot Time Between Trials (TBT) and Reaction Time (RT) on the same plot with histograms on the y-axes.
     """
     # Check if the dataframe has the necessary columns
-    column_checker(df, required_columns={"Time_Between_Trials", "Reaction_Time"})
+    column_checker(df_in, required_columns={"Time_Between_Trials", "Reaction_Time", "total_trial"})
 
+    # Create a copy of the dataframe to avoid modifying the original
+    df = df_in.copy()
+    tts = []
+    if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
+        for sc in kwargs["session_changes"][1:]:
+            tts.append(df.loc[sc]["total_trial"])
     # Drop NaN or Inf values to avoid errors in plotting
     df = df.dropna(subset=['Reaction_Time', 'Time_Between_Trials'])
     df = df[(df['Reaction_Time'] != float('inf')) & (df['Time_Between_Trials'] != float('inf'))]
@@ -411,12 +418,14 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     ax2_center = ax_center.twinx()
 
     # Plot Time Between Trials
-    ax_center.plot(df["trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
+    ax_center.plot(df["total_trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
     ax_center.set_xlabel("Trial number", fontsize=28, labelpad=10)
     ax_center.tick_params(labelsize=28, width=2, length=10)
+    for tt in tts:
+        ax_center.axvline(tt, linestyle="--", color="gray")
 
     # Plot Reaction Time
-    ax2_center.plot(df["trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
+    ax2_center.plot(df["total_trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
     ax2_center.set_ylabel("")
     ax2_center.tick_params(left=False, right=False, top=False, bottom=False, labelleft=False, labelright=False, labeltop=False, labelbottom=False, labelsize=20)    
 
@@ -425,7 +434,7 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     handles2, labels2 = ax2_center.get_legend_handles_labels()
     handles = handles1 + handles2
     labels = ["TBT", "RT"]
-    ax_center.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False, fontsize=20, )
+    ax_center.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False, fontsize=20)
 
     # Remove lateral and topspines for the center plot
     ax_center.spines["top"].set_visible(False)
@@ -450,6 +459,20 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     ax_left.spines['top'].set_visible(False)
     ax_left.spines['bottom'].set_linewidth(2)
     ax_left.tick_params(left=True, right=False, labelright=False, labelleft=True, bottom=False, labelbottom=False, labelsize=25, width=2)
+
+    # Make all y lower limits to 0
+    ax_left.set_ylim(bottom=0)
+    ax_center.set_ylim(bottom=0)
+    ax_right.set_ylim(bottom=0)
+    ax2_center.set_ylim(bottom=0)
+
+    # higher y lims to show 97% of data
+    topy_tbt = df["Time_Between_Trials"].quantile(0.97)
+    ax_left.set_ylim(top=topy_tbt)
+    ax_center.set_ylim(top=topy_tbt)
+    topy_rt = df["Reaction_Time"].quantile(0.97)
+    ax_right.set_ylim(top=topy_rt)
+    ax2_center.set_ylim(top=topy_rt)
 
     # Ensure layout is adjusted
     plt.tight_layout()
