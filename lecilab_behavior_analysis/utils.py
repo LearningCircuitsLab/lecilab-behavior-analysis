@@ -533,6 +533,33 @@ def get_repeat_or_alternate_to_numeric(row: pd.Series) -> float:
         return np.nan
 
 
+def get_trial_port_hold(row, port_number):
+    if not type(row) == pd.Series:
+        raise ValueError("row must be a pandas Series")
+    ins = row["Port" + str(port_number) + "In"]
+    outs = row["Port" + str(port_number) + "Out"]
+    if ins == "[]" or outs == "[]":
+        return np.nan
+    if type(ins) == str:
+        ins = ast.literal_eval(ins)
+        outs = ast.literal_eval(outs)
+    if type(ins) == float:
+        ins = [ins]
+    if type(outs) == float:
+        outs = [outs]
+    # if the first out is earlier than the first in, remove it
+    if outs[0] < ins[0]:
+        outs = outs[1:]
+    # if they are different lengths, we need to pad the shorter one with NaNs
+    if len(ins) > len(outs):
+        outs = np.concatenate((outs, [np.nan] * (len(ins) - len(outs))))
+    elif len(outs) > len(ins):
+        ins = np.concatenate((ins, [np.nan] * (len(outs) - len(ins))))
+    
+    # now we can calculate the hold time
+    return np.array(outs) - np.array(ins)
+
+
 if __name__ == "__main__":
     # Example usage
     print(get_server_projects())

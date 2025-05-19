@@ -226,6 +226,7 @@ def repeat_or_alternate_performance_plot(
         x="total_trial",
         y="repeat_or_alternate_performance",
         hue="repeat_or_alternate",
+        hue_order=["repeat", "alternate"],
         ax=ax,
     )
     ax.set_xlabel("Trial number")
@@ -738,3 +739,102 @@ def plot_transition_network_with_curved_edges(transition_matrix: pd.DataFrame, t
     plt.title(f'Transition Network (Edges above {threshold}% of total weight)', fontsize=16)
     
     return plt.gcf()
+
+
+def plot_number_of_pokes_histogram(df: pd.DataFrame, port_number: int, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    port_hold_column = f"port{port_number}_holds"
+    column_checker(df, required_columns={port_hold_column})
+    # plot the histogram of the number of pokes
+    npokes = df[port_hold_column].apply(lambda x: len(x))
+    sns.histplot(npokes,
+                 ax=ax,
+                 bins=np.nanmax(npokes) - np.nanmin(npokes),
+                 color="gray")
+    ax.set_xlabel(f"Number of pokes in Port{port_number}")
+    ax.set_ylabel("Frequency")
+    # remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    # ax.set_title("Number of pokes histogram")
+    return ax
+
+
+def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    port_hold_column = f"port{port_number}_holds"
+    column_checker(df, required_columns={port_hold_column})
+    # plot the histogram of the holding times
+    port_holds = df[port_hold_column].tolist()
+    port_holds = [item for sublist in port_holds for item in sublist]
+
+    sns.histplot(port_holds,
+                 ax=ax,
+                 bins=100,
+                 color="gray",
+                 stat="probability",
+                 kde=True)
+    ax.set_xlabel(f"Port{port_number} holding time (ms)")
+    ax.set_ylabel("Frequency")
+    # remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    # ax.set_title("Holding time histogram")
+    return ax
+
+
+def plot_poke_number_by_date(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    column_checker(df, required_columns={"year_month_day", "mean_number", "bot95_number", "top95_number"})
+    # plot a thick line with the mean number of pokes per trial
+    # and a shaded area with the CIs
+    if "color" in kwargs:
+        color = kwargs["color"]
+    else:
+        color = "black"
+    sns.lineplot(data=df, x="year_month_day", y="mean_number", ax=ax, color=color, linewidth=2)
+    ax.fill_between(df["year_month_day"], df["mean_number"] - df["bot95_number"],
+                    df["mean_number"] + df["top95_number"], color=color, alpha=0.2)
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Center pokes per trial")
+    # remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    return ax
+
+
+def plot_poke_speed_by_date(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    # check if there is someting plotted in the axis already
+    items_in_axis = (
+        len(ax.patches) + len(ax.lines) + len(ax.collections) + len(ax.texts)
+    )
+    if items_in_axis > 0:
+        # create a new y axis on the right
+        ax2 = ax.twinx()
+        ax_to_use = ax2
+        add_stuff = False
+    else:
+        ax_to_use = ax
+        add_stuff = True
+    column_checker(df, required_columns={"year_month_day", "mean_speed", "bot95_speed", "top95_speed"})
+    # plot a thick line with the mean speed of holding time per trial
+    # and a shaded area with the CIs
+    if "color" in kwargs:
+        color = kwargs["color"]
+    else:
+        color = "red"
+    sns.lineplot(data=df, x="year_month_day", y="mean_speed", ax=ax_to_use, color=color, linewidth=2)
+    ax_to_use.fill_between(df["year_month_day"], df["mean_speed"] - df["bot95_speed"],
+                    df["mean_speed"] + df["top95_speed"], color=color, alpha=0.2)
+    ax_to_use.set_ylabel("Center holding time per trial")
+    if not add_stuff:
+        ax_to_use.set_xlabel("Date")
+        # remove the top and right spines
+        ax_to_use.spines["top"].set_visible(False)
+        ax_to_use.spines["right"].set_visible(False)
+    return ax

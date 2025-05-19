@@ -501,6 +501,34 @@ def add_visual_stimulus_difference(df_in: pd.DataFrame) -> pd.DataFrame:
     df["vis_stim_dif_bin"] = np.round((df["visual_stim_difference"] // 0.1) * 0.1, 1)
     return df
 
+
+def get_center_hold_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
+    utils.column_checker(df, required_columns={"Port2In", "Port2Out", "year_month_day"})
+    df["port2_holds"] = df.apply(lambda row: utils.get_trial_port_hold(row, 2), axis=1)
+    df["port2_holds_number"] = df.port2_holds.apply(len)
+    # df["port2_holds_mean"] = df.port2_holds.apply(np.mean)
+    # group by date and get the mean and 95 of the port2_holds
+    def mean_and_cis_of_holds(group):
+        port_holds_number = group["port2_holds"].apply(len)
+        mean_n = np.nanmean(port_holds_number)
+        bot95_n, top95_n = np.nanpercentile(port_holds_number, [5, 95])
+        
+        port_holds = group["port2_holds"].tolist()
+        port_holds = [item for sublist in port_holds for item in sublist]
+        mean_s = np.nanmean(port_holds)
+        bot95_s, top95_s = np.nanpercentile(port_holds, [5, 95])
+        return pd.Series({
+            "mean_number": mean_n,
+            "bot95_number": bot95_n,
+            "top95_number": top95_n,
+            "mean_speed": mean_s,
+            "bot95_speed": bot95_s,
+            "top95_speed": top95_s
+        })
+    return df.groupby("year_month_day").apply(mean_and_cis_of_holds).reset_index()
+
+
 # if __name__ == "__main__":
 #     from lecilab_behavior_analysis.utils import load_example_data
 #     df = load_example_data("mouse1")

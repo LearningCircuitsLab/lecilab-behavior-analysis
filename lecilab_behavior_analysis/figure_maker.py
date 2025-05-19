@@ -29,7 +29,7 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     # Create separate inner grids for each row with different width ratios
     gs1 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=rows_gs[0], width_ratios=[1, 3, 1])
     gs2 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[1], width_ratios=[1.5, 3])
-    gs3 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=rows_gs[2], width_ratios=[1.5, 1, 3])
+    gs3 = gridspec.GridSpecFromSubplotSpec(1, 4, subplot_spec=rows_gs[2], width_ratios=[1.5, 1, 2, 1])
     gs4 = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[3])
     # Create the top axis
     ax_name = fig.add_subplot(gs1[0, 0])
@@ -46,6 +46,8 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     ax_pbd = fig.add_subplot(gs3[0, 0])
     # evolution of the bias
     ax_bias = fig.add_subplot(gs3[0, 1])
+    # holding time in center port
+    ax_htime = fig.add_subplot(gs3[0, 2])
 
     # summary plot if requested
     if summary_matrix_plot_requested:
@@ -121,6 +123,12 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     df_bias_evolution = dft.points_to_lines_for_bias_evolution(df_bias_evolution, groupby='trial_group')
     ax_bias = plots.plot_decision_evolution_triangle(df_bias_evolution, ax=ax_bias, hue='trial_group')
 
+    # holding time in the center port
+    df_ch = dft.get_center_hold_df(df)
+    ax_htime = plots.plot_poke_number_by_date(df_ch, ax=ax_htime, color='tab:green')
+    ax_htime = plots.plot_poke_speed_by_date(df_ch, ax=ax_htime, color='tab:red')
+
+
     # Summary plot
     if summary_matrix_plot_requested:
         summat_df, summat_info = dft.get_training_summary_matrix(df)
@@ -145,7 +153,7 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     return fig
 
 
-def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> plt.Figure:
+def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     """
     Summary of a particular session.
     """
@@ -163,7 +171,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
         1, 3, subplot_spec=rows_gs[0], width_ratios=[2, 2, 1]
     )
     mid_gs = gridspec.GridSpecFromSubplotSpec(
-        1, 3, subplot_spec=rows_gs[1], width_ratios=[1, 1, 2]
+        1, 4, subplot_spec=rows_gs[1], width_ratios=[1, 1, 1, 1]
     )
     bot_gs = gridspec.GridSpecFromSubplotSpec(
         1, 2, subplot_spec=rows_gs[2], width_ratios=[1, 1]
@@ -174,10 +182,12 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     lrc_ax = fig.add_subplot(top_gs[0, 2])
     roap_ax = fig.add_subplot(mid_gs[0, 0])
     psych_ax = fig.add_subplot(mid_gs[0, 1])
+    p2hn_ax = fig.add_subplot(mid_gs[0, 2])
+    p2ht_ax = fig.add_subplot(mid_gs[0, 3])
     # reaction_time_ax = fig.add_subplot(mid_gs[0, 2])
     bias_ax = fig.add_subplot(bot_gs[0, 0])
 
-    fig.tight_layout()
+    # fig.tight_layout()
     # original_pos = reaction_time_ax.get_position()
     #Altering the bottom right subplot bbox to remove the padding between subplots and the figure border to adapt the rasterized image later that already includes axis
     #The default pading = 0.2 and so the pading between subplots is 0.05
@@ -201,6 +211,10 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     roap_ax = plots.repeat_or_alternate_performance_plot(df, roap_ax)
     psych_df = dft.get_performance_by_difficulty(df)
     psych_ax = plots.psychometric_plot(psych_df, psych_ax)
+    df["port2_holds"] = df.apply(lambda row: utils.get_trial_port_hold(row, 2), axis=1)
+    p2hn_ax = plots.plot_number_of_pokes_histogram(df, port_number=2, ax=p2hn_ax)
+    p2ht_ax = plots.plot_port_holding_time_histogram(df, port_number=2, ax=p2ht_ax)
+
 
     # df = dft.calculate_time_between_trials_and_reaction_time(df, window=window)
     # reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
@@ -216,5 +230,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     # turn bias into a number (-1 for left, 1 for right, 0 for alternating)
     df['bias'] = df.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
     bias_ax = plots.bias_vs_trials_plot(df, bias_ax)
+
+    fig.tight_layout()
 
     return fig
