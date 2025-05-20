@@ -395,24 +395,26 @@ def trial_reaction_time(series: pd.Series) -> float:
     """
     This method calculates the reaction time of a trial.
     """
-    out_time = np.max(ast.literal_eval(series["Port2Out"]))
-    port1_in = np.nan
-    port3_in = np.nan
+    try:
+        out_time = np.max(ast.literal_eval(series["Port2Out"]))
+    except Exception:
+        return np.nan
     try:
         port1_ins = ast.literal_eval(series["Port1In"])
         # get the first Port1In after Port2Out
         port1_ins = np.array(port1_ins)
         port1_in = np.min(port1_ins[port1_ins > out_time])
     except Exception:
-        pass
+        port1_in = np.nan
     try:
         port3_ins = ast.literal_eval(series["Port3In"])
         # get the first Port3In after Port2Out
         port3_ins = np.array(port3_ins)
-        port3_ins = np.min(port3_ins[port3_ins > out_time])
+        port3_in = np.min(port3_ins[port3_ins > out_time])
     except Exception:
         port3_in = np.nan
-    
+    if np.isnan(port1_in) and np.isnan(port3_in):
+        return np.nan
     return np.nanmin([port1_in, port3_in]) - out_time
 
 

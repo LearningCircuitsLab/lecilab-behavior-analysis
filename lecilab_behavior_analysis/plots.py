@@ -379,7 +379,7 @@ def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) ->
     Plot Time Between Trials (TBT) and Reaction Time (RT) on the same plot with histograms on the y-axes.
     """
     # Check if the dataframe has the necessary columns
-    column_checker(df_in, required_columns={"Time_Between_Trials", "Reaction_Time", "total_trial"})
+    column_checker(df_in, required_columns={"time_between_trials", "reaction_time", "total_trial"})
 
     # Create a copy of the dataframe to avoid modifying the original
     df = df_in.copy()
@@ -388,8 +388,8 @@ def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) ->
         for sc in kwargs["session_changes"][1:]:
             tts.append(df.loc[sc]["total_trial"])
     # Drop NaN or Inf values to avoid errors in plotting
-    df = df.dropna(subset=['Reaction_Time', 'Time_Between_Trials'])
-    df = df[(df['Reaction_Time'] != float('inf')) & (df['Time_Between_Trials'] != float('inf'))]
+    df = df.dropna(subset=['reaction_time', 'time_between_trials'])
+    df = df[(df['reaction_time'] != float('inf')) & (df['time_between_trials'] != float('inf'))]
     
     # Create a 1x3 grid layout for two histograms and the main plot in the center
     fig = plt.figure(figsize=(14, 8))  # Increased figure size for better visibility
@@ -397,10 +397,10 @@ def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) ->
 
     # Right plot for Reaction Time (RT) KDE plot
     ax_right = fig.add_subplot(grid[0, 2])
-    if df['Reaction_Time'].nunique() > 1:
-        sns.kdeplot(y=df['Reaction_Time'], ax=ax_right, color="tab:orange", fill=True)
+    if df['reaction_time'].nunique() > 1:
+        sns.kdeplot(y=df['reaction_time'], ax=ax_right, color="tab:orange", fill=True)
     else:
-        sns.histplot(y=df['Reaction_Time'], ax=ax_right, color="tab:orange")
+        sns.histplot(y=df['reaction_time'], ax=ax_right, color="tab:orange")
 
     ax_right.invert_xaxis()  # Flip the x-axis to make the plot point towards the main plot
     ax_right.set_xlabel("")
@@ -418,14 +418,14 @@ def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) ->
     ax2_center = ax_center.twinx()
 
     # Plot Time Between Trials
-    ax_center.plot(df["total_trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
+    ax_center.plot(df["total_trial"], df["time_between_trials"], color="tab:blue", label="Time Between Trials")
     ax_center.set_xlabel("Trial number", fontsize=28, labelpad=10)
     ax_center.tick_params(labelsize=28, width=2, length=10)
     for tt in tts:
         ax_center.axvline(tt, linestyle="--", color="gray")
 
     # Plot Reaction Time
-    ax2_center.plot(df["total_trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
+    ax2_center.plot(df["total_trial"], df["reaction_time"], color="tab:orange", label="Reaction Time")
     ax2_center.set_ylabel("")
     ax2_center.tick_params(left=False, right=False, top=False, bottom=False, labelleft=False, labelright=False, labeltop=False, labelbottom=False, labelsize=20)    
 
@@ -447,10 +447,10 @@ def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) ->
 
     # Left plot for Time Between Trials (TBT) KDE plot
     ax_left = fig.add_subplot(grid[0, 0])
-    if df['Time_Between_Trials'].nunique() > 1:
-        sns.kdeplot(y=df['Time_Between_Trials'], ax=ax_left, color="tab:blue", fill=True)
+    if df['time_between_trials'].nunique() > 1:
+        sns.kdeplot(y=df['time_between_trials'], ax=ax_left, color="tab:blue", fill=True)
     else:
-        sns.histplot(y=df['Time_Between_Trials'], ax=ax_left, color="tab:blue")
+        sns.histplot(y=df['time_between_trials'], ax=ax_left, color="tab:blue")
 
     ax_left.set_xlabel("")
     ax_left.set_ylabel("Time Between Trials (TBT) [ms]", fontsize=28)
@@ -467,10 +467,10 @@ def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) ->
     ax2_center.set_ylim(bottom=0)
 
     # higher y lims to show 97% of data
-    topy_tbt = df["Time_Between_Trials"].quantile(0.97)
+    topy_tbt = df["time_between_trials"].quantile(0.97)
     ax_left.set_ylim(top=topy_tbt)
     ax_center.set_ylim(top=topy_tbt)
-    topy_rt = df["Reaction_Time"].quantile(0.97)
+    topy_rt = df["reaction_time"].quantile(0.97)
     ax_right.set_ylim(top=topy_rt)
     ax2_center.set_ylim(top=topy_rt)
 
@@ -808,28 +808,12 @@ def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt
     return ax
 
 
-def plot_poke_number_by_date(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
-    if ax is None:
-        ax = plt.gca()
-    column_checker(df, required_columns={"year_month_day", "mean_number", "bot95_number", "top95_number"})
-    # plot a thick line with the mean number of pokes per trial
-    # and a shaded area with the CIs
-    if "color" in kwargs:
-        color = kwargs["color"]
-    else:
-        color = "black"
-    sns.lineplot(data=df, x="year_month_day", y="mean_number", ax=ax, color=color, linewidth=2)
-    ax.fill_between(df["year_month_day"], df["mean_number"] - df["bot95_number"],
-                    df["mean_number"] + df["top95_number"], color=color, alpha=0.2)
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Center pokes per trial")
-    # remove the top and right spines
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    return ax
-
-
-def plot_poke_speed_by_date(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_by: str, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    mean_col = f"{item_to_show}_mean"
+    bot95_col = f"{item_to_show}_bot95"
+    top95_col = f"{item_to_show}_top95"
+    column_checker(df, required_columns={group_trials_by, mean_col, bot95_col, top95_col})
+    
     if ax is None:
         ax = plt.gca()
     # check if there is someting plotted in the axis already
@@ -844,20 +828,28 @@ def plot_poke_speed_by_date(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> 
     else:
         ax_to_use = ax
         add_stuff = True
-    column_checker(df, required_columns={"year_month_day", "mean_speed", "bot95_speed", "top95_speed"})
+
     # plot a thick line with the mean speed of holding time per trial
     # and a shaded area with the CIs
     if "color" in kwargs:
         color = kwargs["color"]
     else:
-        color = "red"
-    sns.lineplot(data=df, x="year_month_day", y="mean_speed", ax=ax_to_use, color=color, linewidth=2)
-    ax_to_use.fill_between(df["year_month_day"], df["mean_speed"] - df["bot95_speed"],
-                    df["mean_speed"] + df["top95_speed"], color=color, alpha=0.2)
-    ax_to_use.set_ylabel("Center holding time per trial")
+        color = "black"
+    sns.lineplot(data=df, x=group_trials_by, y=mean_col, ax=ax_to_use, color=color, linewidth=2)
+    ax_to_use.fill_between(df[group_trials_by], df[mean_col] - df[bot95_col],
+                            df[mean_col] + df[top95_col], color=color, alpha=0.2)
+    ax_to_use.set_ylabel(f"{item_to_show}", color=color)
+    ax_to_use.spines["top"].set_visible(False)
+
     if not add_stuff:
-        ax_to_use.set_xlabel("Date")
+        ax_to_use.set_xlabel(group_trials_by)
         # remove the top and right spines
-        ax_to_use.spines["top"].set_visible(False)
         ax_to_use.spines["right"].set_visible(False)
+    # rotate the x-axis labels and align them to the end
+    for label in ax_to_use.get_xticklabels():
+        label.set_rotation(45)
+        label.set_horizontalalignment("right")
+    
+    if "ylog" in kwargs and kwargs["ylog"]:
+        ax_to_use.set_yscale("log")
     return ax

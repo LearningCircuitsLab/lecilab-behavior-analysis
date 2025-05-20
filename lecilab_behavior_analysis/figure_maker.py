@@ -25,12 +25,13 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     summary_matrix_plot_requested = kwargs.get("summary_matrix_plot", False)
     fig = plt.figure(figsize=(width, height))
     # Create a GridSpec with 3 rows and 1 column
-    rows_gs = gridspec.GridSpec(4, 1, height_ratios=[.7, 1, 1, 1])
+    rows_gs = gridspec.GridSpec(5, 1, height_ratios=[.7, 1, 1, 1, 1])
     # Create separate inner grids for each row with different width ratios
     gs1 = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=rows_gs[0], width_ratios=[1, 3, 1])
     gs2 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[1], width_ratios=[1.5, 3])
     gs3 = gridspec.GridSpecFromSubplotSpec(1, 4, subplot_spec=rows_gs[2], width_ratios=[1.5, 1, 2, 1])
-    gs4 = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[3])
+    gs4 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=rows_gs[3], width_ratios=[1, 1])
+    gs5 = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=rows_gs[4])
     # Create the top axis
     ax_name = fig.add_subplot(gs1[0, 0])
     ax_cal = fig.add_subplot(gs1[0, 1])
@@ -48,10 +49,12 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     ax_bias = fig.add_subplot(gs3[0, 1])
     # holding time in center port
     ax_htime = fig.add_subplot(gs3[0, 2])
+    # reaction time
+    ax_rt = fig.add_subplot(gs4[0, 0])
 
     # summary plot if requested
     if summary_matrix_plot_requested:
-        ax_summat = fig.add_subplot(gs4[0, 0])
+        ax_summat = fig.add_subplot(gs5[0, 0])
 
     # add a vertical space between the medium and bottom row
     # fig.subplots_adjust(hspace=.5)
@@ -128,9 +131,13 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
 
     # holding time in the center port
     df_ch = dft.get_center_hold_df(df)
-    ax_htime = plots.plot_poke_number_by_date(df_ch, ax=ax_htime, color='tab:green')
-    ax_htime = plots.plot_poke_speed_by_date(df_ch, ax=ax_htime, color='tab:red')
+    ax_htime = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="number_of_pokes", group_trials_by="year_month_day", ax=ax_htime, color='tab:green')
+    ax_htime = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="hold_time", group_trials_by="year_month_day", ax=ax_htime, color='tab:red')
 
+    # add the reaction time plot
+    rt_df = dft.get_reaction_times_by_date_df(df)
+    ax_rt = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="reaction_time", group_trials_by="year_month_day", ax=ax_rt, color='tab:blue', ylog=True)
+    ax_rt = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="time_between_trials", group_trials_by="year_month_day", ax=ax_rt, color='tab:orange', ylog=True)
 
     # Summary plot
     if summary_matrix_plot_requested:
@@ -187,8 +194,9 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     psych_ax = fig.add_subplot(mid_gs[0, 1])
     p2hn_ax = fig.add_subplot(mid_gs[0, 2])
     p2ht_ax = fig.add_subplot(mid_gs[0, 3])
-    # reaction_time_ax = fig.add_subplot(mid_gs[0, 2])
     bias_ax = fig.add_subplot(bot_gs[0, 0])
+    ax_rt = fig.add_subplot(bot_gs[0, 1])
+
 
     # fig.tight_layout()
     # original_pos = reaction_time_ax.get_position()
@@ -218,13 +226,6 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     p2hn_ax = plots.plot_number_of_pokes_histogram(df, port_number=2, ax=p2hn_ax)
     p2ht_ax = plots.plot_port_holding_time_histogram(df, port_number=2, ax=p2ht_ax)
 
-
-    # df = dft.calculate_time_between_trials_and_reaction_time(df, window=window)
-    # reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
-    # reaction_time_ax.imshow(reaction_time_image, aspect='auto')
-    # # Turn off the axis for clean presentation
-    # reaction_time_ax.axis("off")
-
     # add the bias plot
     # get the first choice of the mouse
     df = dft.add_mouse_first_choice(df)
@@ -233,6 +234,12 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     # turn bias into a number (-1 for left, 1 for right, 0 for alternating)
     df['bias'] = df.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
     bias_ax = plots.bias_vs_trials_plot(df, bias_ax)
+
+    df = dft.calculate_time_between_trials_and_reaction_time(df)
+    reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
+    ax_rt.imshow(reaction_time_image, aspect='auto')
+    # Turn off the axis for clean presentation
+    ax_rt.axis("off")
 
     fig.tight_layout()
 

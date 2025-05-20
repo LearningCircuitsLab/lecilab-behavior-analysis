@@ -234,10 +234,10 @@ def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame) -> pd.D
     for date in pd.unique(df['date']):
         date_df = df[df['date'] == date].copy()
         port2outs = date_df['Port2Out'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
-        date_df['Time_Between_Trials'] = port2outs.diff()
-        df.loc[df['date'] == date, 'Time_Between_Trials'] = date_df['Time_Between_Trials']
+        date_df['time_between_trials'] = port2outs.diff()
+        df.loc[df['date'] == date, 'time_between_trials'] = date_df['time_between_trials']
     # Calculate the reaction time
-    df['Reaction_Time'] = df.apply(utils.trial_reaction_time, axis=1)
+    df['reaction_time'] = df.apply(utils.trial_reaction_time, axis=1)
 
     return df
 
@@ -519,14 +519,41 @@ def get_center_hold_df(df_in: pd.DataFrame) -> pd.DataFrame:
         mean_s = np.nanmean(port_holds)
         bot95_s, top95_s = np.nanpercentile(port_holds, [5, 95])
         return pd.Series({
-            "mean_number": mean_n,
-            "bot95_number": bot95_n,
-            "top95_number": top95_n,
-            "mean_speed": mean_s,
-            "bot95_speed": bot95_s,
-            "top95_speed": top95_s
+            "number_of_pokes_mean": mean_n,
+            "number_of_pokes_bot95": bot95_n,
+            "number_of_pokes_top95": top95_n,
+            "hold_time_mean": mean_s,
+            "hold_time_bot95": bot95_s,
+            "hold_time_top95": top95_s
         })
     return df.groupby("year_month_day").apply(mean_and_cis_of_holds).reset_index()
+
+
+def get_reaction_times_by_date_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
+    utils.column_checker(df, required_columns={"year_month_day"})
+    # group by date and get the mean and 95 of the reaction times
+    def mean_and_cis_of_rt_and_tbt(group):
+        group = calculate_time_between_trials_and_reaction_time(group)
+        if group.reaction_time.isna().all():
+            mean_rt, bot95_rt, top95_rt = np.nan, np.nan, np.nan
+        else:
+            mean_rt = np.nanmean(group.reaction_time)
+            bot95_rt, top95_rt = np.nanpercentile(group.reaction_time, [5, 95])
+        if group.time_between_trials.isna().all():
+            mean_tbt, bot95_tbt, top95_tbt = np.nan, np.nan, np.nan
+        else:
+            mean_tbt = np.nanmean(group.time_between_trials)
+            bot95_tbt, top95_tbt = np.nanpercentile(group.time_between_trials, [5, 95])
+        return pd.Series({
+            "reaction_time_mean": mean_rt,
+            "reaction_time_bot95": bot95_rt,
+            "reaction_time_top95": top95_rt,
+            "time_between_trials_mean": mean_tbt,
+            "time_between_trials_bot95": bot95_tbt,
+            "time_between_trials_top95": top95_tbt
+        })
+    return df.groupby("year_month_day").apply(mean_and_cis_of_rt_and_tbt).reset_index()
 
 
 # if __name__ == "__main__":
