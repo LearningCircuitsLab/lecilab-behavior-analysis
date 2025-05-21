@@ -159,6 +159,24 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
 
+def get_performance_by_difficulty_test(df_test: pd.DataFrame) -> pd.DataFrame:
+    df_test['visual_stimulus_devi'] = df_test['visual_stimulus'].apply(lambda x: abs(round(eval(x)[0] / eval(x)[1])))
+    df_test['visual_stimulus_devi'] = df_test.apply(
+        lambda row: row['visual_stimulus_devi'] if row['correct_side'] == 'left' else -row['visual_stimulus_devi'],
+        axis=1
+    )
+    leftward_choices = []
+    leftward_evidence = []
+    for i in df_test.groupby('visual_stimulus_devi'):
+        if (i[0] > 0) & (len(i[1][i[1]['correct_side'] == 'left']) != 0):
+            leftward_choices.append(len(i[1][(i[1]['correct_side'] == 'left') & (i[1]['correct'] == True)]) / len(i[1][i[1]['correct_side'] == 'left']))
+            leftward_evidence.append(i[0])
+        elif (i[0] < 0) & (len(i[1][i[1]['correct_side'] == 'right']) != 0):
+            leftward_choices.append(-len(i[1][(i[1]['correct_side'] == 'right') & (i[1]['correct'] == True)]) / len(i[1][i[1]['correct_side'] == 'right']))
+            leftward_evidence.append(i[0])
+        else:
+            pass
+    return leftward_evidence, leftward_choices
 
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
     match row.difficulty:
