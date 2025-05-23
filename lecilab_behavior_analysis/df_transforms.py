@@ -516,8 +516,11 @@ def get_center_hold_df(df_in: pd.DataFrame) -> pd.DataFrame:
         
         port_holds = group["port2_holds"].tolist()
         port_holds = [item for sublist in port_holds for item in sublist]
-        mean_s = np.nanmean(port_holds)
-        bot95_s, top95_s = np.nanpercentile(port_holds, [5, 95])
+        if len(port_holds) == 0:
+            mean_s, bot95_s, top95_s = np.nan, np.nan, np.nan
+        else:
+            mean_s = np.nanmean(port_holds)
+            bot95_s, top95_s = np.nanpercentile(port_holds, [5, 95])
         return pd.Series({
             "number_of_pokes_mean": mean_n,
             "number_of_pokes_bot95": bot95_n,
