@@ -71,6 +71,7 @@ def repeat_or_alternate_series_comparison(
 
 
 def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
+    # TODO: the name of this function is not great, as it adds also extra information
     """
     The previous side port can come from two sources.
     One, from the previous trial, where the animal was drinking water
@@ -116,6 +117,8 @@ def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
             # add the new column to the original dataframe, as the series have the index
             # equal to the original dataframe
             df.loc[df_mouse_session.index, 'roa_choice'] = series_to_append
+            # add also the port where the animal comes from
+            df.loc[df_mouse_session.index, 'previous_port_before_stimulus'] = last_choice
 
     return df
 
