@@ -61,7 +61,7 @@ def repeat_or_alternate_series_comparison(
     """
     repeat_or_alternate = np.where(
         series.isna() | comparison_series.isna(),
-        np.nan,
+        str(np.nan),
         np.where(
             series == comparison_series,
             "repeat",
