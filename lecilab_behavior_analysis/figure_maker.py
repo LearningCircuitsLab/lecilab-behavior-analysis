@@ -173,7 +173,8 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     perf_ax = fig.add_subplot(top_gs[0, 1])
     lrc_ax = fig.add_subplot(top_gs[0, 2])
     roap_ax = fig.add_subplot(mid_gs[0, 0])
-    psych_ax = fig.add_subplot(mid_gs[0, 1])
+    # psych_ax = fig.add_subplot(mid_gs[0, 1])
+    psych_by_difficulty_ratio_ax = fig.add_subplot(mid_gs[0, 1])
     # reaction_time_ax = fig.add_subplot(mid_gs[0, 2])
     bias_ax = fig.add_subplot(bot_gs[0, 0])
 
@@ -199,8 +200,14 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     df["repeat_or_alternate"] = dft.get_repeat_or_alternate_series(df.correct_side)
     df = dft.get_repeat_or_alternate_performance(df, window=window)
     roap_ax = plots.repeat_or_alternate_performance_plot(df, roap_ax)
-    psych_df = dft.get_performance_by_difficulty(df)
-    psych_ax = plots.psychometric_plot(psych_df, psych_ax)
+    # psych_df = dft.get_performance_by_difficulty(df)
+    # psych_ax = plots.psychometric_plot(psych_df, psych_ax)
+
+
+    df_hard = df[df["current_training_stage"] == "TwoAFC_visual_hard"]
+    psych_by_difficulty_ratio_df_hard = dft.get_performance_by_difficulty_ratio(df_hard)
+    psych_by_difficulty_ratio_ax = plots.psychometric_plot_by_ratio(psych_by_difficulty_ratio_df_hard, psych_by_difficulty_ratio_ax)
+
 
     # df = dft.calculate_time_between_trials_and_reaction_time(df, window=window)
     # reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)

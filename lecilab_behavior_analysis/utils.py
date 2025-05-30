@@ -5,6 +5,7 @@ from typing import List, Dict, Tuple, Union
 import subprocess
 import matplotlib.pyplot as plt
 import ast
+from scipy.optimize import minimize
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
@@ -532,6 +533,53 @@ def get_repeat_or_alternate_to_numeric(row: pd.Series) -> float:
     else:
         return np.nan
 
+# Define the lapse logistic function with independent lapses for left and right
+def lapse_logistic_independent(params, x, y):
+    lapse_left, lapse_right, beta, x0 = params
+    # Ensure lapse rates are within [0, 0.5]
+    lapse_left = np.clip(lapse_left, 0, 0.5)
+    lapse_right = np.clip(lapse_right, 0, 0.5)
+    # Predicted probabilities
+    p_left = lapse_left + (1 - lapse_left - lapse_right) / (1 + np.exp(-beta * (x - x0)))
+    # Negative log-likelihood
+    nll = -np.sum(y * np.log(p_left) + (1 - y) * np.log(1 - p_left))
+    return nll
+
+def fit_lapse_logistic_independent(x, y, initial_params=None):
+    """
+    Fit a lapse logistic model with independent lapses for left and right choices.
+    
+    Args:
+        x (np.array): Independent variable (e.g., stimulus intensity).
+        y (np.array): Dependent variable (e.g., choice probabilities).
+        initial_params (list, optional): Initial guess for the parameters [lapse_left, lapse_right, beta, x0].
+    
+    Returns:
+        tuple: Fitted parameters and the minimized negative log-likelihood.
+    """
+    if isinstance(x, pd.Series):
+        x = x.values
+    if isinstance(y, pd.Series):
+        y = y.values
+
+    if initial_params is None:
+        initial_params = [0.05, 0.05, 1, 0]  # Default initial values
+    
+    result = minimize(
+        lapse_logistic_independent,
+        initial_params,
+        args=(x, y),
+        bounds=[(0, 0.5), (0, 0.5), (None, None), (None, None)]
+    )
+
+    # Extract fitted parameters
+    lapse_left, lapse_right, beta, x0 = result.x
+    # print(f"Lapse Left: {lapse_left}, Lapse Right: {lapse_right}, Slope (Beta): {beta}, PSE (x0): {x0}")
+
+    # Generate predictions
+    xs = np.linspace(x.min(), x.max(), 100).reshape(-1, 1)
+    p_left = lapse_left + (1 - lapse_left - lapse_right) / (1 + np.exp(-beta * (xs - x0)))
+    return p_left, (lapse_left, lapse_right, beta, x0)
 
 if __name__ == "__main__":
     # Example usage

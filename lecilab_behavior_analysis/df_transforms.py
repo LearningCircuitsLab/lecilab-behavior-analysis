@@ -151,6 +151,14 @@ def get_repeat_or_alternate_performance(
     ].transform(lambda x: x.rolling(window=window).mean() * 100)
     return df
 
+def get_evidence_ratio(df):
+
+    return df
+
+def get_left_choice(df):
+    df = add_mouse_first_choice(df)
+    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df
 
 def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     utils.column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
@@ -162,24 +170,22 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
 
-def get_performance_by_difficulty_test(df_test: pd.DataFrame) -> pd.DataFrame:
-    df_test['visual_stimulus_devi'] = df_test['visual_stimulus'].apply(lambda x: abs(round(eval(x)[0] / eval(x)[1])))
-    df_test['visual_stimulus_devi'] = df_test.apply(
-        lambda row: row['visual_stimulus_devi'] if row['correct_side'] == 'left' else -row['visual_stimulus_devi'],
+def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
+    # Get the performance by difficulty ratio
+    df['visual_stimulus_ratio'] = df['visual_stimulus'].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
+    # transform it to a log value, preserving the negative sign
+    df['visual_stimulus_ratio'] = df['visual_stimulus_ratio'].apply(lambda x: np.log(x))
+    # reduce the decimal places to 4, so it is easier to read
+    df['visual_stimulus_ratio'] = df['visual_stimulus_ratio'].apply(lambda x: round(x, 4))
+    # This was good in order to make the fit work for both left and right choices!
+    df['visual_stimulus_ratio'] = df.apply(
+        lambda row: row['visual_stimulus_ratio'] if row['correct_side'] == 'left' else -row['visual_stimulus_ratio'],
         axis=1
     )
-    leftward_choices = []
-    leftward_evidence = []
-    for i in df_test.groupby('visual_stimulus_devi'):
-        if (i[0] > 0) & (len(i[1][i[1]['correct_side'] == 'left']) != 0):
-            leftward_choices.append(len(i[1][(i[1]['correct_side'] == 'left') & (i[1]['correct'] == True)]) / len(i[1][i[1]['correct_side'] == 'left']))
-            leftward_evidence.append(i[0])
-        elif (i[0] < 0) & (len(i[1][i[1]['correct_side'] == 'right']) != 0):
-            leftward_choices.append(-len(i[1][(i[1]['correct_side'] == 'right') & (i[1]['correct'] == True)]) / len(i[1][i[1]['correct_side'] == 'right']))
-            leftward_evidence.append(i[0])
-        else:
-            pass
-    return leftward_evidence, leftward_choices
+    # transform choice to 0 and 1, where 0 is right and 1 is left
+    df = add_mouse_first_choice(df)
+    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df
 
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
     match row.difficulty:

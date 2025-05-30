@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
+import lecilab_behavior_analysis.utils as utils
 from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
 
 
@@ -264,6 +265,40 @@ def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     ax.spines[["top", "right"]].set_visible(False)
     return ax
 
+def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    column_checker(df, required_columns={"visual_stimulus_ratio", "left_choice"})
+
+    # Plot the fitted curve
+    sns.pointplot(
+        x='visual_stimulus_ratio',
+        y='left_choice',
+        data=df,
+        estimator=lambda x: np.mean(x),
+        color='blue',
+        markers='o',
+        errorbar=("ci", 95),
+        ax=ax,
+        label='Observed Choices',
+        native_scale=True,
+        linestyles='',
+    )
+
+    # Generate predictions
+    xs = np.linspace(df['visual_stimulus_ratio'].min(), df['visual_stimulus_ratio'].max(), 100).reshape(-1, 1)
+    # Input for the function fit_lapse_logistic_independent is (x(array or series), 
+    # y(array or series), 
+    # initial_params(list, optional, Initial guess for the parameters [lapse_left, lapse_right, beta, x0], if not define, the default values are [0.05, 0.05, 1, 0].))
+    # initial_params = [0.05, 0.05, 1, 0]
+    p_left, fitted_params = utils.fit_lapse_logistic_independent(df['visual_stimulus_ratio'], df['left_choice']) # fitted_params includes (lapse_left, lapse_right, beta, x0)
+    
+    ax.plot(xs, p_left, color='red', label='Lapse Logistic Fit (Independent)')
+    ax.set_xlabel("Visual Stimulus ratio")
+    ax.set_ylabel("Probability of Left Choice")
+    ax.set_ylim(0, 1)
+    
+    return ax
 
 def summary_matrix_plot(
     mat_df: pd.DataFrame,
