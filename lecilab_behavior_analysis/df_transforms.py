@@ -61,7 +61,7 @@ def repeat_or_alternate_series_comparison(
     """
     repeat_or_alternate = np.where(
         series.isna() | comparison_series.isna(),
-        str(np.nan),#I change the type from float to str
+        None, # None instead of np.nan to keep dtype the same TODO: check!
         np.where(
             series == comparison_series,
             "repeat",
