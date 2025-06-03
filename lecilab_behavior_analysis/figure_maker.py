@@ -184,7 +184,6 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     #The default pading = 0.2 and so the pading between subplots is 0.05
     # reaction_time_ax.set_position(pos=[original_pos.x0-0.05, original_pos.y0-0.075, original_pos.width+0.05, original_pos.height+0.075])
     
-    # TODO: Psychometric with actual values and fit
     # TODO: separate optogenetic and control if available in several plots
     # TODO: Performance by trial with blocks if available
 
@@ -204,6 +203,23 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     # psych_ax = plots.psychometric_plot(psych_df, psych_ax)
 
 
+    # TODO: For Nuo:
+    """
+    What we need is for these functions (e.g. session_summary_figure) to be able to take any set of trials
+    and work regardless of what they contain. For instance, your changes work now if within the trials there are
+    some that correspond to "current_training_stage" == "TwoAFC_visual_hard", but if there are no such trials,
+    the psychometric plot will not be generated (try running plot_testing.ipynb). We need to make sure that the function can handle
+    all possible cases. These are:
+    - All trials are of one modality (visual and auditory) and all are easy (no need for psychometric plot)
+    - All trials are of one modality (visual and auditory) and all are hard (psychometric plot)
+    - All trials are of one modality (visual and auditory) and some are easy and some are hard (psychometric plot, but including all training stages)
+        ***Thinking about this, it would be very nice to overlay a trial count (a histogram or something like that) on top of the psychometric plot.
+            These plots can be tricky as they require to make a separate figure, and then rasterize it to paste it in the main figure. Leave this for later.
+    - Same as above but we have mixed modalities. In this case, we need to generate two psychometric plots, one for each modality.
+
+    The trick here is to think of a robust logic to do all this without errors. 
+    
+    """
     df_hard = df[df["current_training_stage"] == "TwoAFC_visual_hard"]
     psych_by_difficulty_ratio_df_hard = dft.get_performance_by_difficulty_ratio(df_hard)
     psych_by_difficulty_ratio_ax = plots.psychometric_plot_by_ratio(psych_by_difficulty_ratio_df_hard, psych_by_difficulty_ratio_ax)
