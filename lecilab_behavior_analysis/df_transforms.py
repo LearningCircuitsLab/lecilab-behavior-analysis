@@ -171,18 +171,21 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     return pbd_df
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
-    # Get the performance by difficulty ratio
-    df['visual_stimulus_ratio'] = df['visual_stimulus'].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
-    # transform it to a log value, preserving the negative sign
-    df['visual_stimulus_ratio'] = df['visual_stimulus_ratio'].apply(lambda x: np.log(x))
-    # reduce the decimal places to 4, so it is easier to read
-    df['visual_stimulus_ratio'] = df['visual_stimulus_ratio'].apply(lambda x: round(x, 4))
-    # This was good in order to make the fit work for both left and right choices!
-    df['visual_stimulus_ratio'] = df.apply(
-        lambda row: row['visual_stimulus_ratio'] if row['correct_side'] == 'left' else -row['visual_stimulus_ratio'],
+    if df["current_training_stage"].str.contains("visual").any():
+        stim_col = "visual_stimulus"
+        ratio_col = "visual_stimulus_ratio"
+    elif df["current_training_stage"].str.contains("auditory").any():
+        stim_col = "auditory_stimulus"
+        ratio_col = "auditory_stimulus_ratio"
+    else:
+        raise ValueError("modality must be one of 'visual' or 'auditory'")
+
+    df[ratio_col] = df[stim_col].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
+    df[ratio_col] = df[ratio_col].apply(np.log).round(4)
+    df[ratio_col] = df.apply(
+        lambda row: row[ratio_col] if row['correct_side'] == 'left' else -row[ratio_col],
         axis=1
     )
-    # transform choice to 0 and 1, where 0 is right and 1 is left
     df = add_mouse_first_choice(df)
     df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df

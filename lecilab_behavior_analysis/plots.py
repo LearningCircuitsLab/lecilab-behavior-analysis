@@ -268,11 +268,17 @@ def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
 def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
-    column_checker(df, required_columns={"visual_stimulus_ratio", "left_choice"})
+    
+    if "visual_stimulus_ratio" in df.columns:
+        stim_col = "visual_stimulus_ratio"
+        xlabel = "Visual Stimulus ratio"
+    elif "auditory_stimulus_ratio" in df.columns:
+        stim_col = "auditory_stimulus_ratio"
+        xlabel = "Auditory Stimulus ratio"
+    column_checker(df, required_columns={stim_col, "left_choice"})
 
-    # Plot the fitted curve
     sns.pointplot(
-        x='visual_stimulus_ratio',
+        x=stim_col,
         y='left_choice',
         data=df,
         estimator=lambda x: np.mean(x),
@@ -285,19 +291,12 @@ def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axe
         linestyles='',
     )
 
-    # Generate predictions
-    xs = np.linspace(df['visual_stimulus_ratio'].min(), df['visual_stimulus_ratio'].max(), 100).reshape(-1, 1)
-    # Input for the function fit_lapse_logistic_independent is (x(array or series), 
-    # y(array or series), 
-    # initial_params(list, optional, Initial guess for the parameters [lapse_left, lapse_right, beta, x0], if not define, the default values are [0.05, 0.05, 1, 0].))
-    # initial_params = [0.05, 0.05, 1, 0]
-    p_left, fitted_params = utils.fit_lapse_logistic_independent(df['visual_stimulus_ratio'], df['left_choice']) # fitted_params includes (lapse_left, lapse_right, beta, x0)
-    
+    xs = np.linspace(df[stim_col].min(), df[stim_col].max(), 100).reshape(-1, 1)
+    p_left, fitted_params = utils.fit_lapse_logistic_independent(df[stim_col], df['left_choice'])
     ax.plot(xs, p_left, color='red', label='Lapse Logistic Fit (Independent)')
-    ax.set_xlabel("Visual Stimulus ratio")
+    ax.set_xlabel(xlabel)
     ax.set_ylabel("Probability of Left Choice")
     ax.set_ylim(0, 1)
-    
     return ax
 
 def summary_matrix_plot(

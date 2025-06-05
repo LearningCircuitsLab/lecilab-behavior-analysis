@@ -163,7 +163,7 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
         1, 3, subplot_spec=rows_gs[0], width_ratios=[2, 2, 1]
     )
     mid_gs = gridspec.GridSpecFromSubplotSpec(
-        1, 3, subplot_spec=rows_gs[1], width_ratios=[1, 1, 2]
+        1, 4, subplot_spec=rows_gs[1], width_ratios=[1, 1, 1, 1] # I change to 4 plot in this row
     )
     bot_gs = gridspec.GridSpecFromSubplotSpec(
         1, 2, subplot_spec=rows_gs[2], width_ratios=[1, 1]
@@ -174,7 +174,8 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     lrc_ax = fig.add_subplot(top_gs[0, 2])
     roap_ax = fig.add_subplot(mid_gs[0, 0])
     # psych_ax = fig.add_subplot(mid_gs[0, 1])
-    psych_by_difficulty_ratio_ax = fig.add_subplot(mid_gs[0, 1])
+    visual_psych_by_difficulty_ratio_ax = fig.add_subplot(mid_gs[0, 1])
+    auditory_psych_by_difficulty_ratio_ax = fig.add_subplot(mid_gs[0, 2])
     # reaction_time_ax = fig.add_subplot(mid_gs[0, 2])
     bias_ax = fig.add_subplot(bot_gs[0, 0])
 
@@ -220,10 +221,28 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     The trick here is to think of a robust logic to do all this without errors. 
     
     """
-    df_hard = df[df["current_training_stage"] == "TwoAFC_visual_hard"]
-    psych_by_difficulty_ratio_df_hard = dft.get_performance_by_difficulty_ratio(df_hard)
-    psych_by_difficulty_ratio_ax = plots.psychometric_plot_by_ratio(psych_by_difficulty_ratio_df_hard, psych_by_difficulty_ratio_ax)
+    modalities = [
+        {
+            "name": "visual",
+            "stage": "TwoAFC_visual_hard",
+            "ax": visual_psych_by_difficulty_ratio_ax,
+        },
+        {
+            "name": "auditory",
+            "stage": "TwoAFC_auditory_hard",
+            "ax": auditory_psych_by_difficulty_ratio_ax,
+        },
+    ]
 
+    for mod in modalities:
+        df_mod = df[df["current_training_stage"].str.contains(mod["name"], na=False)]
+        if not df_mod.empty:
+            if mod["stage"] in df_mod["current_training_stage"].unique():
+                df_mod_hard = df_mod[df_mod["current_training_stage"] == mod["stage"]]
+                psych_df = dft.get_performance_by_difficulty_ratio(df_mod_hard)
+                plots.psychometric_plot_by_ratio(psych_df, mod["ax"])
+            else:
+                mod["ax"].text(0.5, 0.5, "No hard trials", fontsize=12, color='k')
 
     # df = dft.calculate_time_between_trials_and_reaction_time(df, window=window)
     # reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
