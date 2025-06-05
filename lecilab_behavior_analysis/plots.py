@@ -289,7 +289,7 @@ def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axe
         label='Observed Choices',
         native_scale=True,
         linestyles='',
-        markersize=2,
+        markersize=5,
         capsize=0.01
     )
 
