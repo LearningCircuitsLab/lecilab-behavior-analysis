@@ -289,6 +289,8 @@ def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axe
         label='Observed Choices',
         native_scale=True,
         linestyles='',
+        markersize=8,
+        capsize=0.1
     )
 
     xs = np.linspace(df[stim_col].min(), df[stim_col].max(), 100).reshape(-1, 1)
