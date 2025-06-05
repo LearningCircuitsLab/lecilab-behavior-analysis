@@ -241,9 +241,11 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
                 df_mod_hard = df_mod[df_mod["current_training_stage"] == mod["stage"]]
                 psych_df = dft.get_performance_by_difficulty_ratio(df_mod_hard)
                 plots.psychometric_plot_by_ratio(psych_df, mod["ax"])
+                mod["ax"].set_title(mod["name"] + " psychometric plot", fontsize=12)
             else:
-                mod["ax"].text(0.5, 0.5, "No hard trials", fontsize=12, color='k')
-
+                mod["ax"].text(0.1, 0.5, "No hard trials in " + mod["name"], fontsize=12, color='k')
+        else:
+            mod["ax"].text(0.1, 0.5, "No trials in " + mod["name"], fontsize=12, color='k')
     # df = dft.calculate_time_between_trials_and_reaction_time(df, window=window)
     # reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
     # reaction_time_ax.imshow(reaction_time_image, aspect='auto')
