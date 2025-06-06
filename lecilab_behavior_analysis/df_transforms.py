@@ -327,6 +327,39 @@ def get_occupancy_heatmap(occupancy_df: pd.DataFrame, window_size: int = 30) -> 
     return heatmap_vector
 
 
+def get_occupancy_matrix(occupancy_df: pd.DataFrame, window_size: int = 30) -> pd.DataFrame:
+    # do the same as in the get_occupancy_heatmap function, but for each day of training
+    utils.column_checker(occupancy_df, required_columns={"start_time", "end_time"})
+    # get all the possible dates using both start and end times
+    all_dates = pd.concat([
+        occupancy_df['start_time'].dt.date,
+        occupancy_df['end_time'].dt.date
+    ]).unique()
+    # generate the matrix
+    occupancy_matrix = pd.DataFrame(index=all_dates, columns=np.arange(0, 1440, 1))
+    # fill the matrix with zeros
+    occupancy_matrix.fillna(0, inplace=True)
+    # Populate the matrix with event occurrences
+    # for each row of the dataframe
+    counter = 0
+    for _, row in occupancy_df.iterrows():
+        start_minute_of_day = row['start_time'].hour * 60 + row['start_time'].minute
+        end_minute_of_day = row['end_time'].hour * 60 + row['end_time'].minute
+        date = row['start_time'].date()
+        
+        if start_minute_of_day <= end_minute_of_day:
+            occupancy_matrix.loc[date, start_minute_of_day:end_minute_of_day] += 1
+        else:
+            occupancy_matrix.loc[date, start_minute_of_day:] += 1
+            # get the next day
+            next_day = date + pd.Timedelta(days=1)
+            occupancy_matrix.loc[next_day, :end_minute_of_day] += 1
+    
+        counter += 1
+        if counter % 100 == 0:
+            print(f"Processed {counter} rows out of {occupancy_df.shape[0]}")
+    return occupancy_matrix
+
 
 def reformat_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()  # Make a copy to avoid modifying the original DataFrame
