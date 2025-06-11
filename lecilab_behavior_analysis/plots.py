@@ -273,7 +273,7 @@ def psychometric_plot_by_discreVal(df: pd.DataFrame, x, y, ax: plt.Axes = None,
                                 linestyle='-',
                                 markersize=5, 
                                 linecolor='red', 
-                                linelabel='Lapse Logistic Fit (Independent)'
+                                linelabel='Lapse Logistic Fit (Independent)', 
                                 ) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
