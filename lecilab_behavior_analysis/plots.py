@@ -304,15 +304,7 @@ def psychometric_plot_by_discreVal(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     ax.set_ylim(0, 1)
     return ax
 
-def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None, 
-                                markercolor='blue',
-                                markers='o',
-                                errorbar=("ci", 95),
-                                markerlabel='Observed Choices',
-                                linestyle='',
-                                markersize=5, 
-                                linecolor='red', 
-                                ) -> plt.Axes:
+def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     
@@ -329,20 +321,20 @@ def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None,
         y='left_choice',
         data=df,
         estimator=lambda x: np.mean(x),
-        color=markercolor,
-        markers=markers,
-        errorbar=errorbar,
+        color='blue',
+        markers='o',
+        errorbar=("ci", 95),
         ax=ax,
-        label=markerlabel,
+        label='Observed Choices',
         native_scale=True,
         linestyles='',
-        markersize=markersize,
+        markersize=5,
         capsize=0.01
     )
 
     xs = np.linspace(df[stim_col].min(), df[stim_col].max(), 100).reshape(-1, 1)
     p_left, fitted_params = utils.fit_lapse_logistic_independent(df[stim_col], df['left_choice'])
-    ax.plot(xs, p_left, color=linecolor, label='Lapse Logistic Fit (Independent)', linestyle=linestyle)
+    ax.plot(xs, p_left, color='red', label='Lapse Logistic Fit (Independent)')
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Probability of Left Choice")
     ax.set_ylim(0, 1)
