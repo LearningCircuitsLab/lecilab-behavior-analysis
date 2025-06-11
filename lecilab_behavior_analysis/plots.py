@@ -265,7 +265,54 @@ def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     ax.spines[["top", "right"]].set_visible(False)
     return ax
 
-def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+def psychometric_plot_by_discreVal(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
+                                markercolor='blue',
+                                markers='o',
+                                errorbar=("ci", 95),
+                                markerlabel='Observed Choices',
+                                linestyle='',
+                                markersize=5, 
+                                linecolor='red', 
+                                linelabel='Lapse Logistic Fit (Independent)'
+                                ) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+
+    column_checker(df, required_columns={x, y})
+
+    sns.pointplot(
+        x=x,
+        y=y,
+        data=df,
+        estimator=lambda x: np.mean(x),
+        color=markercolor,
+        markers=markers,
+        errorbar=errorbar,
+        ax=ax,
+        label=markerlabel,
+        native_scale=True,
+        linestyles='',
+        markersize=markersize,
+        capsize=0.01
+    )
+
+    xs = np.linspace(df[x].min(), df[x].max(), 100).reshape(-1, 1)
+    p_left, fitted_params = utils.fit_lapse_logistic_independent(df[x], df[y])
+    ax.plot(xs, p_left, color=linecolor, label=linelabel, linestyle=linestyle)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_ylim(0, 1)
+    return ax
+
+def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None, 
+                                markercolor='blue',
+                                markers='o',
+                                errorbar=("ci", 95),
+                                markerlabel='Observed Choices',
+                                linestyle='',
+                                markersize=5, 
+                                linecolor='red', 
+                                ) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     
@@ -282,20 +329,20 @@ def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axe
         y='left_choice',
         data=df,
         estimator=lambda x: np.mean(x),
-        color='blue',
-        markers='o',
-        errorbar=("ci", 95),
+        color=markercolor,
+        markers=markers,
+        errorbar=errorbar,
         ax=ax,
-        label='Observed Choices',
+        label=markerlabel,
         native_scale=True,
         linestyles='',
-        markersize=5,
+        markersize=markersize,
         capsize=0.01
     )
 
     xs = np.linspace(df[stim_col].min(), df[stim_col].max(), 100).reshape(-1, 1)
     p_left, fitted_params = utils.fit_lapse_logistic_independent(df[stim_col], df['left_choice'])
-    ax.plot(xs, p_left, color='red', label='Lapse Logistic Fit (Independent)')
+    ax.plot(xs, p_left, color=linecolor, label='Lapse Logistic Fit (Independent)', linestyle=linestyle)
     ax.set_xlabel(xlabel)
     ax.set_ylabel("Probability of Left Choice")
     ax.set_ylim(0, 1)
