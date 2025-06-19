@@ -302,43 +302,50 @@ def psychometric_plot_by_discreVal(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     ax.set_xlabel(x)
     ax.set_ylabel(y)
     ax.set_ylim(0, 1)
+    ax.legend()
     return ax
 
-def psychometric_plot_by_ratio(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+def psychometric_plot_by_continuVal(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
+                                markercolor='blue',
+                                markers='o',
+                                errorbar=("ci", 95),
+                                markerlabel='Observed Choices',
+                                linestyle='-',
+                                markersize=5, 
+                                linecolor='red', 
+                                linelabel='Lapse Logistic Fit (Independent)', 
+                                ) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
-    
-    if "visual_stimulus_ratio" in df.columns:
-        stim_col = "visual_stimulus_ratio"
-        xlabel = "Visual Stimulus ratio"
-    elif "auditory_stimulus_ratio" in df.columns:
-        stim_col = "auditory_stimulus_ratio"
-        xlabel = "Auditory Stimulus ratio"
-    column_checker(df, required_columns={stim_col, "left_choice"})
 
+    column_checker(df, required_columns={x, y})
+
+    xs = np.linspace(df[x].min(), df[x].max(), 100).reshape(-1, 1)
+    p_left, fitted_params = utils.fit_lapse_logistic_independent(df[x], df[y])
+    # bin the visual stimulus difference for better visualization
+    df[x+"_binned"] = df[x] // 0.1 / 10
     sns.pointplot(
-        x=stim_col,
-        y='left_choice',
+        x=x+"_binned",
+        y=y,
         data=df,
         estimator=lambda x: np.mean(x),
-        color='blue',
-        markers='o',
-        errorbar=("ci", 95),
+        color=markercolor,
+        markers=markers,
+        errorbar=errorbar,
         ax=ax,
-        label='Observed Choices',
+        label=markerlabel,
         native_scale=True,
         linestyles='',
-        markersize=5,
+        markersize=markersize,
         capsize=0.01
     )
-
-    xs = np.linspace(df[stim_col].min(), df[stim_col].max(), 100).reshape(-1, 1)
-    p_left, fitted_params = utils.fit_lapse_logistic_independent(df[stim_col], df['left_choice'])
-    ax.plot(xs, p_left, color='red', label='Lapse Logistic Fit (Independent)')
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel("Probability of Left Choice")
+    ax.plot(xs, p_left, color=linecolor, label=linelabel, linestyle=linestyle)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
     ax.set_ylim(0, 1)
+    ax.legend()
     return ax
+
 
 def summary_matrix_plot(
     mat_df: pd.DataFrame,
