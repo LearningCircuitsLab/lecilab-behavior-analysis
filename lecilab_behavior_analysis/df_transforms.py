@@ -190,6 +190,25 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
     df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df
 
+def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
+    if df["current_training_stage"].str.contains("visual").any():
+        stim_col = "visual_stimulus"
+        diff_col = "visual_stimulus_diff"
+    elif df["current_training_stage"].str.contains("auditory").any():
+        stim_col = "auditory_stimulus"
+        diff_col = "auditory_stimulus_diff"
+    else:
+        raise ValueError("modality must be one of 'visual' or 'auditory'")
+
+    df[diff_col] = df[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
+    df[diff_col] = df.apply(
+        lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
+        axis=1
+    )
+    df = add_mouse_first_choice(df)
+    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df
+
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
     match row.difficulty:
         case "easy":
