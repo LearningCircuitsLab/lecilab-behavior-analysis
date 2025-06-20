@@ -634,6 +634,7 @@ if __name__ == "__main__":
     print(get_server_projects())
     print(get_animals_in_project("visual_and_COT_data"))
 
+
 def logi_model_fit(df: pd.DataFrame, X, y, method='newton'):
     column_checker(df, {x for x in X})
     column_checker(df, {y})
