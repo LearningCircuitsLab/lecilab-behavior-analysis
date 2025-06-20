@@ -6,6 +6,7 @@ import subprocess
 import matplotlib.pyplot as plt
 import ast
 from scipy.optimize import minimize
+import statsmodels.api as sm
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
@@ -632,3 +633,25 @@ if __name__ == "__main__":
     # Example usage
     print(get_server_projects())
     print(get_animals_in_project("visual_and_COT_data"))
+
+def logi_model_fit(df: pd.DataFrame, X, y):
+    column_checker(df, required_columns={x for x in X})
+    column_checker(df, required_columns={y})
+
+    # drop NaN values if any
+    df_for_fit = df.dropna(subset=X + [y])
+    df_for_fit = df_for_fit[X].astype(int)
+
+    # Prepare the independent variables
+    X_multi = df_for_fit[X].values
+    X_multi_const = sm.add_constant(X_multi)
+    y_predict = df_for_fit[y].values.astype(int)
+
+    # Fit the logistic regression model with multiple regressors
+    logit_model_multi = sm.Logit(y_predict, X_multi_const).fit()
+
+    # Display the summary, which includes p-values for all regressors
+    results = logit_model_multi.summary(xname= ["intercept"] + X)
+    print(results)
+    
+    return results
