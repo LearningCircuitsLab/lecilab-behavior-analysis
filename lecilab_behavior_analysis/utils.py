@@ -652,6 +652,6 @@ def logi_model_fit(df: pd.DataFrame, X, y):
 
     # Display the summary, which includes p-values for all regressors
     results = logit_model_multi.summary(xname= ["intercept"] + X)
-    print(results)
+    print(results) 
     
     return results
