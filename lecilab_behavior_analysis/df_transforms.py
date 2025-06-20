@@ -316,6 +316,9 @@ def get_occupancy_heatmap(occupancy_df: pd.DataFrame, window_size: int = 30) -> 
         else:
             heatmap_vector[start_minute_of_day:] += 1
             heatmap_vector[:end_minute_of_day] += 1
+    
+    # normalize the heatmap vector to the number of days
+    heatmap_vector /= len(occupancy_df.date.unique())
 
     # add the window size to the beginning and end of the vector
     heatmap_vector = np.concatenate((heatmap_vector[len(heatmap_vector)-window_size:], heatmap_vector, heatmap_vector[:window_size]))
@@ -376,7 +379,6 @@ def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
     # df = reformat_df_columns(df)
     df = fill_missing_data(df)
     df = add_day_column_to_df(df)
-    df = add_trial_of_day_column_to_df(df)
     df = add_trial_misses(df)
     df = add_mouse_first_choice(df)
     df = add_mouse_last_choice(df)
@@ -388,6 +390,7 @@ def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
         subject_df["total_trial"] = np.arange(1, subject_df.shape[0] + 1)
         # add the total trial column to the original dataframe
         df.loc[df['subject'] == subject, "total_trial"] = subject_df["total_trial"]
+        df = add_trial_of_day_column_to_df(df)
 
     return df
 

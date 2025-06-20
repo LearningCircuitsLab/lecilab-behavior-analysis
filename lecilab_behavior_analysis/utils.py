@@ -364,6 +364,22 @@ def rsync_session_data(
     return result.returncode == 0
 
 
+def rsync_sessions_summary(
+    project_name: str,
+    credentials: dict,
+    local_path: str,
+) -> bool:
+    """
+    This method syncs the session data from the server to the local machine.
+    """
+    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions_summary.csv"
+    rsync_command = f"rsync -avz {remote_path} {local_path}"
+    result = subprocess.run(rsync_command, shell=True)
+    if result.returncode != 0:
+        print(f"Error syncing session summary data for {project_name}: {result.stderr.decode('utf-8')}")
+    return result.returncode == 0
+
+
 def list_to_colors(ids: np.array, cmap: str) -> Tuple[List[tuple], Dict]:
     unique_cts = pd.unique(ids)
     colormap = plt.get_cmap(cmap)
