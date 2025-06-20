@@ -588,8 +588,8 @@ if __name__ == "__main__":
     print(get_animals_in_project("visual_and_COT_data"))
 
 def logi_model_fit(df: pd.DataFrame, X, y):
-    column_checker(df, required_columns={x for x in X})
-    column_checker(df, required_columns={y})
+    column_checker(df, {x for x in X})
+    column_checker(df, {y})
 
     # drop NaN values if any
     df_for_fit = df.dropna(subset=X + [y])
