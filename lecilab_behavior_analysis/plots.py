@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
+import lecilab_behavior_analysis.utils as utils
 from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
 
 
@@ -263,6 +264,87 @@ def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     ax.set_ylim(-.1, 1.1)
     ax.axhline(0.5, linestyle="--", color="gray")
     ax.spines[["top", "right"]].set_visible(False)
+    return ax
+
+def psychometric_plot_by_discreVal(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
+                                markercolor='blue',
+                                markers='o',
+                                errorbar=("ci", 95),
+                                markerlabel='Observed Choices',
+                                linestyle='-',
+                                markersize=5, 
+                                linecolor='red', 
+                                linelabel='Lapse Logistic Fit (Independent)', 
+                                ) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+
+    column_checker(df, required_columns={x, y})
+
+    sns.pointplot(
+        x=x,
+        y=y,
+        data=df,
+        estimator=lambda x: np.mean(x),
+        color=markercolor,
+        markers=markers,
+        errorbar=errorbar,
+        ax=ax,
+        label=markerlabel,
+        native_scale=True,
+        linestyles='',
+        markersize=markersize,
+        capsize=0.01
+    )
+
+    xs = np.linspace(df[x].min(), df[x].max(), 100).reshape(-1, 1)
+    p_left, fitted_params = utils.fit_lapse_logistic_independent(df[x], df[y])
+    ax.plot(xs, p_left, color=linecolor, label=linelabel, linestyle=linestyle)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_ylim(0, 1)
+    ax.legend()
+    return ax
+
+def psychometric_plot_by_continuVal(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
+                                markercolor='blue',
+                                markers='o',
+                                errorbar=("ci", 95),
+                                markerlabel='Observed Choices',
+                                linestyle='-',
+                                markersize=5, 
+                                linecolor='red', 
+                                linelabel='Lapse Logistic Fit (Independent)', 
+                                ) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+
+    column_checker(df, required_columns={x, y})
+
+    xs = np.linspace(df[x].min(), df[x].max(), 100).reshape(-1, 1)
+    p_left, fitted_params = utils.fit_lapse_logistic_independent(df[x], df[y])
+    # bin the visual stimulus difference for better visualization
+    df[x+"_binned"] = df[x] // 0.1 / 10
+    sns.pointplot(
+        x=x+"_binned",
+        y=y,
+        data=df,
+        estimator=lambda x: np.mean(x),
+        color=markercolor,
+        markers=markers,
+        errorbar=errorbar,
+        ax=ax,
+        label=markerlabel,
+        native_scale=True,
+        linestyles='',
+        markersize=markersize,
+        capsize=0.01
+    )
+    ax.plot(xs, p_left, color=linecolor, label=linelabel, linestyle=linestyle)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_ylim(0, 1)
+    ax.legend()
     return ax
 
 

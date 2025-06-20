@@ -10,6 +10,7 @@ dependencies = [
   "calplot",
   "seaborn",
   "networkx",
+  "sklearn",
 ]
 
 license = {text = "BSD-3-Clause"}

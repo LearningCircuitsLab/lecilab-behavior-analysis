@@ -61,7 +61,7 @@ def repeat_or_alternate_series_comparison(
     """
     repeat_or_alternate = np.where(
         series.isna() | comparison_series.isna(),
-        np.nan,
+        None, # None instead of np.nan to keep dtype the same TODO: check!
         np.where(
             series == comparison_series,
             "repeat",
@@ -71,6 +71,7 @@ def repeat_or_alternate_series_comparison(
 
 
 def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
+    # TODO: the name of this function is not great, as it adds also extra information
     """
     The previous side port can come from two sources.
     One, from the previous trial, where the animal was drinking water
@@ -116,6 +117,8 @@ def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
             # add the new column to the original dataframe, as the series have the index
             # equal to the original dataframe
             df.loc[df_mouse_session.index, 'roa_choice'] = series_to_append
+            # add also the port where the animal comes from
+            df.loc[df_mouse_session.index, 'previous_port_before_stimulus'] = last_choice
 
     return df
 
@@ -148,6 +151,14 @@ def get_repeat_or_alternate_performance(
     ].transform(lambda x: x.rolling(window=window).mean() * 100)
     return df
 
+def get_evidence_ratio(df):
+
+    return df
+
+def get_left_choice(df):
+    df = add_mouse_first_choice(df)
+    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df
 
 def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     utils.column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
@@ -159,6 +170,44 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
 
+def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
+    if df["current_training_stage"].str.contains("visual").any():
+        stim_col = "visual_stimulus"
+        ratio_col = "visual_stimulus_ratio"
+    elif df["current_training_stage"].str.contains("auditory").any():
+        stim_col = "auditory_stimulus"
+        ratio_col = "auditory_stimulus_ratio"
+    else:
+        raise ValueError("modality must be one of 'visual' or 'auditory'")
+
+    df[ratio_col] = df[stim_col].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
+    df[ratio_col] = df[ratio_col].apply(np.log).round(4)
+    df[ratio_col] = df.apply(
+        lambda row: row[ratio_col] if row['correct_side'] == 'left' else -row[ratio_col],
+        axis=1
+    )
+    df = add_mouse_first_choice(df)
+    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df
+
+def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
+    if df["current_training_stage"].str.contains("visual").any():
+        stim_col = "visual_stimulus"
+        diff_col = "visual_stimulus_diff"
+    elif df["current_training_stage"].str.contains("auditory").any():
+        stim_col = "auditory_stimulus"
+        diff_col = "auditory_stimulus_diff"
+    else:
+        raise ValueError("modality must be one of 'visual' or 'auditory'")
+
+    df[diff_col] = df[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
+    df[diff_col] = df.apply(
+        lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
+        axis=1
+    )
+    df = add_mouse_first_choice(df)
+    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df
 
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
     match row.difficulty:
