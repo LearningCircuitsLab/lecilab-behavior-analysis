@@ -640,7 +640,7 @@ def logi_model_fit(df: pd.DataFrame, X, y, method='newton'):
 
     # drop NaN values if any
     df_for_fit = df.dropna(subset=X + [y])
-    df_for_fit = df_for_fit[X + [y]].astype(int)
+    df_for_fit = df_for_fit[X + [y]].astype(float)
 
     # Prepare the independent variables
     X_multi = df_for_fit[X].values
