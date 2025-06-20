@@ -640,12 +640,12 @@ def logi_model_fit(df: pd.DataFrame, X, y):
 
     # drop NaN values if any
     df_for_fit = df.dropna(subset=X + [y])
-    df_for_fit = df_for_fit[X].astype(int)
+    df_for_fit = df_for_fit[X + [y]].astype(int)
 
     # Prepare the independent variables
     X_multi = df_for_fit[X].values
     X_multi_const = sm.add_constant(X_multi)
-    y_predict = df_for_fit[y].values.astype(int)
+    y_predict = df_for_fit[y].values
 
     # Fit the logistic regression model with multiple regressors
     logit_model_multi = sm.Logit(y_predict, X_multi_const).fit()
