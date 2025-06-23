@@ -281,6 +281,8 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
             'markersize': 5,
             'capsize': 0.01
         }
+    if point_kwargs is None:
+        point_kwargs = {}
     point_kwargs = {**default_point_kwargs, **point_kwargs}
     
     default_line_kwargs = {
@@ -288,12 +290,14 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
             'label': 'Lapse Logistic Fit (Independent)',
             'linestyle': '-'
         }
+    if line_kwargs is None:
+        line_kwargs = {}
     line_kwargs = {**default_line_kwargs, **line_kwargs}
 
     column_checker(df, required_columns={x, y})
     df_copy = df.copy(deep=True)
     if valueType != 'discrete':
-        # bin the visual stimulus difference for better visualization
+        # bin the continuous values when valueType is not discrete
         df_copy[x + "_binned"] = df_copy[x] // 0.1 / 10
         x = x + "_binned"
     sns.pointplot(
