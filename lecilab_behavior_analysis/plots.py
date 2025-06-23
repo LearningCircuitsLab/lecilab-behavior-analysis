@@ -299,14 +299,14 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     sns.pointplot(
         x=x,
         y=y,
-        data=df,
+        data=df_copy,
         estimator=lambda x: np.mean(x),
         ax=ax,
         **point_kwargs
     )
 
-    xs = np.linspace(df[x].min(), df[x].max(), 100).reshape(-1, 1)
-    p_left, fitted_params = utils.fit_lapse_logistic_independent(df[x], df[y])
+    xs = np.linspace(df_copy[x].min(), df_copy[x].max(), 100).reshape(-1, 1)
+    p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
     ax.set_xlabel(x)
     ax.set_ylabel(y)
