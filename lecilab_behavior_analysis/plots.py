@@ -271,8 +271,7 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     if ax is None:
         ax = plt.gca()
     
-    if point_kwargs is None:
-        point_kwargs = {
+    default_point_kwargs = {
             'color': 'blue',
             'markers': 'o',
             'errorbar': ("ci", 95),
@@ -282,13 +281,14 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
             'markersize': 5,
             'capsize': 0.01
         }
-
-    if line_kwargs is None:
-        line_kwargs = {
+    point_kwargs = {**default_point_kwargs, **point_kwargs}
+    
+    default_line_kwargs = {
             'color': 'red',
             'label': 'Lapse Logistic Fit (Independent)',
             'linestyle': '-'
         }
+    line_kwargs = {**default_line_kwargs, **line_kwargs}
 
     column_checker(df, required_columns={x, y})
     df_copy = df.copy(deep=True)
