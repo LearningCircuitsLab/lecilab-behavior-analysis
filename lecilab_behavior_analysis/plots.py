@@ -266,81 +266,49 @@ def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     ax.spines[["top", "right"]].set_visible(False)
     return ax
 
-def psychometric_plot_by_discreVal(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
-                                markercolor='blue',
-                                markers='o',
-                                errorbar=("ci", 95),
-                                markerlabel='Observed Choices',
-                                linestyle='-',
-                                markersize=5, 
-                                linecolor='red', 
-                                linelabel='Lapse Logistic Fit (Independent)', 
-                                ) -> plt.Axes:
+def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
+                                   point_kwargs=None,
+                                   line_kwargs=None, valueType = 'discrete') -> plt.Axes:
     if ax is None:
         ax = plt.gca()
+    
+    if point_kwargs is None:
+        point_kwargs = {
+            'color': 'blue',
+            'markers': 'o',
+            'errorbar': ("ci", 95),
+            'label': 'Observed Choices',
+            'native_scale': True,
+            'linestyles': '',
+            'markersize': 5,
+            'capsize': 0.01
+        }
+
+    if line_kwargs is None:
+        line_kwargs = {
+            'color': 'red',
+            'label': 'Lapse Logistic Fit (Independent)',
+            'linestyle': '-'
+        }
 
     column_checker(df, required_columns={x, y})
-
+    df_copy = df.copy(deep=True)
+    if valueType != 'discrete':
+        # bin the visual stimulus difference for better visualization
+        df_copy[x + "_binned"] = df_copy[x] // 0.1 / 10
+        x = x + "_binned"
     sns.pointplot(
         x=x,
         y=y,
         data=df,
         estimator=lambda x: np.mean(x),
-        color=markercolor,
-        markers=markers,
-        errorbar=errorbar,
         ax=ax,
-        label=markerlabel,
-        native_scale=True,
-        linestyles='',
-        markersize=markersize,
-        capsize=0.01
+        **point_kwargs
     )
 
     xs = np.linspace(df[x].min(), df[x].max(), 100).reshape(-1, 1)
     p_left, fitted_params = utils.fit_lapse_logistic_independent(df[x], df[y])
-    ax.plot(xs, p_left, color=linecolor, label=linelabel, linestyle=linestyle)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    ax.set_ylim(0, 1)
-    ax.legend()
-    return ax
-
-def psychometric_plot_by_continuVal(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
-                                markercolor='blue',
-                                markers='o',
-                                errorbar=("ci", 95),
-                                markerlabel='Observed Choices',
-                                linestyle='-',
-                                markersize=5, 
-                                linecolor='red', 
-                                linelabel='Lapse Logistic Fit (Independent)', 
-                                ) -> plt.Axes:
-    if ax is None:
-        ax = plt.gca()
-
-    column_checker(df, required_columns={x, y})
-
-    xs = np.linspace(df[x].min(), df[x].max(), 100).reshape(-1, 1)
-    p_left, fitted_params = utils.fit_lapse_logistic_independent(df[x], df[y])
-    # bin the visual stimulus difference for better visualization
-    df[x+"_binned"] = df[x] // 0.1 / 10
-    sns.pointplot(
-        x=x+"_binned",
-        y=y,
-        data=df,
-        estimator=lambda x: np.mean(x),
-        color=markercolor,
-        markers=markers,
-        errorbar=errorbar,
-        ax=ax,
-        label=markerlabel,
-        native_scale=True,
-        linestyles='',
-        markersize=markersize,
-        capsize=0.01
-    )
-    ax.plot(xs, p_left, color=linecolor, label=linelabel, linestyle=linestyle)
+    ax.plot(xs, p_left, **line_kwargs)
     ax.set_xlabel(x)
     ax.set_ylabel(y)
     ax.set_ylim(0, 1)
