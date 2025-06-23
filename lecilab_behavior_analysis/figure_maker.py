@@ -263,7 +263,7 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
             if mod["stage"] in df_mod["current_training_stage"].unique():
                 df_mod_hard = df_mod[df_mod["current_training_stage"] == mod["stage"]]
                 psych_df = dft.get_performance_by_difficulty_ratio(df_mod_hard)
-                plots.psychometric_plot_by_discreVal(psych_df, x = mod["name"] + '_stimulus_ratio', y = 'left_choice', mod["ax"])
+                plots.psychometric_plot_by_discreVal(psych_df, x = mod["name"] + '_stimulus_ratio', y = 'left_choice', ax = mod["ax"])
                 mod["ax"].set_title(mod["name"] + " psychometric plot", fontsize=10)
             else:
                 mod["ax"].text(0.1, 0.5, "No hard trials in " + mod["name"], fontsize=10, color='k')

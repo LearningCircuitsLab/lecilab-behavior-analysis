@@ -151,6 +151,7 @@ def get_repeat_or_alternate_performance(
     ].transform(lambda x: x.rolling(window=window).mean() * 100)
     return df
 
+
 def get_evidence_ratio(df):
 
     return df
@@ -159,6 +160,7 @@ def get_left_choice(df):
     df = add_mouse_first_choice(df)
     df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df
+
 
 def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     utils.column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
@@ -169,6 +171,7 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     pbd_df["leftward_evidence"] = pbd_df.apply(side_and_difficulty_to_numeric, axis=1)
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
+
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
     if df["current_training_stage"].str.contains("visual").any():
@@ -190,6 +193,7 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
     df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df
 
+
 def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     if df["current_training_stage"].str.contains("visual").any():
         stim_col = "visual_stimulus"
@@ -208,6 +212,7 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     df = add_mouse_first_choice(df)
     df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df
+
 
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
     match row.difficulty:
@@ -228,7 +233,6 @@ def side_and_difficulty_to_numeric(row: pd.Series) -> float:
             numval = 0
     
     return round(numval / 3, 3)
-
 
 
 def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
@@ -274,6 +278,8 @@ def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
 
 
 def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame) -> pd.DataFrame:
+    # TODO: separate this into two functions, one for time between trials and one for reaction time
+    
     """
     Calculate Time Between Trials and Reaction Time.
     """
@@ -288,6 +294,30 @@ def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame) -> pd.D
     # Calculate the reaction time
     df['reaction_time'] = df.apply(utils.trial_reaction_time, axis=1)
 
+    return df
+
+
+def add_inter_trial_interval_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add an inter-trial interval column to the dataframe.
+    """
+    # Check if the required columns are present
+    utils.column_checker(df_in, required_columns={"Port2In", "TRIAL_END"})
+    df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
+    for date in pd.unique(df['date']):
+        session_df = df[df['date'] == date].copy()
+        # Calculate the inter-trial interval
+        # shift the trial end time by one
+        trial_end_shifted = session_df['TRIAL_END'].shift(1)
+        # Animals can do multiple port2Ins in each trial. It could happen that the
+        # animal gives up in the middle of these pokes. We will consider the last port2In as the one that counts
+        port2ins_last = session_df['Port2In'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
+        iti_vector = port2ins_last - trial_end_shifted
+        # fill the first value with NaN
+        iti_vector.iloc[0] = np.nan
+        # assign the new column to the original dataframe
+        df.loc[df['date'] == date, 'inter_trial_interval'] = iti_vector
+    
     return df
 
 
