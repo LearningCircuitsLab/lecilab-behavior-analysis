@@ -193,6 +193,16 @@ def summary_text_plot(
     return ax
 
 
+def number_of_correct_responses_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    if "stimulus_modality" not in df.columns:
+        return correct_left_and_right_plot(df, ax)
+    elif df['stimulus_modality'].nunique() == 1:
+        # if there is only one modality, plot the correct left and right plot
+        return correct_left_and_right_plot(df, ax)
+    else:
+        return correct_left_and_right_plot_multisensory(df, ax)
+
+
 def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
@@ -206,6 +216,40 @@ def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Ax
     ax.get_legend().set_frame_on(False)
     # change labels of the legend
     ax.spines[["top", "right"]].set_visible(False)
+    return ax
+
+
+def correct_left_and_right_plot_multisensory(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    column_checker(df, required_columns={"correct_side", "correct", "stimulus_modality"})
+    
+    # Group the data by 'stimulus_modality', 'correct_side', and 'correct' and count occurrences
+    grouped_df = (
+        df.groupby(["stimulus_modality", "correct_side", "correct"])
+        .size()
+        .reset_index(name="count")
+    )
+    
+    # Create a new column combining 'correct_side' and 'stimulus_modality' with a line break for the x-axis
+    grouped_df["x"] = grouped_df["correct_side"] + "\n" + grouped_df["stimulus_modality"]
+    
+    # Create a bar plot using the grouped data
+    sns.barplot(
+        data=grouped_df,
+        x="x",
+        y="count",
+        hue="correct",
+        ax=ax,
+        hue_order=[False, True],
+        errorbar=None,
+    )
+    
+    ax.set_xlabel("")
+    ax.set_ylabel("Number of Trials")
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(title="Correct", loc="upper right")
+    
     return ax
 
 

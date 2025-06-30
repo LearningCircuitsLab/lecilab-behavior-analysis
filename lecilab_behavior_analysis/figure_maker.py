@@ -219,7 +219,7 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     session_changes = df[df.session != df.session.shift(1)].index
     # add a vertical line to the performance plot
     perf_ax = plots.performance_vs_trials_plot(df, perf_ax, legend=False, session_changes=session_changes)
-    lrc_ax = plots.correct_left_and_right_plot(df, lrc_ax)
+    lrc_ax = plots.number_of_correct_responses_plot(df, lrc_ax)
     df["repeat_or_alternate"] = dft.get_repeat_or_alternate_series(df.correct_side)
     df = dft.get_repeat_or_alternate_performance(df, window=window)
     roap_ax = plots.repeat_or_alternate_performance_plot(df, roap_ax)
