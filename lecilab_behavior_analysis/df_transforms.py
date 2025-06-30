@@ -311,7 +311,8 @@ def add_inter_trial_interval_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
         trial_end_shifted = session_df['TRIAL_END'].shift(1)
         # Animals can do multiple port2Ins in each trial. It could happen that the
         # animal gives up in the middle of these pokes. We will consider the last port2In as the one that counts
-        port2ins_last = session_df['Port2In'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
+        # TODO: changed to the min
+        port2ins_last = session_df['Port2In'].apply(lambda x: np.min(ast.literal_eval(x)) if isinstance(x, str) else np.min(x))
         iti_vector = port2ins_last - trial_end_shifted
         # fill the first value with NaN
         iti_vector.iloc[0] = np.nan
@@ -319,6 +320,21 @@ def add_inter_trial_interval_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
         df.loc[df['date'] == date, 'inter_trial_interval'] = iti_vector
     
     return df
+
+
+def add_trial_duration_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a trial duration column to the dataframe.
+    """
+    df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
+    # Check if the required columns are present
+    utils.column_checker(df, required_columns={"TRIAL_START", "TRIAL_END"})
+    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    trial_duration_date = df['TRIAL_END'] - df['TRIAL_START']
+    df['trial_duration'] = trial_duration_date
+
+    return df
+
 
 
 def add_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
