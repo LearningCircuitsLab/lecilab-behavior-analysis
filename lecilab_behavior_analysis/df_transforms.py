@@ -182,6 +182,7 @@ def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
     df['percentage_of_timebins_with_evidence_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['percentage_of_timebins_with_evidence'])
     df['total_evidence_strength'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['total_evidence_strength'])
 
+    return df
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
     if df["stimulus_modality"].unique() == 'visual':
