@@ -175,23 +175,21 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
-    if df["current_training_stage"].str.contains("visual").any():
+    if df["stimulus_modality"].unique() == 'visual':
         stim_col = "visual_stimulus"
         ratio_col = "visual_stimulus_ratio"
-    elif df["current_training_stage"].str.contains("auditory").any():
-        stim_col = "auditory_stimulus"
-        ratio_col = "auditory_stimulus_ratio"
+        df["visual_stimulus_ratio"] = df["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
+        df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
+        df["visual_stimulus_ratio"] = df.apply(
+            lambda row: row["visual_stimulus_ratio"] if row['correct_side'] == 'left' else -row["visual_stimulus_ratio"],
+            axis=1
+        )
+    elif df["current_training_stage"].unique() == "auditory":
+        df = add_auditory_real_statistics(df)
     else:
-        raise ValueError("modality must be one of 'visual' or 'auditory'")
+        raise ValueError("modality must be either 'visual' or 'auditory'")
+    df = get_left_choice(df)
 
-    df[ratio_col] = df[stim_col].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
-    df[ratio_col] = df[ratio_col].apply(np.log).round(4)
-    df[ratio_col] = df.apply(
-        lambda row: row[ratio_col] if row['correct_side'] == 'left' else -row[ratio_col],
-        axis=1
-    )
-    df = add_mouse_first_choice(df)
-    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df
 
 
@@ -210,8 +208,7 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
         lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
         axis=1
     )
-    df = add_mouse_first_choice(df)
-    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    df = get_left_choice(df)
     return df
 
 
@@ -697,7 +694,14 @@ def get_reaction_times_by_date_df(df_in: pd.DataFrame) -> pd.DataFrame:
 #     summary_matrix_df = summary_matrix(df)
 #     print(summary_matrix_df)
 
-
+def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
+    df['number_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['number_of_tones'])
+    df['number_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['number_of_tones'])
+    df['total_percentage_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['total_percentage_of_tones'])
+    df['total_percentage_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['total_percentage_of_tones'])
+    df['percentage_of_timebins_with_evidence_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['percentage_of_timebins_with_evidence'])
+    df['percentage_of_timebins_with_evidence_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['percentage_of_timebins_with_evidence'])
+    df['total_evidence_strength'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['total_evidence_strength'])
 
 def parameters_for_fit(df):
     """
@@ -707,26 +711,29 @@ def parameters_for_fit(df):
     df_new_for_fit = add_mouse_first_choice(df_new_for_fit)
     df_new_for_fit = add_mouse_last_choice(df_new_for_fit)
     df_new_for_fit = add_port_where_animal_comes_from(df_new_for_fit)
-    df_new_for_fit = get_performance_by_difficulty_ratio(df_new_for_fit)
-    df_new_for_fit = get_performance_by_difficulty_diff(df_new_for_fit)
-    df_new_for_fit['abs_visual_stimulus_ratio'] = df_new_for_fit['visual_stimulus_ratio'].abs()
-    df_new_for_fit['visual_ratio_diff_interact'] = df_new_for_fit['abs_visual_stimulus_ratio'] * (df_new_for_fit['visual_stimulus_diff'].abs())
+    if df['stimulus_modality'] == 'visual':
+        df_new_for_fit = get_performance_by_difficulty_ratio(df_new_for_fit)
+        df_new_for_fit = get_performance_by_difficulty_diff(df_new_for_fit)
+        df_new_for_fit['abs_visual_stimulus_ratio'] = df_new_for_fit['visual_stimulus_ratio'].abs()
+        df_new_for_fit['visual_ratio_diff_interact'] = df_new_for_fit['abs_visual_stimulus_ratio'] * (df_new_for_fit['visual_stimulus_diff'].abs())
+        df_new_for_fit['left_bright'] = df_new_for_fit.apply(
+            lambda row: ast.literal_eval(row['visual_stimulus'])[0] if row['correct_side'] == 'left' else ast.literal_eval(row['visual_stimulus'])[1],
+            axis=1
+        )
+        df_new_for_fit['visual_ratio_bright_interact'] = df_new_for_fit['abs_visual_stimulus_ratio'] * df_new_for_fit['left_bright']
+        df_new_for_fit['wrong_bright'] = df_new_for_fit['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
+        df_new_for_fit['wrong_bright_zscore'] = df_new_for_fit.groupby('abs_visual_stimulus_ratio')['wrong_bright'].transform(lambda x: (x - x.mean()) / x.std())
+    elif df['stimulus_modality'] == 'auditory':
+        df = add_auditory_real_statistics(df)
     df_new_for_fit['previous_port_before_stimulus_numeric'] = df_new_for_fit['previous_port_before_stimulus'].apply(
                 lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
                 )
     df_new_for_fit['roa_choice_numeric'] = df_new_for_fit['roa_choice'].apply(
                 lambda x: 1 if x == 'repeat' else 0 if x == 'alternate' else np.nan
                 )   
-    df_new_for_fit['left_bright'] = df_new_for_fit.apply(
-        lambda row: ast.literal_eval(row['visual_stimulus'])[0] if row['correct_side'] == 'left' else ast.literal_eval(row['visual_stimulus'])[1],
-        axis=1
-    )
-    df_new_for_fit['visual_ratio_bright_interact'] = df_new_for_fit['abs_visual_stimulus_ratio'] * df_new_for_fit['left_bright']
 
     # Add the correct column as numeric, 1 for correct, 0 for incorrect
     df_new_for_fit['correct_numeric'] = df_new_for_fit['correct'].astype(int)
-    df_new_for_fit['wrong_bright'] = df_new_for_fit['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
-    df_new_for_fit['wrong_bright_zscore'] = df_new_for_fit.groupby('abs_visual_stimulus_ratio')['wrong_bright'].transform(lambda x: (x - x.mean()) / x.std())
 
     
     for mouse in df_new_for_fit['subject'].unique():
