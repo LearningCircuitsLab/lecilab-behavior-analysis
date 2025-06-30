@@ -179,7 +179,6 @@ def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
     df['percentage_of_timebins_with_evidence_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['percentage_of_timebins_with_evidence'])
     df['percentage_of_timebins_with_evidence_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['percentage_of_timebins_with_evidence'])
     df['total_evidence_strength'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['total_evidence_strength'])
-
     return df
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
@@ -574,7 +573,7 @@ def parameters_for_fit(df):
     df_new_for_fit = add_mouse_first_choice(df_new_for_fit)
     df_new_for_fit = add_mouse_last_choice(df_new_for_fit)
     df_new_for_fit = add_port_where_animal_comes_from(df_new_for_fit)
-    if df['stimulus_modality'] == 'visual':
+    if df['stimulus_modality'].unique() == 'visual':
         df_new_for_fit = get_performance_by_difficulty_ratio(df_new_for_fit)
         df_new_for_fit = get_performance_by_difficulty_diff(df_new_for_fit)
         df_new_for_fit['abs_visual_stimulus_ratio'] = df_new_for_fit['visual_stimulus_ratio'].abs()
@@ -586,7 +585,7 @@ def parameters_for_fit(df):
         df_new_for_fit['visual_ratio_bright_interact'] = df_new_for_fit['abs_visual_stimulus_ratio'] * df_new_for_fit['left_bright']
         df_new_for_fit['wrong_bright'] = df_new_for_fit['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
         df_new_for_fit['wrong_bright_zscore'] = df_new_for_fit.groupby('abs_visual_stimulus_ratio')['wrong_bright'].transform(lambda x: (x - x.mean()) / x.std())
-    elif df['stimulus_modality'] == 'auditory':
+    elif df['stimulus_modality'].unique() == 'auditory':
         df = add_auditory_real_statistics(df)
     df_new_for_fit['previous_port_before_stimulus_numeric'] = df_new_for_fit['previous_port_before_stimulus'].apply(
                 lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
