@@ -249,9 +249,12 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
             stage_name = "TwoAFC_" + mod + "_hard"
             ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
             if stage_name in df["current_training_stage"].unique():
-                df_mod_hard = df[df["current_training_stage"] == mod["stage"]]
+                df_mod_hard = df[df["current_training_stage"] == stage_name]
                 psych_df = dft.get_performance_by_difficulty_ratio(df_mod_hard)
-                plots.psychometric_plot(psych_df, x = mod + '_stimulus_ratio', y = 'left_choice', ax = ax_name)
+                if mod == 'visual':
+                    plots.psychometric_plot(psych_df, x = 'visual_stimulus_ratio', y = 'left_choice', ax = ax_name)
+                elif mod == 'auditory':
+                    plots.psychometric_plot(psych_df, x = 'total_evidence_strength', y = 'left_choice', ax = ax_name, valueType='continue')
                 ax_name.set_title(mod + " psychometric plot", fontsize=10)
             else:
                 ax_name.text(0.1, 0.5, "No hard trials in " + mod, fontsize=10, color='k')
