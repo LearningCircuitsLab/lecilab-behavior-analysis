@@ -171,6 +171,16 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
 
+def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
+    df['number_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['number_of_tones'])
+    df['number_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['number_of_tones'])
+    df['total_percentage_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['total_percentage_of_tones'])
+    df['total_percentage_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['total_percentage_of_tones'])
+    df['percentage_of_timebins_with_evidence_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['percentage_of_timebins_with_evidence'])
+    df['percentage_of_timebins_with_evidence_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['percentage_of_timebins_with_evidence'])
+    df['total_evidence_strength'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['total_evidence_strength'])
+
+
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
     if df["stimulus_modality"].unique() == 'visual':
         stim_col = "visual_stimulus"
@@ -554,14 +564,6 @@ def add_visual_stimulus_difference(df_in: pd.DataFrame) -> pd.DataFrame:
 #     summary_matrix_df = summary_matrix(df)
 #     print(summary_matrix_df)
 
-def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
-    df['number_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['number_of_tones'])
-    df['number_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['number_of_tones'])
-    df['total_percentage_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['total_percentage_of_tones'])
-    df['total_percentage_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['total_percentage_of_tones'])
-    df['percentage_of_timebins_with_evidence_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['percentage_of_timebins_with_evidence'])
-    df['percentage_of_timebins_with_evidence_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['percentage_of_timebins_with_evidence'])
-    df['total_evidence_strength'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['total_evidence_strength'])
 
 def parameters_for_fit(df):
     """
