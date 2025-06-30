@@ -184,7 +184,7 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
             lambda row: row["visual_stimulus_ratio"] if row['correct_side'] == 'left' else -row["visual_stimulus_ratio"],
             axis=1
         )
-    elif df["current_training_stage"].unique() == "auditory":
+    elif df["stimulus_modality"].unique() == "auditory":
         df = add_auditory_real_statistics(df)
     else:
         raise ValueError("modality must be either 'visual' or 'auditory'")
