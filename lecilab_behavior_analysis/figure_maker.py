@@ -222,9 +222,9 @@ def session_summary_figure(df: pd.DataFrame, mouse_name: str = "", **kwargs) -> 
     
     """
     for mod in ['visual', 'auditory']:
+        ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
         if mod in df['stimulus_modality'].unique():
             stage_name = "TwoAFC_" + mod + "_hard"
-            ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
             if stage_name in df["current_training_stage"].unique():
                 df_mod_hard = df[df["current_training_stage"] == stage_name]
                 psych_df = dft.get_performance_by_difficulty_ratio(df_mod_hard)
