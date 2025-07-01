@@ -193,6 +193,16 @@ def summary_text_plot(
     return ax
 
 
+def number_of_correct_responses_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    if "stimulus_modality" not in df.columns:
+        return correct_left_and_right_plot(df, ax)
+    elif df['stimulus_modality'].nunique() == 1:
+        # if there is only one modality, plot the correct left and right plot
+        return correct_left_and_right_plot(df, ax)
+    else:
+        return correct_left_and_right_plot_multisensory(df, ax)
+
+
 def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
@@ -206,6 +216,40 @@ def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Ax
     ax.get_legend().set_frame_on(False)
     # change labels of the legend
     ax.spines[["top", "right"]].set_visible(False)
+    return ax
+
+
+def correct_left_and_right_plot_multisensory(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    column_checker(df, required_columns={"correct_side", "correct", "stimulus_modality"})
+    
+    # Group the data by 'stimulus_modality', 'correct_side', and 'correct' and count occurrences
+    grouped_df = (
+        df.groupby(["stimulus_modality", "correct_side", "correct"])
+        .size()
+        .reset_index(name="count")
+    )
+    
+    # Create a new column combining 'correct_side' and 'stimulus_modality' with a line break for the x-axis
+    grouped_df["x"] = grouped_df["correct_side"] + "\n" + grouped_df["stimulus_modality"]
+    
+    # Create a bar plot using the grouped data
+    sns.barplot(
+        data=grouped_df,
+        x="x",
+        y="count",
+        hue="correct",
+        ax=ax,
+        hue_order=[False, True],
+        errorbar=None,
+    )
+    
+    ax.set_xlabel("")
+    ax.set_ylabel("Number of Trials")
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.legend(title="Correct", loc="upper right")
+    
     return ax
 
 
@@ -227,6 +271,7 @@ def repeat_or_alternate_performance_plot(
         x="total_trial",
         y="repeat_or_alternate_performance",
         hue="repeat_or_alternate",
+        hue_order=["repeat", "alternate"],
         ax=ax,
     )
     ax.set_xlabel("Trial number")
@@ -426,16 +471,23 @@ def side_correct_performance_plot(df: pd.DataFrame, ax: plt.Axes, trials_to_show
 
     return ax
 
-def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = None) -> plt.figure:
+
+def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) -> plt.figure:
     """
     Plot Time Between Trials (TBT) and Reaction Time (RT) on the same plot with histograms on the y-axes.
     """
     # Check if the dataframe has the necessary columns
-    column_checker(df, required_columns={"Time_Between_Trials", "Reaction_Time"})
+    column_checker(df_in, required_columns={"time_between_trials", "reaction_time", "total_trial"})
 
+    # Create a copy of the dataframe to avoid modifying the original
+    df = df_in.copy()
+    tts = []
+    if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
+        for sc in kwargs["session_changes"][1:]:
+            tts.append(df.loc[sc]["total_trial"])
     # Drop NaN or Inf values to avoid errors in plotting
-    df = df.dropna(subset=['Reaction_Time', 'Time_Between_Trials'])
-    df = df[(df['Reaction_Time'] != float('inf')) & (df['Time_Between_Trials'] != float('inf'))]
+    df = df.dropna(subset=['reaction_time', 'time_between_trials'])
+    df = df[(df['reaction_time'] != float('inf')) & (df['time_between_trials'] != float('inf'))]
     
     # Create a 1x3 grid layout for two histograms and the main plot in the center
     fig = plt.figure(figsize=(14, 8))  # Increased figure size for better visibility
@@ -443,10 +495,10 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
 
     # Right plot for Reaction Time (RT) KDE plot
     ax_right = fig.add_subplot(grid[0, 2])
-    if df['Reaction_Time'].nunique() > 1:
-        sns.kdeplot(y=df['Reaction_Time'], ax=ax_right, color="tab:orange", fill=True)
+    if df['reaction_time'].nunique() > 1:
+        sns.kdeplot(y=df['reaction_time'], ax=ax_right, color="tab:orange", fill=True)
     else:
-        sns.histplot(y=df['Reaction_Time'], ax=ax_right, color="tab:orange")
+        sns.histplot(y=df['reaction_time'], ax=ax_right, color="tab:orange")
 
     ax_right.invert_xaxis()  # Flip the x-axis to make the plot point towards the main plot
     ax_right.set_xlabel("")
@@ -464,12 +516,14 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     ax2_center = ax_center.twinx()
 
     # Plot Time Between Trials
-    ax_center.plot(df["trial"], df["Time_Between_Trials"], color="tab:blue", label="Time Between Trials")
+    ax_center.plot(df["total_trial"], df["time_between_trials"], color="tab:blue", label="Time Between Trials")
     ax_center.set_xlabel("Trial number", fontsize=28, labelpad=10)
     ax_center.tick_params(labelsize=28, width=2, length=10)
+    for tt in tts:
+        ax_center.axvline(tt, linestyle="--", color="gray")
 
     # Plot Reaction Time
-    ax2_center.plot(df["trial"], df["Reaction_Time"], color="tab:orange", label="Reaction Time")
+    ax2_center.plot(df["total_trial"], df["reaction_time"], color="tab:orange", label="Reaction Time")
     ax2_center.set_ylabel("")
     ax2_center.tick_params(left=False, right=False, top=False, bottom=False, labelleft=False, labelright=False, labeltop=False, labelbottom=False, labelsize=20)    
 
@@ -478,7 +532,7 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     handles2, labels2 = ax2_center.get_legend_handles_labels()
     handles = handles1 + handles2
     labels = ["TBT", "RT"]
-    ax_center.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False, fontsize=20, )
+    ax_center.legend(handles, labels, bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=2, borderaxespad=0.0, frameon=False, fontsize=20)
 
     # Remove lateral and topspines for the center plot
     ax_center.spines["top"].set_visible(False)
@@ -491,10 +545,10 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
 
     # Left plot for Time Between Trials (TBT) KDE plot
     ax_left = fig.add_subplot(grid[0, 0])
-    if df['Time_Between_Trials'].nunique() > 1:
-        sns.kdeplot(y=df['Time_Between_Trials'], ax=ax_left, color="tab:blue", fill=True)
+    if df['time_between_trials'].nunique() > 1:
+        sns.kdeplot(y=df['time_between_trials'], ax=ax_left, color="tab:blue", fill=True)
     else:
-        sns.histplot(y=df['Time_Between_Trials'], ax=ax_left, color="tab:blue")
+        sns.histplot(y=df['time_between_trials'], ax=ax_left, color="tab:blue")
 
     ax_left.set_xlabel("")
     ax_left.set_ylabel("Time Between Trials (TBT) [ms]", fontsize=28)
@@ -503,6 +557,20 @@ def plot_time_between_trials_and_reaction_time(df: pd.DataFrame, ax: plt.Axes = 
     ax_left.spines['top'].set_visible(False)
     ax_left.spines['bottom'].set_linewidth(2)
     ax_left.tick_params(left=True, right=False, labelright=False, labelleft=True, bottom=False, labelbottom=False, labelsize=25, width=2)
+
+    # Make all y lower limits to 0
+    ax_left.set_ylim(bottom=0)
+    ax_center.set_ylim(bottom=0)
+    ax_right.set_ylim(bottom=0)
+    ax2_center.set_ylim(bottom=0)
+
+    # higher y lims to show 97% of data
+    topy_tbt = df["time_between_trials"].quantile(0.97)
+    ax_left.set_ylim(top=topy_tbt)
+    ax_center.set_ylim(top=topy_tbt)
+    topy_rt = df["reaction_time"].quantile(0.97)
+    ax_right.set_ylim(top=topy_rt)
+    ax2_center.set_ylim(top=topy_rt)
 
     # Ensure layout is adjusted
     plt.tight_layout()
@@ -792,3 +860,94 @@ def plot_transition_network_with_curved_edges(transition_matrix: pd.DataFrame, t
     plt.title(f'Transition Network (Edges above {threshold}% of total weight)', fontsize=16)
     
     return plt.gcf()
+
+
+def plot_number_of_pokes_histogram(df: pd.DataFrame, port_number: int, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    port_hold_column = f"port{port_number}_holds"
+    column_checker(df, required_columns={port_hold_column})
+    # plot the histogram of the number of pokes
+    npokes = df[port_hold_column].apply(lambda x: len(x))
+    sns.histplot(npokes,
+                 ax=ax,
+                 bins=np.nanmax(npokes) - np.nanmin(npokes),
+                 color="gray")
+    ax.set_xlabel(f"Number of pokes in Port{port_number}")
+    ax.set_ylabel("Frequency")
+    # remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    # ax.set_title("Number of pokes histogram")
+    return ax
+
+
+def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt.Axes = None) -> plt.Axes:
+    if ax is None:
+        ax = plt.gca()
+    port_hold_column = f"port{port_number}_holds"
+    column_checker(df, required_columns={port_hold_column})
+    # plot the histogram of the holding times
+    port_holds = df[port_hold_column].tolist()
+    port_holds = [item for sublist in port_holds for item in sublist]
+
+    sns.histplot(port_holds,
+                 ax=ax,
+                 bins=100,
+                 color="gray",
+                 stat="probability",
+                 kde=True)
+    ax.set_xlabel(f"Port{port_number} holding time (ms)")
+    ax.set_ylabel("Frequency")
+    # remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    # ax.set_title("Holding time histogram")
+    return ax
+
+
+def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_by: str, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    mean_col = f"{item_to_show}_mean"
+    bot95_col = f"{item_to_show}_bot95"
+    top95_col = f"{item_to_show}_top95"
+    column_checker(df, required_columns={group_trials_by, mean_col, bot95_col, top95_col})
+    
+    if ax is None:
+        ax = plt.gca()
+    # check if there is someting plotted in the axis already
+    items_in_axis = (
+        len(ax.patches) + len(ax.lines) + len(ax.collections) + len(ax.texts)
+    )
+    if items_in_axis > 0:
+        # create a new y axis on the right
+        ax2 = ax.twinx()
+        ax_to_use = ax2
+        add_stuff = False
+    else:
+        ax_to_use = ax
+        add_stuff = True
+
+    # plot a thick line with the mean speed of holding time per trial
+    # and a shaded area with the CIs
+    if "color" in kwargs:
+        color = kwargs["color"]
+    else:
+        color = "black"
+    sns.lineplot(data=df, x=group_trials_by, y=mean_col, ax=ax_to_use, color=color, linewidth=2)
+    ax_to_use.fill_between(df[group_trials_by], df[mean_col] - df[bot95_col],
+                            df[mean_col] + df[top95_col], color=color, alpha=0.2)
+    ax_to_use.set_ylabel(f"{item_to_show}", color=color)
+    ax_to_use.spines["top"].set_visible(False)
+
+    if not add_stuff:
+        ax_to_use.set_xlabel(group_trials_by)
+        # remove the top and right spines
+        ax_to_use.spines["right"].set_visible(False)
+    # rotate the x-axis labels and align them to the end
+    for label in ax_to_use.get_xticklabels():
+        label.set_rotation(45)
+        label.set_horizontalalignment("right")
+    
+    if "ylog" in kwargs and kwargs["ylog"]:
+        ax_to_use.set_yscale("log")
+    return ax

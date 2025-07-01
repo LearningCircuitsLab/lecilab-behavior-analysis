@@ -321,9 +321,11 @@ def get_folders_from_server(credentials: dict, path: str) -> List[str]:
         f"ssh {credentials['username']}@{credentials['host']} "
         f"'ls {path}'"
     )
+    print(ssh_command)
     result = subprocess.run(
         ssh_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
+    print("B")
     # Decode the output and split it into a list of folder names
     if result.returncode == 0:
         folders = result.stdout.decode("utf-8").strip().split("\n")
@@ -366,6 +368,22 @@ def rsync_session_data(
     return result.returncode == 0
 
 
+def rsync_sessions_summary(
+    project_name: str,
+    credentials: dict,
+    local_path: str,
+) -> bool:
+    """
+    This method syncs the session data from the server to the local machine.
+    """
+    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions_summary.csv"
+    rsync_command = f"rsync -avz {remote_path} {local_path}"
+    result = subprocess.run(rsync_command, shell=True)
+    if result.returncode != 0:
+        print(f"Error syncing session summary data for {project_name}: {result.stderr.decode('utf-8')}")
+    return result.returncode == 0
+
+
 def list_to_colors(ids: np.array, cmap: str) -> Tuple[List[tuple], Dict]:
     unique_cts = pd.unique(ids)
     colormap = plt.get_cmap(cmap)
@@ -397,24 +415,26 @@ def trial_reaction_time(series: pd.Series) -> float:
     """
     This method calculates the reaction time of a trial.
     """
-    out_time = np.max(ast.literal_eval(series["Port2Out"]))
-    port1_in = np.nan
-    port3_in = np.nan
+    try:
+        out_time = np.max(ast.literal_eval(series["Port2Out"]))
+    except Exception:
+        return np.nan
     try:
         port1_ins = ast.literal_eval(series["Port1In"])
         # get the first Port1In after Port2Out
         port1_ins = np.array(port1_ins)
         port1_in = np.min(port1_ins[port1_ins > out_time])
     except Exception:
-        pass
+        port1_in = np.nan
     try:
         port3_ins = ast.literal_eval(series["Port3In"])
         # get the first Port3In after Port2Out
         port3_ins = np.array(port3_ins)
-        port3_ins = np.min(port3_ins[port3_ins > out_time])
+        port3_in = np.min(port3_ins[port3_ins > out_time])
     except Exception:
         port3_in = np.nan
-    
+    if np.isnan(port1_in) and np.isnan(port3_in):
+        return np.nan
     return np.nanmin([port1_in, port3_in]) - out_time
 
 
@@ -581,6 +601,33 @@ def fit_lapse_logistic_independent(x, y, initial_params=None):
     xs = np.linspace(x.min(), x.max(), 100).reshape(-1, 1)
     p_left = lapse_left + (1 - lapse_left - lapse_right) / (1 + np.exp(-beta * (xs - x0)))
     return p_left, (lapse_left, lapse_right, beta, x0)
+
+def get_trial_port_hold(row, port_number):
+    if not type(row) == pd.Series:
+        raise ValueError("row must be a pandas Series")
+    ins = row["Port" + str(port_number) + "In"]
+    outs = row["Port" + str(port_number) + "Out"]
+    if ins == "[]" or outs == "[]":
+        return np.nan
+    if type(ins) == str:
+        ins = ast.literal_eval(ins)
+        outs = ast.literal_eval(outs)
+    if type(ins) == float:
+        ins = [ins]
+    if type(outs) == float:
+        outs = [outs]
+    # if the first out is earlier than the first in, remove it
+    if outs[0] < ins[0]:
+        outs = outs[1:]
+    # if they are different lengths, we need to pad the shorter one with NaNs
+    if len(ins) > len(outs):
+        outs = np.concatenate((outs, [np.nan] * (len(ins) - len(outs))))
+    elif len(outs) > len(ins):
+        ins = np.concatenate((ins, [np.nan] * (len(outs) - len(ins))))
+    
+    # now we can calculate the hold time
+    return np.array(outs) - np.array(ins)
+
 
 if __name__ == "__main__":
     # Example usage

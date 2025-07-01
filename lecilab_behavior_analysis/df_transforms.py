@@ -152,6 +152,7 @@ def get_repeat_or_alternate_performance(
     ].transform(lambda x: x.rolling(window=window).mean() * 100)
     return df
 
+
 def get_evidence_ratio(df):
 
     return df
@@ -160,6 +161,7 @@ def get_left_choice(df):
     df = add_mouse_first_choice(df)
     df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df
+
 
 def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     utils.column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
@@ -199,6 +201,7 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
 def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     if df["current_training_stage"].str.contains("visual").any():
         stim_col = "visual_stimulus"
@@ -216,6 +219,7 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     )
     df = get_left_choice(df)
     return df
+
 
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
     match row.difficulty:
@@ -236,7 +240,6 @@ def side_and_difficulty_to_numeric(row: pd.Series) -> float:
             numval = 0
     
     return round(numval / 3, 3)
-
 
 
 def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
@@ -281,22 +284,64 @@ def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
     return mat_df, session_info
 
 
-def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame, window: int = 25) -> pd.DataFrame:
+def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame) -> pd.DataFrame:
+    # TODO: separate this into two functions, one for time between trials and one for reaction time
+    
     """
     Calculate Time Between Trials and Reaction Time.
     """
     # Check if the required columns are present
-    utils.column_checker(df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
+    utils.column_checker(in_df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
     df = in_df.copy()  # Make a copy to avoid modifying the original DataFrame
     for date in pd.unique(df['date']):
-        date_df = df[df['date'] == date]
+        date_df = df[df['date'] == date].copy()
         port2outs = date_df['Port2Out'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
-        date_df['Time_Between_Trials'] = port2outs.diff()
-        df.loc[df['date'] == date, 'Time_Between_Trials'] = date_df['Time_Between_Trials']
+        date_df['time_between_trials'] = port2outs.diff()
+        df.loc[df['date'] == date, 'time_between_trials'] = date_df['time_between_trials']
     # Calculate the reaction time
-    df['Reaction_Time'] = df.apply(utils.trial_reaction_time, axis=1)
+    df['reaction_time'] = df.apply(utils.trial_reaction_time, axis=1)
 
     return df
+
+
+def add_inter_trial_interval_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add an inter-trial interval column to the dataframe.
+    """
+    # Check if the required columns are present
+    utils.column_checker(df_in, required_columns={"Port2In", "TRIAL_END"})
+    df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
+    for date in pd.unique(df['date']):
+        session_df = df[df['date'] == date].copy()
+        # Calculate the inter-trial interval
+        # shift the trial end time by one
+        trial_end_shifted = session_df['TRIAL_END'].shift(1)
+        # Animals can do multiple port2Ins in each trial. It could happen that the
+        # animal gives up in the middle of these pokes. We will consider the last port2In as the one that counts
+        # TODO: changed to the min
+        port2ins_last = session_df['Port2In'].apply(lambda x: np.min(ast.literal_eval(x)) if isinstance(x, str) else np.min(x))
+        iti_vector = port2ins_last - trial_end_shifted
+        # fill the first value with NaN
+        iti_vector.iloc[0] = np.nan
+        # assign the new column to the original dataframe
+        df.loc[df['date'] == date, 'inter_trial_interval'] = iti_vector
+    
+    return df
+
+
+def add_trial_duration_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a trial duration column to the dataframe.
+    """
+    df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
+    # Check if the required columns are present
+    utils.column_checker(df, required_columns={"TRIAL_START", "TRIAL_END"})
+    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    trial_duration_date = df['TRIAL_END'] - df['TRIAL_START']
+    df['trial_duration'] = trial_duration_date
+
+    return df
+
 
 
 def add_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -373,6 +418,9 @@ def get_occupancy_heatmap(occupancy_df: pd.DataFrame, window_size: int = 30) -> 
         else:
             heatmap_vector[start_minute_of_day:] += 1
             heatmap_vector[:end_minute_of_day] += 1
+    
+    # normalize the heatmap vector to the number of days
+    heatmap_vector /= len(occupancy_df.date.unique())
 
     # add the window size to the beginning and end of the vector
     heatmap_vector = np.concatenate((heatmap_vector[len(heatmap_vector)-window_size:], heatmap_vector, heatmap_vector[:window_size]))
@@ -383,6 +431,39 @@ def get_occupancy_heatmap(occupancy_df: pd.DataFrame, window_size: int = 30) -> 
 
     return heatmap_vector
 
+
+def get_occupancy_matrix(occupancy_df: pd.DataFrame, window_size: int = 30) -> pd.DataFrame:
+    # do the same as in the get_occupancy_heatmap function, but for each day of training
+    utils.column_checker(occupancy_df, required_columns={"start_time", "end_time"})
+    # get all the possible dates using both start and end times
+    all_dates = pd.concat([
+        occupancy_df['start_time'].dt.date,
+        occupancy_df['end_time'].dt.date
+    ]).unique()
+    # generate the matrix
+    occupancy_matrix = pd.DataFrame(index=all_dates, columns=np.arange(0, 1440, 1))
+    # fill the matrix with zeros
+    occupancy_matrix.fillna(0, inplace=True)
+    # Populate the matrix with event occurrences
+    # for each row of the dataframe
+    counter = 0
+    for _, row in occupancy_df.iterrows():
+        start_minute_of_day = row['start_time'].hour * 60 + row['start_time'].minute
+        end_minute_of_day = row['end_time'].hour * 60 + row['end_time'].minute
+        date = row['start_time'].date()
+        
+        if start_minute_of_day <= end_minute_of_day:
+            occupancy_matrix.loc[date, start_minute_of_day:end_minute_of_day] += 1
+        else:
+            occupancy_matrix.loc[date, start_minute_of_day:] += 1
+            # get the next day
+            next_day = date + pd.Timedelta(days=1)
+            occupancy_matrix.loc[next_day, :end_minute_of_day] += 1
+    
+        counter += 1
+        if counter % 100 == 0:
+            print(f"Processed {counter} rows out of {occupancy_df.shape[0]}")
+    return occupancy_matrix
 
 
 def reformat_df_columns(df: pd.DataFrame) -> pd.DataFrame:
@@ -400,7 +481,6 @@ def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
     # df = reformat_df_columns(df)
     df = fill_missing_data(df)
     df = add_day_column_to_df(df)
-    df = add_trial_of_day_column_to_df(df)
     df = add_trial_misses(df)
     df = add_mouse_first_choice(df)
     df = add_mouse_last_choice(df)
@@ -412,6 +492,7 @@ def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
         subject_df["total_trial"] = np.arange(1, subject_df.shape[0] + 1)
         # add the total trial column to the original dataframe
         df.loc[df['subject'] == subject, "total_trial"] = subject_df["total_trial"]
+        df = add_trial_of_day_column_to_df(df)
 
     return df
 
@@ -557,6 +638,64 @@ def add_visual_stimulus_difference(df_in: pd.DataFrame) -> pd.DataFrame:
     # bin the data every 0.1
     df["vis_stim_dif_bin"] = np.round((df["visual_stim_difference"] // 0.1) * 0.1, 1)
     return df
+
+
+def get_center_hold_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
+    utils.column_checker(df, required_columns={"Port2In", "Port2Out", "year_month_day"})
+    df["port2_holds"] = df.apply(lambda row: utils.get_trial_port_hold(row, 2), axis=1)
+    df["port2_holds_number"] = df.port2_holds.apply(len)
+    # df["port2_holds_mean"] = df.port2_holds.apply(np.mean)
+    # group by date and get the mean and 95 of the port2_holds
+    def mean_and_cis_of_holds(group):
+        port_holds_number = group["port2_holds"].apply(len)
+        mean_n = np.nanmean(port_holds_number)
+        bot95_n, top95_n = np.nanpercentile(port_holds_number, [5, 95])
+        
+        port_holds = group["port2_holds"].tolist()
+        port_holds = [item for sublist in port_holds for item in sublist]
+        if len(port_holds) == 0:
+            mean_s, bot95_s, top95_s = np.nan, np.nan, np.nan
+        else:
+            mean_s = np.nanmean(port_holds)
+            bot95_s, top95_s = np.nanpercentile(port_holds, [5, 95])
+        return pd.Series({
+            "number_of_pokes_mean": mean_n,
+            "number_of_pokes_bot95": bot95_n,
+            "number_of_pokes_top95": top95_n,
+            "hold_time_mean": mean_s,
+            "hold_time_bot95": bot95_s,
+            "hold_time_top95": top95_s
+        })
+    return df.groupby("year_month_day").apply(mean_and_cis_of_holds).reset_index()
+
+
+def get_reaction_times_by_date_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
+    utils.column_checker(df, required_columns={"year_month_day"})
+    # group by date and get the mean and 95 of the reaction times
+    def mean_and_cis_of_rt_and_tbt(group):
+        group = calculate_time_between_trials_and_reaction_time(group)
+        if group.reaction_time.isna().all():
+            mean_rt, bot95_rt, top95_rt = np.nan, np.nan, np.nan
+        else:
+            mean_rt = np.nanmean(group.reaction_time)
+            bot95_rt, top95_rt = np.nanpercentile(group.reaction_time, [5, 95])
+        if group.time_between_trials.isna().all():
+            mean_tbt, bot95_tbt, top95_tbt = np.nan, np.nan, np.nan
+        else:
+            mean_tbt = np.nanmean(group.time_between_trials)
+            bot95_tbt, top95_tbt = np.nanpercentile(group.time_between_trials, [5, 95])
+        return pd.Series({
+            "reaction_time_mean": mean_rt,
+            "reaction_time_bot95": bot95_rt,
+            "reaction_time_top95": top95_rt,
+            "time_between_trials_mean": mean_tbt,
+            "time_between_trials_bot95": bot95_tbt,
+            "time_between_trials_top95": top95_tbt
+        })
+    return df.groupby("year_month_day").apply(mean_and_cis_of_rt_and_tbt).reset_index()
+
 
 # if __name__ == "__main__":
 #     from lecilab_behavior_analysis.utils import load_example_data
