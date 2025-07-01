@@ -592,7 +592,10 @@ def parameters_for_fit(df):
                 )
     df_new_for_fit['roa_choice_numeric'] = df_new_for_fit['roa_choice'].apply(
                 lambda x: 1 if x == 'repeat' else 0 if x == 'alternate' else np.nan
-                )   
+                )
+    df_new_for_fit['last_choice_numeric'] = df_new_for_fit['last_choice'].apply(
+                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                )
 
     # Add the correct column as numeric, 1 for correct, 0 for incorrect
     df_new_for_fit['correct_numeric'] = df_new_for_fit['correct'].astype(int)
