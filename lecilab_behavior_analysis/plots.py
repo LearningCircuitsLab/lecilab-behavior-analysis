@@ -291,25 +291,6 @@ def repeat_or_alternate_performance_plot(
     return ax
 
 
-def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
-    if ax is None:
-        ax = plt.gca()
-    column_checker(df, required_columns={"leftward_evidence", "leftward_choices"})
-    sns.scatterplot(
-        data=df,
-        x="leftward_evidence",
-        y="leftward_choices",
-        # hue="difficulty",
-        ax=ax,
-    )
-    ax.set_xlabel("Leftward evidence")
-    ax.set_ylabel("P(Left)")
-    ax.set_xlim(-1.1, 1.1)
-    ax.set_ylim(-.1, 1.1)
-    ax.axhline(0.5, linestyle="--", color="gray")
-    ax.spines[["top", "right"]].set_visible(False)
-    return ax
-
 def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
                                    point_kwargs=None,
                                    line_kwargs=None, valueType = 'discrete') -> plt.Axes:

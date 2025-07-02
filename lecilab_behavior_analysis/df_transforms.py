@@ -154,7 +154,8 @@ def get_repeat_or_alternate_performance(
 
 
 def get_evidence_ratio(df):
-
+    # raise error
+    raise ValueError("Not implemented yet")
     return df
 
 def get_left_choice(df):
