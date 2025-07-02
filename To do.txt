@@ -1,0 +1,42 @@
+Action points (TODOs) from meeting 2025/07/01
+
+- Mirrors: print the mirror triangular base once the filament arrives and test orientation. 
+Reiterate print design. Goal: having two printed pieces to hold the mirrors
+
+- Psychometric curves: focus on the visual stimulus ratio for now, and look not only
+at the lapses but also at the other coefficients (bias and slope), and how they differ
+between animals and evolve with time. Compare the visual with the auditory (the auditory
+is more stable, but for now there is less data).√
+
+- Use a the logarithm value on the x axis for better fits √
+
+- In all modeling, scale the regressors to the same scale so that the coefficients are comparable.
+
+- Start experimenting with measures for how much explanatory power each regressor has.
+Here we need to be careful as some regressors might covary. Explore different methods to
+account for this. I did a very quick check with ChatGPT and this is the suggestion:
+https://chatgpt.com/share/6864d511-00cc-8011-9996-9ae0a1e4321e
+It might improve with a better prompt, but it looks like a good plan for now.
+
+- A few regressors to explore: previous correct answer, previous choice of the animal,
+and port where the animal comes from. Explore first the correlations of these regressors.
+For example, in correct trials, the three of them should be the same.
+
+- Psychometric for auditory. Test using log value of the evidence strength.
+Reduce a bit the number of bins to make it less noisy in the middle. Explore other
+properties of the cloud of tones, and the impact they have on decisions. For instance,
+several tones can sound simultaneously in the same timebin. One question is:
+are mice affected more by the total number of tones, or by the total number of timebins
+with some evidence?
+Something else you can try here: to explore the differential effects of each timebin
+e.g. does the first timebin matter more than the last? You can fit temporal kernels
+(also GLMs) to the animals choices. Your timebins will be your regressors (0 or 1 if they
+contain evidence; or you can make it continuous using the % or number of tones that
+appear in that timebin; or calculate the evidence strength in each timebin by
+comparing the two sides). Then you can compare the coefficients. Another thing to 
+test here is the effects of the loudness, which you could also incorporate in your
+model. This will help us understand how mice are using the stimulus. We can discuss this
+if this is confusing as there is a lot in here :)
+
+- Psychometric plots in session_summary_figure. Make them work for the different possibilities.
+We can allocate some time today if you wish to think about the best way to code this.
