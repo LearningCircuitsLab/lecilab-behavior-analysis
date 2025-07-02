@@ -152,9 +152,6 @@ def get_repeat_or_alternate_performance(
     ].transform(lambda x: x.rolling(window=window).mean() * 100)
     return df
 
-def get_evidence_ratio(df):
-
-    return df
 
 def get_left_choice(df):
     df = add_mouse_first_choice(df)
@@ -186,7 +183,7 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
         stim_col = "visual_stimulus"
         ratio_col = "visual_stimulus_ratio"
         df["visual_stimulus_ratio"] = df["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
-        df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
+        # df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
         df["visual_stimulus_ratio"] = df.apply(
             lambda row: row["visual_stimulus_ratio"] if row['correct_side'] == 'left' else -row["visual_stimulus_ratio"],
             axis=1

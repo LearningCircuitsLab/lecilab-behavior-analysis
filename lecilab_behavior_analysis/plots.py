@@ -246,24 +246,24 @@ def repeat_or_alternate_performance_plot(
     return ax
 
 
-def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
-    if ax is None:
-        ax = plt.gca()
-    column_checker(df, required_columns={"leftward_evidence", "leftward_choices"})
-    sns.scatterplot(
-        data=df,
-        x="leftward_evidence",
-        y="leftward_choices",
-        # hue="difficulty",
-        ax=ax,
-    )
-    ax.set_xlabel("Leftward evidence")
-    ax.set_ylabel("P(Left)")
-    ax.set_xlim(-1.1, 1.1)
-    ax.set_ylim(-.1, 1.1)
-    ax.axhline(0.5, linestyle="--", color="gray")
-    ax.spines[["top", "right"]].set_visible(False)
-    return ax
+# def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+#     if ax is None:
+#         ax = plt.gca()
+#     column_checker(df, required_columns={"leftward_evidence", "leftward_choices"})
+#     sns.scatterplot(
+#         data=df,
+#         x="leftward_evidence",
+#         y="leftward_choices",
+#         # hue="difficulty",
+#         ax=ax,
+#     )
+#     ax.set_xlabel("Leftward evidence")
+#     ax.set_ylabel("P(Left)")
+#     ax.set_xlim(-1.1, 1.1)
+#     ax.set_ylim(-.1, 1.1)
+#     ax.axhline(0.5, linestyle="--", color="gray")
+#     ax.spines[["top", "right"]].set_visible(False)
+#     return ax
 
 def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
                                    point_kwargs=None,
@@ -296,10 +296,14 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
 
     column_checker(df, required_columns={x, y})
     df_copy = df.copy(deep=True)
-    if valueType != 'discrete':
+    if valueType == 'discrete':
+        df_copy[x] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
+        ax.set_xlabel('log_' + x)
+    else:
         # bin the continuous values when valueType is not discrete
-        df_copy[x + "_binned"] = df_copy[x] // 0.1 / 10
+        df_copy[x + "_binned"] = pd.cut(df_copy[x], bins = 6, labels=False)
         x = x + "_binned"
+        ax.set_xlabel(x)
     sns.pointplot(
         x=x,
         y=y,
@@ -312,7 +316,6 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     xs = np.linspace(df_copy[x].min(), df_copy[x].max(), 100).reshape(-1, 1)
     p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
-    ax.set_xlabel(x)
     ax.set_ylabel(y)
     ax.set_ylim(0, 1)
     ax.legend()
