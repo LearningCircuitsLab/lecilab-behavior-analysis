@@ -152,14 +152,6 @@ def get_repeat_or_alternate_performance(
     ].transform(lambda x: x.rolling(window=window).mean() * 100)
     return df
 
-<<<<<<< HEAD
-
-def get_evidence_ratio(df):
-
-    return df
-=======
->>>>>>> 0166bba942219abff5ac57bc893f1ab8db3d344f
-
 def get_left_choice(df):
     df = add_mouse_first_choice(df)
     df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
