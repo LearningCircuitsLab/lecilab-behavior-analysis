@@ -6,7 +6,7 @@ Reiterate print design. Goal: having two printed pieces to hold the mirrors
 - Psychometric curves: focus on the visual stimulus ratio for now, and look not only
 at the lapses but also at the other coefficients (bias and slope), and how they differ
 between animals and evolve with time. Compare the visual with the auditory (the auditory
-is more stable, but for now there is less data).
+is more stable, but for now there is less data).√
 
 - Use a the logarithm value on the x axis for better fits √
 
