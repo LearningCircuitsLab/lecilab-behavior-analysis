@@ -642,6 +642,9 @@ def logi_model_fit(df: pd.DataFrame, X, y, method='newton'):
     df_for_fit = df.dropna(subset=X + [y])
     df_for_fit = df_for_fit[X + [y]].astype(float)
 
+    # to make coefficients comparable
+    df_for_fit[X] = df_for_fit[X].apply(lambda x: (x - x.mean()) / x.std())
+
     # Prepare the independent variables
     X_multi = df_for_fit[X].values
     X_multi_const = sm.add_constant(X_multi)

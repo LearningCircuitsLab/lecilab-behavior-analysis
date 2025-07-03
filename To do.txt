@@ -10,7 +10,7 @@ is more stable, but for now there is less data).√
 
 - Use a the logarithm value on the x axis for better fits √
 
-- In all modeling, scale the regressors to the same scale so that the coefficients are comparable.
+- In all modeling, scale the regressors to the same scale so that the coefficients are comparable. √
 
 - Start experimenting with measures for how much explanatory power each regressor has.
 Here we need to be careful as some regressors might covary. Explore different methods to
@@ -32,11 +32,11 @@ Something else you can try here: to explore the differential effects of each tim
 e.g. does the first timebin matter more than the last? You can fit temporal kernels
 (also GLMs) to the animals choices. Your timebins will be your regressors (0 or 1 if they
 contain evidence; or you can make it continuous using the % or number of tones that
-appear in that timebin; or calculate the evidence strength in each timebin by
-comparing the two sides). Then you can compare the coefficients. Another thing to 
-test here is the effects of the loudness, which you could also incorporate in your
-model. This will help us understand how mice are using the stimulus. We can discuss this
-if this is confusing as there is a lot in here :)
+appear in that timebin;√(I don't know if I understand time kernel correctly) 
+or calculate the evidence strength in each timebin by comparing the two sides). (I think this is what Alexis did)
+Then you can compare the coefficients. Another thing to  test here is the effects of the loudness, 
+which you could also incorporate in your model. This will help us understand how mice are using 
+the stimulus. We can discuss this if this is confusing as there is a lot in here :)
 
 - Psychometric plots in session_summary_figure. Make them work for the different possibilities.
 We can allocate some time today if you wish to think about the best way to code this.
