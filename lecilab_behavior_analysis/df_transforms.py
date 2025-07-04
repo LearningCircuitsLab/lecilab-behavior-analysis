@@ -152,11 +152,6 @@ def get_repeat_or_alternate_performance(
     ].transform(lambda x: x.rolling(window=window).mean() * 100)
     return df
 
-def get_left_choice(df):
-    df = add_mouse_first_choice(df)
-    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
-    return df
-
 
 def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     utils.column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
@@ -192,7 +187,8 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
         df = add_auditory_real_statistics(df)
     else:
         raise ValueError("modality must be either 'visual' or 'auditory'")
-    df = get_left_choice(df)
+    df = add_mouse_first_choice(df)
+    df['first_choice_numeric'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
 
     return df
 
@@ -212,7 +208,7 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
         lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
         axis=1
     )
-    df = get_left_choice(df)
+    df['first_choice_numeric'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df
 
 
