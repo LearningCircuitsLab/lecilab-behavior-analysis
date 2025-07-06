@@ -694,3 +694,12 @@ def hierarchical_partitioning(df, x_cols, y_col, method='newton'):
     total = sum(avg_contrib.values())
     norm_contrib = {var: val / total for var, val in avg_contrib.items()}
     return pd.Series(norm_contrib).sort_values(ascending=False)
+
+def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
+    kernel = np.exp(np.arange(1, max_lag+1) / tau)
+    padded = np.concatenate([[0]*len(kernel), series])
+    # time kernel convolve
+    return np.array([
+        np.dot(kernel, padded[i:i+len(kernel)])
+        for i in range(len(series))
+    ])

@@ -797,6 +797,9 @@ def parameters_for_fit(df):
     # Add the correct column as numeric, 1 for correct, 0 for incorrect
     df_copy['correct_numeric'] = df_copy['correct'].astype(int)
 
+    # Add the past trials impact by time kernel
+    
+
     df_copy = get_choice_before(df_copy)
 
     df_copy['previous_first_choice_numeric'] = df_copy['previous_first_choice'].apply(
