@@ -696,7 +696,7 @@ def hierarchical_partitioning(df, x_cols, y_col, method='newton'):
     return pd.Series(norm_contrib).sort_values(ascending=False)
 
 def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
-    kernel = np.exp(np.arange(1, max_lag+1) / tau)
+    kernel = np.exp(-np.arange(1, max_lag+1) / tau)
     padded = np.concatenate([[0]*len(kernel), series])
     # time kernel convolve
     return np.array([
@@ -705,7 +705,7 @@ def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
     ])
 
 def verify_params_time_kernel(dic:dict, X:list, y:str):
-    combinations = list(itertools.product(range(1, 10), range(1, 30)))
+    combinations = list(itertools.product(range(1,20), range(1, 11)))
     comb_dict = {}
     # iterate all the combinations of max_lag and tau of time kernel
     for comb in combinations:
