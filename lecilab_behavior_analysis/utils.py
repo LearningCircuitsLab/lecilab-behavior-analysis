@@ -327,7 +327,6 @@ def get_folders_from_server(credentials: dict, path: str) -> List[str]:
     result = subprocess.run(
         ssh_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    print("B")
     # Decode the output and split it into a list of folder names
     if result.returncode == 0:
         folders = result.stdout.decode("utf-8").strip().split("\n")
