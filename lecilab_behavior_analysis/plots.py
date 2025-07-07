@@ -957,3 +957,20 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
     if "ylog" in kwargs and kwargs["ylog"]:
         ax_to_use.set_yscale("log")
     return ax
+
+
+def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.DataFrame, **kwargs) -> plt.Axes:
+    fig, ax = plt.subplots(2, 1, figsize=(10, 10))
+    X = norm_contribution_df.index
+    corr_mat_mean = np.mean(np.stack(corr_mat_list), axis=0)
+    # # Create a mask for the upper triangle
+    # mask = np.triu(np.ones_like(corr_mat_mean, dtype=bool), k=1)
+    sns.heatmap(corr_mat_mean, ax=ax[0], cmap='coolwarm', annot=True, fmt=".2f")
+    ax[0].set_xticklabels(X, rotation=16, ha="right", rotation_mode="anchor")
+    ax[0].set_yticklabels(X, rotation=8, ha="right", rotation_mode="anchor")
+    ax[0].set_title("Mean Correlation Matrix")
+
+    norm_contribution_df.mean(axis=1).sort_values().plot(kind='barh', ax=ax[1])
+    ax[1].set_xlabel('Mean Contribution')
+    plt.tight_layout()
+    plt.show()

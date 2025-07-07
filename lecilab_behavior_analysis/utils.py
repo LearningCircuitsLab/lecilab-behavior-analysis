@@ -715,14 +715,14 @@ def verify_params_time_kernel(dic:dict, y:str):
         previous_impact_on_kernel_mice = []
         for df_name, df in zip(dic.keys(), dic.values()):
             if y == 'first_choice_numeric':
-                df = dft.add_mouse_first_choice(df)
+                # df = dft.add_mouse_first_choice(df)
                 df['first_choice_numeric'] = df['first_choice'].apply(
                         lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
                         )
             elif y == 'correct_numeric':
                 df['correct_numeric'] = df['correct'].astype(int)
             else:
-                raise ValueError("impact should be either 'first_choice_numeric' and 'correct_numeric'")
+                raise ValueError("impact should be either 'first_choice_numeric' or 'correct_numeric'")
             
             for session in df['session'].unique():
                 df_session = df[df['session'] == session]
@@ -732,3 +732,18 @@ def verify_params_time_kernel(dic:dict, y:str):
             previous_impact_on_kernel_mice.append(abs(model.params['previous_impact_on_kernel']))
         comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
     return comb_dict
+
+def filter_variables_for_model(dic:dict, X:list, y:str, max_lag:8, tau:1):
+    corr_mat_list = []
+    norm_contribution_df = pd.DataFrame([])
+    for df_name, df in zip(dic.keys(), dic.values()):
+        df_for_fit = dft.parameters_for_fit(df)
+        df_for_fit = dft.get_time_kernel_impact(df_for_fit, y=y, max_lag=max_lag, tau=tau)
+        
+        corr_fit_X_df = df_for_fit[X].corr().values
+        corr_mat_list.append(corr_fit_X_df)
+
+        norm_contribution = hierarchical_partitioning(df_for_fit, x_cols = X, y_col = y)
+        norm_contribution_df[df_name] = norm_contribution
+
+    return corr_mat_list, norm_contribution_df
