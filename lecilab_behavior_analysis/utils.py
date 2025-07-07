@@ -10,6 +10,7 @@ import statsmodels.api as sm
 import itertools
 from collections import defaultdict
 from sklearn.metrics import r2_score
+import lecilab_behavior_analysis.df_transforms as dft
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
@@ -704,7 +705,7 @@ def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
         for i in range(len(series))
     ])
 
-def verify_params_time_kernel(dic:dict, X:list, y:str):
+def verify_params_time_kernel(dic:dict, y:str):
     combinations = list(itertools.product(range(1,20), range(1, 11)))
     comb_dict = {}
     # iterate all the combinations of max_lag and tau of time kernel
@@ -713,14 +714,21 @@ def verify_params_time_kernel(dic:dict, X:list, y:str):
         tau = comb[1]
         previous_impact_on_kernel_mice = []
         for df_name, df in zip(dic.keys(), dic.values()):
-            df['first_choice_numeric'] = df['first_choice'].apply(
+            if y == 'first_choice_numeric':
+                df = dft.add_mouse_first_choice(df)
+                df['first_choice_numeric'] = df['first_choice'].apply(
                         lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
                         )
+            elif y == 'correct_numeric':
+                df['correct_numeric'] = df['correct'].astype(int)
+            else:
+                raise ValueError("impact should be either 'first_choice_numeric' and 'correct_numeric'")
+            
             for session in df['session'].unique():
                 df_session = df[df['session'] == session]
-                df_session['previous_impact_on_kernel'] = previous_impact_on_time_kernel(df_session['first_choice_numeric'], max_lag=max_lag, tau=tau)
+                df_session['previous_impact_on_kernel'] = previous_impact_on_time_kernel(df_session[y], max_lag=max_lag, tau=tau)
                 df.loc[df_session.index, 'previous_impact_on_kernel'] = df_session['previous_impact_on_kernel']
-            _, model = logi_model_fit(df, X=X, y=y)
-            previous_impact_on_kernel_mice.append(model.pvalues['previous_impact_on_kernel'])
+            _, model = logi_model_fit(df, X=['previous_impact_on_kernel'], y=y)
+            previous_impact_on_kernel_mice.append(abs(model.params['previous_impact_on_kernel']))
         comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
     return comb_dict
