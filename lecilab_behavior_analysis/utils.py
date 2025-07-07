@@ -324,7 +324,6 @@ def get_folders_from_server(credentials: dict, path: str) -> List[str]:
         f"ssh {credentials['username']}@{credentials['host']} "
         f"'ls {path}'"
     )
-    print(ssh_command)
     result = subprocess.run(
         ssh_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -632,11 +631,6 @@ def get_trial_port_hold(row, port_number):
     return np.array(outs) - np.array(ins)
 
 
-if __name__ == "__main__":
-    # Example usage
-    print(get_server_projects())
-    print(get_animals_in_project("visual_and_COT_data"))
-
 def logi_model_fit_input(df: pd.DataFrame, X, y, method='newton'):
     column_checker(df, {x for x in X})
     column_checker(df, {y})
@@ -724,3 +718,9 @@ def verify_params_time_kernel(dic:dict, X:list, y:str):
             previous_impact_on_kernel_mice.append(model.pvalues['previous_impact_on_kernel'])
         comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
     return comb_dict
+
+
+if __name__ == "__main__":
+    # Example usage
+    print(get_server_projects())
+    print(get_animals_in_project("visual_and_COT_data"))
