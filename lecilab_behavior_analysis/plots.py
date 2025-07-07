@@ -340,7 +340,7 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     ax.plot(xs, p_left, **line_kwargs)
     ax.set_xlabel(x)
     ax.set_ylabel(y)
-    ax.set_ylim(0, 1)
+    # ax.set_ylim(0, 1)
     ax.legend()
     return ax
 
