@@ -189,7 +189,7 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
         stim_col = "visual_stimulus"
         ratio_col = "visual_stimulus_ratio"
         df["visual_stimulus_ratio"] = df["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
-        df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
+        # df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
         df["visual_stimulus_ratio"] = df.apply(
             lambda row: row["visual_stimulus_ratio"] if row['correct_side'] == 'left' else -row["visual_stimulus_ratio"],
             axis=1
@@ -198,7 +198,8 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
         df = add_auditory_real_statistics(df)
     else:
         raise ValueError("modality must be either 'visual' or 'auditory'")
-    df = get_left_choice(df)
+    df = add_mouse_first_choice(df)
+    df['first_choice_numeric'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
 
     return df
 
@@ -218,7 +219,7 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
         lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
         axis=1
     )
-    df = get_left_choice(df)
+    df['first_choice_numeric'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df
 
 
@@ -705,122 +706,137 @@ def get_reaction_times_by_date_df(df_in: pd.DataFrame) -> pd.DataFrame:
 #     print(summary_matrix_df)
 
 
+def get_choice_before(df):
+    df_copy = df.copy(deep=False)
+    utils.column_checker(df_copy, required_columns={"first_choice", "last_choice", "previous_port_before_stimulus", "correct"})
+
+    for mouse in df_copy['subject'].unique():
+        for session in df_copy[df_copy.subject == mouse]['session'].unique():
+            df_mouse_session = df_copy[np.logical_and(df_copy['subject'] == mouse, df_copy['session'] == session)]
+            # df_mouse_session['correct_side_in_previous'] = df_mouse_session['correct_side'].shift(1, fill_value=np.nan)
+            df_mouse_session['previous_correct'] = df_mouse_session['correct'].shift(1, fill_value=np.nan)
+            df_mouse_session['previous_first_choice'] = df_mouse_session['first_choice'].shift(1, fill_value=np.nan)
+            df_mouse_session['previous_last_choice'] = df_mouse_session['last_choice'].shift(1, fill_value=np.nan)
+            df_mouse_session['previous_correct_side'] = df_mouse_session['correct_side'].shift(1, fill_value=np.nan)
+
+            df_copy.loc[df_mouse_session.index, 'previous_correct'] = df_mouse_session['previous_correct']
+            df_copy.loc[df_mouse_session.index, 'previous_first_choice'] = df_mouse_session['previous_first_choice']
+            df_copy.loc[df_mouse_session.index, 'previous_last_choice'] = df_mouse_session['previous_last_choice']
+            df_copy.loc[df_mouse_session.index, 'previous_port_before_stimulus'] = df_mouse_session['previous_port_before_stimulus']
+
+            # Add the previous choice is left and correct as 1, or 0, remain NaN
+            previous_left_choice_correct_numeric = np.where(
+                df_mouse_session['previous_first_choice'].isna() | df_mouse_session['previous_correct'].isna(),
+                None,
+                ((df_mouse_session['previous_first_choice'] == 'left') & (df_mouse_session['previous_correct'] == True)).astype(int)
+            )
+            df_copy.loc[df_mouse_session.index, 'previous_left_choice_correct_numeric'] = previous_left_choice_correct_numeric
+
+            # Add the previous choice is right and wrong as 1, or 0, remain NaN
+            previous_right_choice_wrong_numeric = np.where(
+                df_mouse_session['previous_first_choice'].isna() | df_mouse_session['previous_correct'].isna(),
+                None,
+                ((df_mouse_session['previous_first_choice'] == 'right') & (df_mouse_session['previous_correct'] == False)).astype(int)
+            )
+            df_copy.loc[df_mouse_session.index, 'previous_right_choice_wrong_numeric'] = previous_right_choice_wrong_numeric
+
+
+            # Add the same and correct in choice from previous, where 1 is a same and correct choice and 0 is the rest
+            previous_same_choice_correct_numeric = np.where(
+                df_mouse_session['previous_first_choice'].isna() | df_mouse_session['previous_correct'].isna(),
+                None,
+                (((df_mouse_session['previous_first_choice'] == 'left') & (df_mouse_session['first_choice'] == 'left') & (df_mouse_session['previous_correct'] == True)) 
+                | ((df_mouse_session['previous_first_choice'] == 'right') & (df_mouse_session['first_choice'] == 'right') & (df_mouse_session['previous_correct'] == True))
+                ).astype(int)
+            )
+            df_copy.loc[df_mouse_session.index, 'previous_same_choice_correct_numeric'] = previous_same_choice_correct_numeric
+
+            # Add the difference and wrong in choice from previous, where 1 is a different and wrong choice and 0 is the rest
+            previous_diff_choice_wrong_numeric = np.where(
+                df_mouse_session['previous_first_choice'].isna() | df_mouse_session['previous_correct'].isna(),
+                None,
+                (((df_mouse_session['previous_first_choice'] == 'left') & (df_mouse_session['first_choice'] == 'right') & (df_mouse_session['previous_correct'] == False)) 
+                | ((df_mouse_session['previous_first_choice'] == 'right') & (df_mouse_session['first_choice'] == 'left') & (df_mouse_session['previous_correct'] == False))
+                ).astype(int)
+            )
+            df_copy.loc[df_mouse_session.index, 'previous_diff_choice_wrong_numeric'] = previous_diff_choice_wrong_numeric
+
+            # Add the same choice as previous, where 1 is the same choice and 0 is a different choice
+            previous_same_choice_numeric = np.where(
+                df_mouse_session['previous_first_choice'].isna() | df_mouse_session['first_choice'].isna(),
+                None,
+                (((df_mouse_session['previous_first_choice'] == 'left') & (df_mouse_session['first_choice'] == 'left')) 
+                | ((df_mouse_session['previous_first_choice'] == 'right') & (df_mouse_session['first_choice'] == 'right'))
+                ).astype(int)
+            )
+            df_copy.loc[df_mouse_session.index, 'previous_same_choice_numeric'] = previous_same_choice_numeric
+
+    return df_copy
+
 def parameters_for_fit(df):
     """
     Get the parameters for the fit
     """
-    df_new_for_fit = df.copy(deep=False)
-    df_new_for_fit = add_mouse_first_choice(df_new_for_fit)
-    df_new_for_fit = add_mouse_last_choice(df_new_for_fit)
-    df_new_for_fit = add_port_where_animal_comes_from(df_new_for_fit)
+    df_copy = df.copy(deep=False)
+    df_copy = add_mouse_first_choice(df_copy)
+    df_copy = add_mouse_last_choice(df_copy)
+    df_copy = add_port_where_animal_comes_from(df_copy)
     if df['stimulus_modality'].unique() == 'visual':
-        df_new_for_fit = get_performance_by_difficulty_ratio(df_new_for_fit)
-        df_new_for_fit = get_performance_by_difficulty_diff(df_new_for_fit)
-        df_new_for_fit['abs_visual_stimulus_ratio'] = df_new_for_fit['visual_stimulus_ratio'].abs()
-        df_new_for_fit['visual_ratio_diff_interact'] = df_new_for_fit['abs_visual_stimulus_ratio'] * (df_new_for_fit['visual_stimulus_diff'].abs())
-        df_new_for_fit['left_bright'] = df_new_for_fit.apply(
+        df_copy = get_performance_by_difficulty_ratio(df_copy)
+        df_copy = get_performance_by_difficulty_diff(df_copy)
+        df_copy['abs_visual_stimulus_ratio'] = df_copy['visual_stimulus_ratio'].abs()
+        df_copy['visual_ratio_diff_interact'] = df_copy['abs_visual_stimulus_ratio'] * (df_copy['visual_stimulus_diff'].abs())
+        df_copy['left_bright'] = df_copy.apply(
             lambda row: ast.literal_eval(row['visual_stimulus'])[0] if row['correct_side'] == 'left' else ast.literal_eval(row['visual_stimulus'])[1],
             axis=1
         )
-        df_new_for_fit['visual_ratio_bright_interact'] = df_new_for_fit['abs_visual_stimulus_ratio'] * df_new_for_fit['left_bright']
-        df_new_for_fit['wrong_bright'] = df_new_for_fit['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
-        df_new_for_fit['wrong_bright_zscore'] = df_new_for_fit.groupby('abs_visual_stimulus_ratio')['wrong_bright'].transform(lambda x: (x - x.mean()) / x.std())
+        df_copy['visual_ratio_bright_interact'] = df_copy['abs_visual_stimulus_ratio'] * df_copy['left_bright']
+        df_copy['wrong_bright'] = df_copy['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
     elif df['stimulus_modality'].unique() == 'auditory':
         df = add_auditory_real_statistics(df)
-    df_new_for_fit['previous_port_before_stimulus_numeric'] = df_new_for_fit['previous_port_before_stimulus'].apply(
+
+    df_copy['previous_port_before_stimulus_numeric'] = df_copy['previous_port_before_stimulus'].apply(
                 lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
                 )
-    df_new_for_fit['roa_choice_numeric'] = df_new_for_fit['roa_choice'].apply(
+    df_copy['roa_choice_numeric'] = df_copy['roa_choice'].apply(
                 lambda x: 1 if x == 'repeat' else 0 if x == 'alternate' else np.nan
                 )
-    df_new_for_fit['last_choice_numeric'] = df_new_for_fit['last_choice'].apply(
+    df_copy['last_choice_numeric'] = df_copy['last_choice'].apply(
                 lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
                 )
 
     # Add the correct column as numeric, 1 for correct, 0 for incorrect
-    df_new_for_fit['correct_numeric'] = df_new_for_fit['correct'].astype(int)
+    df_copy['correct_numeric'] = df_copy['correct'].astype(int)
 
+    # Add the past trials impact by time kernel
     
-    for mouse in df_new_for_fit['subject'].unique():
-        for session in df_new_for_fit[df_new_for_fit.subject == mouse]['session'].unique():
-            df_mouse_session = df_new_for_fit[np.logical_and(df_new_for_fit['subject'] == mouse, df_new_for_fit['session'] == session)]
-            df_mouse_session['correct_side_in_previous'] = df_mouse_session['correct_side'].shift(1, fill_value=np.nan)
-            df_mouse_session['correct_in_previous'] = df_mouse_session['correct'].shift(1, fill_value=np.nan)
-            df_mouse_session['left_choice_in_previous'] = df_mouse_session['left_choice'].shift(1, fill_value=np.nan)
 
-            # Add the previous choice is left as 1, or 0, remain NaN
-            df_new_for_fit.loc[df_mouse_session.index, 'previous_choice_left'] = df_mouse_session['left_choice_in_previous']
+    df_copy = get_choice_before(df_copy)
 
-            # Add the previous choice is correct as 1, or 0, remain NaN
-            df_new_for_fit.loc[df_mouse_session.index, 'previous_correct'] = df_mouse_session['correct_in_previous']
+    df_copy['previous_first_choice_numeric'] = df_copy['previous_first_choice'].apply(
+                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                )
+    df_copy['previous_last_choice_numeric'] = df_copy['previous_last_choice'].apply(
+                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                )
+    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(
+                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                )
+    df_copy['previous_correct_numeric'] = df_copy['previous_correct'].astype('Int64')
 
-            # Add the previous choice is left and correct as 1, or 0, remain NaN
-            previous_choice_left_correct = np.where(
-                df_mouse_session['left_choice_in_previous'].isna() | df_mouse_session['correct_in_previous'].isna(),
-                None,
-                ((df_mouse_session['left_choice_in_previous'] == 1) & (df_mouse_session['correct_in_previous'] == True)).astype(int)
-            )
-            df_new_for_fit.loc[df_mouse_session.index, 'previous_choice_left_correct'] = previous_choice_left_correct
+    return df_copy
 
-            # Add the previous choice is right and wrong as 1, or 0, remain NaN
-            previous_choice_right_wrong = np.where(
-                df_mouse_session['left_choice_in_previous'].isna() | df_mouse_session['correct_in_previous'].isna(),
-                None,
-                ((df_mouse_session['left_choice_in_previous'] == 0) & (df_mouse_session['correct_in_previous'] == False)).astype(int)
-            )
-            df_new_for_fit.loc[df_mouse_session.index, 'previous_choice_right_wrong'] = previous_choice_right_wrong
-
-
-            # Add the same and correct in choice from previous, where 1 is a same and correct choice and 0 is the rest
-            same_choice_correctPre = np.where(
-                df_mouse_session['left_choice_in_previous'].isna() | df_mouse_session['correct_in_previous'].isna(),
-                None,
-                (((df_mouse_session['left_choice_in_previous'] == 1) & (df_mouse_session['left_choice'] == 1) & (df_mouse_session['correct_in_previous'] == True)) 
-                | ((df_mouse_session['left_choice_in_previous'] == 0) & (df_mouse_session['left_choice'] == 0) & (df_mouse_session['correct_in_previous'] == True))
-                ).astype(int)
-            )
-            df_new_for_fit.loc[df_mouse_session.index, 'same_choice_correctPre'] = same_choice_correctPre
-
-            # Add the difference and wrong in choice from previous, where 1 is a different and wrong choice and 0 is the rest
-            diff_choice_wrongPre = np.where(
-                df_mouse_session['left_choice_in_previous'].isna() | df_mouse_session['correct_in_previous'].isna(),
-                None,
-                (((df_mouse_session['left_choice_in_previous'] == 1) & (df_mouse_session['left_choice'] == 0) & (df_mouse_session['correct_in_previous'] == False)) 
-                | ((df_mouse_session['left_choice_in_previous'] == 0) & (df_mouse_session['left_choice'] == 1) & (df_mouse_session['correct_in_previous'] == False))
-                ).astype(int)
-            )
-            df_new_for_fit.loc[df_mouse_session.index, 'diff_choice_wrongPre'] = diff_choice_wrongPre
-
-            # Add the same choice as previous, where 1 is the same choice and 0 is a different choice
-            same_choice_previous = np.where(
-                df_mouse_session['left_choice_in_previous'].isna() | df_mouse_session['left_choice'].isna(),
-                None,
-                (((df_mouse_session['left_choice_in_previous'] == 1) & (df_mouse_session['left_choice'] == 1)) 
-                | ((df_mouse_session['left_choice_in_previous'] == 0) & (df_mouse_session['left_choice'] == 0))
-                ).astype(int)
-            )
-            df_new_for_fit.loc[df_mouse_session.index, 'same_choice_previous'] = same_choice_previous
-
-            # Add the different choice as previous: same choice correct, same choice wrong, different choice correct, different choice wrong
-            ## Define conditions for the 4 groups
-            conditions = [
-                ((df_mouse_session['left_choice_in_previous'] == 1) & (df_mouse_session['left_choice'] == 1) & (df_mouse_session['correct_in_previous'] == True)) | ((df_mouse_session['correct_side_in_previous'] == 0) & (df_mouse_session['left_choice'] == 0) & (df_mouse_session['correct_in_previous'] == True)),
-                ((df_mouse_session['left_choice_in_previous'] == 1) & (df_mouse_session['left_choice'] == 1) & (df_mouse_session['correct_in_previous'] == False)) | ((df_mouse_session['correct_side_in_previous'] == 0) & (df_mouse_session['left_choice'] == 0) & (df_mouse_session['correct_in_previous'] == False)),
-                ((df_mouse_session['left_choice_in_previous'] == 1) & (df_mouse_session['left_choice'] == 0) & (df_mouse_session['correct_in_previous'] == True)) | ((df_mouse_session['correct_side_in_previous'] == 0) & (df_mouse_session['left_choice'] == 1) & (df_mouse_session['correct_in_previous'] == True)),
-                ((df_mouse_session['left_choice_in_previous'] == 1) & (df_mouse_session['left_choice'] == 0) & (df_mouse_session['correct_in_previous'] == False)) | ((df_mouse_session['correct_side_in_previous'] == 0) & (df_mouse_session['left_choice'] == 1) & (df_mouse_session['correct_in_previous'] == False)),
-            ]
-            values = [2, -2, 1, -1] # same choice correct, same choice wrong, different choice correct, different choice wrong
-            ## Assign group values, set to None if any isna
-            previous_choice_same_correct = np.select(
-                condlist=conditions,
-                choicelist=values,
-                default=None
-            )
-            previous_choice_same_correct = np.where(
-                df_mouse_session['left_choice_in_previous'].isna() | df_mouse_session['correct_in_previous'].isna() | df_mouse_session['left_choice'].isna(),
-                None,
-                previous_choice_same_correct
-            )
-            df_new_for_fit.loc[df_mouse_session.index, 'previous_choice_same_correct'] = previous_choice_same_correct
-
-    return df_new_for_fit
+def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
+    df_copy = df.copy(deep=False)
+    if y == 'first_choice_numeric':
+        df_copy = add_mouse_first_choice(df_copy)
+        df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(
+                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                )
+    elif y == 'correct_numeric':
+        df_copy['correct_numeric'] = df_copy['correct'].astype(int)
+    else:
+        raise ValueError("impact should be either 'first_choice_numeric' and 'correct_numeric'")
+    df_copy['time_kernel_impact'] = utils.previous_impact_on_time_kernel(df_copy[y], max_lag=max_lag, tau=tau)
+    
+    return df_copy

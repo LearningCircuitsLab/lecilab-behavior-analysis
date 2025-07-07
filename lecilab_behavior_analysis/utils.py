@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import ast
 from scipy.optimize import minimize
 import statsmodels.api as sm
+import itertools
+from collections import defaultdict
+from sklearn.metrics import r2_score
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
@@ -634,8 +637,7 @@ if __name__ == "__main__":
     print(get_server_projects())
     print(get_animals_in_project("visual_and_COT_data"))
 
-
-def logi_model_fit(df: pd.DataFrame, X, y, method='newton'):
+def logi_model_fit_input(df: pd.DataFrame, X, y, method='newton'):
     column_checker(df, {x for x in X})
     column_checker(df, {y})
 
@@ -643,10 +645,18 @@ def logi_model_fit(df: pd.DataFrame, X, y, method='newton'):
     df_for_fit = df.dropna(subset=X + [y])
     df_for_fit = df_for_fit[X + [y]].astype(float)
 
+    # to make coefficients comparable
+    df_for_fit[X] = df_for_fit[X].apply(lambda x: (x - x.mean()) / x.std())
+
     # Prepare the independent variables
-    X_multi = df_for_fit[X].values
+    X_multi = df_for_fit[X]
     X_multi_const = sm.add_constant(X_multi)
-    y_predict = df_for_fit[y].values
+    y_predict = df_for_fit[y]
+    return X_multi_const, y_predict
+
+
+def logi_model_fit(df: pd.DataFrame, X, y, method='newton'):
+    X_multi_const, y_predict = logi_model_fit_input(df, X, y, method=method)
 
     # Fit the logistic regression model with multiple regressors
     logit_model_multi = sm.Logit(y_predict, X_multi_const).fit(method=method)
@@ -655,3 +665,62 @@ def logi_model_fit(df: pd.DataFrame, X, y, method='newton'):
     results = logit_model_multi.summary(xname= ["intercept"] + X)
     
     return results, logit_model_multi
+
+def hierarchical_partitioning(df, x_cols, y_col, method='newton'):
+    contributions = defaultdict(list)
+    n_vars = len(x_cols)
+
+    for k in range(1, n_vars + 1):
+        for subset in itertools.combinations(x_cols, k): # generate all the combinations of the variables
+            subset = list(subset)
+            # fit model input and generate model 
+            X, y = logi_model_fit_input(df, subset, y_col)
+            model = sm.Logit(y, X).fit(method=method)
+            
+            r2 = r2_score(y, model.predict(X))
+
+            # contribution for each variable in the combinations
+            for var in subset:
+                reduced_subset = subset.copy()
+                reduced_subset.remove(var)
+                X_reduced = X[reduced_subset] if reduced_subset else X['const'] # if no feature after remove only calcalate constant
+                model_reduced = sm.Logit(y, X_reduced).fit(method=method)
+                r2_reduced = r2_score(y, model_reduced.predict(X_reduced))
+                delta = r2 - r2_reduced
+                contributions[var].append(delta)
+    
+    # normalize the contributions
+    avg_contrib = {var: np.mean(contrib) for var, contrib in contributions.items()}
+    total = sum(avg_contrib.values())
+    norm_contrib = {var: val / total for var, val in avg_contrib.items()}
+    return pd.Series(norm_contrib).sort_values(ascending=False)
+
+def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
+    kernel = np.exp(np.arange(1, max_lag+1) / tau)
+    padded = np.concatenate([[0]*len(kernel), series])
+    # time kernel convolve
+    return np.array([
+        np.dot(kernel, padded[i:i+len(kernel)])
+        for i in range(len(series))
+    ])
+
+def verify_params_time_kernel(dic:dict, X:list, y:str):
+    combinations = list(itertools.product(range(1, 10), range(1, 30)))
+    comb_dict = {}
+    # iterate all the combinations of max_lag and tau of time kernel
+    for comb in combinations:
+        max_lag = comb[0]
+        tau = comb[1]
+        previous_impact_on_kernel_mice = []
+        for df_name, df in zip(dic.keys(), dic.values()):
+            df['first_choice_numeric'] = df['first_choice'].apply(
+                        lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                        )
+            for session in df['session'].unique():
+                df_session = df[df['session'] == session]
+                df_session['previous_impact_on_kernel'] = previous_impact_on_time_kernel(df_session['first_choice_numeric'], max_lag=max_lag, tau=tau)
+                df.loc[df_session.index, 'previous_impact_on_kernel'] = df_session['previous_impact_on_kernel']
+            _, model = logi_model_fit(df, X=X, y=y)
+            previous_impact_on_kernel_mice.append(model.pvalues['previous_impact_on_kernel'])
+        comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
+    return comb_dict
