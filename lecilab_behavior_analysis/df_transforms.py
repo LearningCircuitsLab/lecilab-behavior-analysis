@@ -814,3 +814,18 @@ def parameters_for_fit(df):
     df_copy['previous_correct_numeric'] = df_copy['previous_correct'].astype('Int64')
 
     return df_copy
+
+def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
+    df_copy = df.copy(deep=False)
+    if y == 'first_choice_numeric':
+        df_copy = add_mouse_first_choice(df_copy)
+        df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(
+                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                )
+    elif y == 'correct_numeric':
+        df_copy['correct_numeric'] = df_copy['correct'].astype(int)
+    else:
+        raise ValueError("impact should be either 'first_choice_numeric' and 'correct_numeric'")
+    df_copy['time_kernel_impact'] = utils.previous_impact_on_time_kernel(df_copy[y], max_lag=max_lag, tau=tau)
+    
+    return df_copy

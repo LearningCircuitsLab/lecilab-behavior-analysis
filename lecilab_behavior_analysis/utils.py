@@ -679,7 +679,7 @@ def hierarchical_partitioning(df, x_cols, y_col, method='newton'):
             
             r2 = r2_score(y, model.predict(X))
 
-            # 对于组合中的每个变量，记录其对 R² 的贡献
+            # contribution for each variable in the combinations
             for var in subset:
                 reduced_subset = subset.copy()
                 reduced_subset.remove(var)
@@ -689,7 +689,7 @@ def hierarchical_partitioning(df, x_cols, y_col, method='newton'):
                 delta = r2 - r2_reduced
                 contributions[var].append(delta)
     
-    # 计算平均贡献并归一化
+    # normalize the contributions
     avg_contrib = {var: np.mean(contrib) for var, contrib in contributions.items()}
     total = sum(avg_contrib.values())
     norm_contrib = {var: val / total for var, val in avg_contrib.items()}
@@ -703,3 +703,24 @@ def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
         np.dot(kernel, padded[i:i+len(kernel)])
         for i in range(len(series))
     ])
+
+def verify_params_time_kernel(dic:dict, X:list, y:str):
+    combinations = list(itertools.product(range(1, 10), range(1, 30)))
+    comb_dict = {}
+    # iterate all the combinations of max_lag and tau of time kernel
+    for comb in combinations:
+        max_lag = comb[0]
+        tau = comb[1]
+        previous_impact_on_kernel_mice = []
+        for df_name, df in zip(dic.keys(), dic.values()):
+            df['first_choice_numeric'] = df['first_choice'].apply(
+                        lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                        )
+            for session in df['session'].unique():
+                df_session = df[df['session'] == session]
+                df_session['previous_impact_on_kernel'] = previous_impact_on_time_kernel(df_session['first_choice_numeric'], max_lag=max_lag, tau=tau)
+                df.loc[df_session.index, 'previous_impact_on_kernel'] = df_session['previous_impact_on_kernel']
+            _, model = logi_model_fit(df, X=X, y=y)
+            previous_impact_on_kernel_mice.append(model.pvalues['previous_impact_on_kernel'])
+        comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
+    return comb_dict
