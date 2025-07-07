@@ -696,7 +696,7 @@ def get_reaction_times_by_date_df(df_in: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_choice_before(df):
-    df_copy = df.copy(deep=False)
+    df_copy = df.copy(deep=True)
     utils.column_checker(df_copy, required_columns={"first_choice", "last_choice", "previous_port_before_stimulus", "correct"})
 
     for mouse in df_copy['subject'].unique():
@@ -766,7 +766,7 @@ def parameters_for_fit(df):
     """
     Get the parameters for the fit
     """
-    df_copy = df.copy(deep=False)
+    df_copy = df.copy(deep=True)
     df_copy = add_mouse_first_choice(df_copy)
     df_copy = add_mouse_last_choice(df_copy)
     df_copy = add_port_where_animal_comes_from(df_copy)
@@ -816,7 +816,7 @@ def parameters_for_fit(df):
     return df_copy
 
 def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
-    df_copy = df.copy(deep=False)
+    df_copy = df.copy(deep=True)
     if y == 'first_choice_numeric':
         df_copy = add_mouse_first_choice(df_copy)
         df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(

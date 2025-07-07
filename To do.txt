@@ -22,8 +22,8 @@ It might improve with a better prompt, but it looks like a good plan for now. �
 and port where the animal comes from. Explore first the correlations of these regressors.
 For example, in correct trials, the three of them should be the same.√
 
-- Psychometric for auditory. Test using log value of the evidence strength.
-Reduce a bit the number of bins to make it less noisy in the middle. Explore other
+- Psychometric for auditory. Test using log value of the evidence strength.√(The values are under 1, so their values will be changed after log)
+Reduce a bit the number of bins to make it less noisy in the middle.√ Explore other
 properties of the cloud of tones, and the impact they have on decisions. For instance,
 several tones can sound simultaneously in the same timebin. One question is:
 are mice affected more by the total number of tones, or by the total number of timebins
