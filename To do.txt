@@ -20,7 +20,7 @@ It might improve with a better prompt, but it looks like a good plan for now. âˆ
 
 - A few regressors to explore: previous correct answer, previous choice of the animal,
 and port where the animal comes from. Explore first the correlations of these regressors.
-For example, in correct trials, the three of them should be the same.
+For example, in correct trials, the three of them should be the same.âˆš
 
 - Psychometric for auditory. Test using log value of the evidence strength.
 Reduce a bit the number of bins to make it less noisy in the middle. Explore other
