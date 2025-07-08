@@ -706,7 +706,7 @@ def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
     ])
 
 def verify_params_time_kernel(dic:dict, y:str):
-    combinations = list(itertools.product(range(1,20), range(1, 11)))
+    combinations = list(itertools.product(range(1,20), range(1, 20)))
     comb_dict = {}
     # iterate all the combinations of max_lag and tau of time kernel
     for comb in combinations:
@@ -744,7 +744,8 @@ def filter_variables_for_model(dic:dict, X:list, y:str, max_lag=None, tau=None):
         corr_fit_X_df = df_for_fit[X].corr().values
         corr_mat_list.append(corr_fit_X_df)
 
-        norm_contribution = hierarchical_partitioning(df_for_fit, x_cols = X, y_col = y)
+        norm_contribution = hierarchical_partitioning(df_for_fit, x_cols = X, y_col = y, method='bfgs')
         norm_contribution_df[df_name] = norm_contribution
 
     return corr_mat_list, norm_contribution_df
+

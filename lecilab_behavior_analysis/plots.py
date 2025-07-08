@@ -343,7 +343,7 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     df_copy = df.copy(deep=True)
     if valueType == 'discrete':
         df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
-        ax.set_xlabel('log_' + x)
+        ax.set_xlabel("log_"+x)
     else:
         # bin the continuous values when valueType is not discrete
         bins = pd.cut(df_copy[x], bins = 6)

@@ -694,6 +694,13 @@ def get_reaction_times_by_date_df(df_in: pd.DataFrame) -> pd.DataFrame:
 #     summary_matrix_df = summary_matrix(df)
 #     print(summary_matrix_df)
 
+def get_left_auditory_stim(df: pd.DataFrame, param: str) -> pd.DataFrame:
+    pbd_df = df.copy()
+    pbd_df[param+'_left'] = pbd_df.apply(
+        lambda row: row[param + '_high'] if row['correct_side'] == 'left' else row[param + '_low'],
+        axis=1
+    )
+    return pbd_df
 
 def get_choice_before(df):
     df_copy = df.copy(deep=True)
@@ -782,7 +789,16 @@ def parameters_for_fit(df):
         df_copy['visual_ratio_bright_interact'] = df_copy['abs_visual_stimulus_ratio'] * df_copy['left_bright']
         df_copy['wrong_bright'] = df_copy['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
     elif df['stimulus_modality'].unique() == 'auditory':
-        df = add_auditory_real_statistics(df)
+        df_copy = add_auditory_real_statistics(df_copy)
+        df_copy = get_left_auditory_stim(df_copy, 'total_percentage_of_tones')
+        df_copy = get_left_auditory_stim(df_copy, 'number_of_tones')
+        df_copy = get_left_auditory_stim(df_copy, 'percentage_of_timebins_with_evidence')
+        df_copy['high_tones'] = df_copy['auditory_stimulus'].apply(lambda row: eval(row)['high_tones'])
+        df_copy['high_tones_amplitude_sum'] = df_copy['high_tones'].apply(lambda row: np.sum(pd.DataFrame(row).values))
+        df_copy['low_tones'] = df_copy['auditory_stimulus'].apply(lambda row: eval(row)['low_tones'])
+        df_copy['low_tones_amplitude_sum'] = df_copy['low_tones'].apply(lambda row: np.sum(pd.DataFrame(row).values))
+        df_copy['amplitude_strength'] = ((df_copy['high_tones_amplitude_sum']/df_copy['number_of_tones_high']) / (df_copy['low_tones_amplitude_sum']/df_copy['number_of_tones_low']))
+
 
     df_copy['previous_port_before_stimulus_numeric'] = df_copy['previous_port_before_stimulus'].apply(
                 lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
@@ -829,3 +845,4 @@ def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
     df_copy['time_kernel_impact'] = utils.previous_impact_on_time_kernel(df_copy[y], max_lag=max_lag, tau=tau)
     
     return df_copy
+
