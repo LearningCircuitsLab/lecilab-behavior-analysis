@@ -781,7 +781,7 @@ def parameters_for_fit(df):
         df_copy = get_performance_by_difficulty_ratio(df_copy)
         df_copy = get_performance_by_difficulty_diff(df_copy)
         df_copy['abs_visual_stimulus_ratio'] = df_copy['visual_stimulus_ratio'].abs()
-        df_copy['visual_ratio_diff_interact'] = df_copy['abs_visual_stimulus_ratio'] * (df_copy['visual_stimulus_diff'].abs())
+        df_copy['visual_ratio_diff_interact'] = df_copy['visual_stimulus_ratio'] * (df_copy['visual_stimulus_diff'].abs())
         df_copy['left_bright'] = df_copy.apply(
             lambda row: ast.literal_eval(row['visual_stimulus'])[0] if row['correct_side'] == 'left' else ast.literal_eval(row['visual_stimulus'])[1],
             axis=1
