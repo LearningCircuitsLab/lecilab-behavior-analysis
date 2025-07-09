@@ -174,6 +174,7 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
 
+
 def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
     df['number_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['number_of_tones'])
     df['number_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['number_of_tones'])
@@ -185,9 +186,15 @@ def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
+    # TODO for Nuo:
+    # - this needs to work for the case that the df has both visual and auditory modalities
+    # - the name of the function is confusing as there is no performance being calculated
+    # - proposal: run a function for every row (apply) that calculates the evidence value based on the modality.
+    # each trial should have an evidence value independent on which modality it has. Then the plotting function
+    # can always use that.
+    # - this function is also adding the leftward choices, which is not the best place to do it. This should
+    # be done outside this function, and we should call both functions when we want to plot the performance by difficulty
     if df["stimulus_modality"].unique() == 'visual':
-        stim_col = "visual_stimulus"
-        ratio_col = "visual_stimulus_ratio"
         df["visual_stimulus_ratio"] = df["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
         # df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
         df["visual_stimulus_ratio"] = df.apply(
@@ -198,8 +205,7 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
         df = add_auditory_real_statistics(df)
     else:
         raise ValueError("modality must be either 'visual' or 'auditory'")
-    df = add_mouse_first_choice(df)
-    df['first_choice_numeric'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    df = get_left_choice(df)
 
     return df
 

@@ -8,6 +8,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+import plotly.graph_objects as go
 
 import lecilab_behavior_analysis.utils as utils
 from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
@@ -938,3 +939,36 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
     if "ylog" in kwargs and kwargs["ylog"]:
         ax_to_use.set_yscale("log")
     return ax
+
+
+def plot_table_from_df(df: pd.DataFrame, **kwargs) -> go.Figure:
+    # Create table
+    fig = go.Figure(data=[go.Table(
+        columnwidth=[80] + [60]*len(df.columns),  # Adjust column widths
+        header=dict(
+            values=[f"<b>{col.replace('_', '<br>')}</b>" for col in df.columns],
+            align='center',
+            font=dict(size=14),
+            height=40,
+            line_color='darkslategray',
+            fill_color='lightgray'
+        ),
+        cells=dict(
+            values=[df[col].tolist() for col in df.columns],
+            align='center',
+            font=dict(size=12),
+            height=35,
+            line_color='darkslategray',
+            fill_color='white'
+        )
+    )])
+
+    # Update layout
+    if "title" in kwargs:
+        fig.update_layout(title_text=kwargs["title"], title_x=0.5)
+    fig.update_layout(
+        margin=dict(l=10, r=10, t=50, b=10),
+        height=30 * len(df),  # Dynamically adjust height based on number of rows
+    )
+
+    return fig

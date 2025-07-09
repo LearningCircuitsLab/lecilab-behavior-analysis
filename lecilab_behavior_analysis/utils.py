@@ -352,37 +352,37 @@ def get_animals_in_project(project_name: str) -> List[str]:
     return folders
 
 
-def rsync_session_data(
+def rsync_cluster_data(
     project_name: str,
-    animal: str,
+    file_path: str,
     credentials: dict,
     local_path: str,
 ) -> bool:
     """
     This method syncs the session data from the server to the local machine.
     """
-    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions/{animal}/{animal}.csv"
+    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/{file_path}"
     rsync_command = f"rsync -avz {remote_path} {local_path}"
     result = subprocess.run(rsync_command, shell=True)
     if result.returncode != 0:
-        print(f"Error syncing data for {animal}: {result.stderr.decode('utf-8')}")
+        print(f"Error syncing data for {file_path}: {result.stderr.decode('utf-8')}")
     return result.returncode == 0
 
 
-def rsync_sessions_summary(
-    project_name: str,
-    credentials: dict,
-    local_path: str,
-) -> bool:
-    """
-    This method syncs the session data from the server to the local machine.
-    """
-    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions_summary.csv"
-    rsync_command = f"rsync -avz {remote_path} {local_path}"
-    result = subprocess.run(rsync_command, shell=True)
-    if result.returncode != 0:
-        print(f"Error syncing session summary data for {project_name}: {result.stderr.decode('utf-8')}")
-    return result.returncode == 0
+# def rsync_sessions_summary(
+#     project_name: str,
+#     credentials: dict,
+#     local_path: str,
+# ) -> bool:
+#     """
+#     This method syncs the session data from the server to the local machine.
+#     """
+#     remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions_summary.csv"
+#     rsync_command = f"rsync -avz {remote_path} {local_path}"
+#     result = subprocess.run(rsync_command, shell=True)
+#     if result.returncode != 0:
+#         print(f"Error syncing session summary data for {project_name}: {result.stderr.decode('utf-8')}")
+#     return result.returncode == 0
 
 
 def list_to_colors(ids: np.array, cmap: str) -> Tuple[List[tuple], Dict]:
@@ -718,6 +718,39 @@ def verify_params_time_kernel(dic:dict, X:list, y:str):
         comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
     return comb_dict
 
+
+def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hours: int = 24):
+    events["date"] = pd.to_datetime(events["date"])
+    sessions_summary["date"] = pd.to_datetime(sessions_summary["date"])
+
+    # get the highest date in the events and sessions_summary dataframes
+    max_date = max(events["date"].max(), sessions_summary["date"].max())
+    time_hours_ago = pd.Timestamp.now() - pd.Timedelta(hours=hours)
+
+    detections = events[
+        (events["description"] == "Subject detected")
+        & (events["date"] >= time_hours_ago)
+    ]
+    sessions = events[
+        (events["type"] == "START") & (events["date"] >= time_hours_ago)
+    ]
+    sessions_summary = sessions_summary[sessions_summary["date"] >= time_hours_ago]
+
+    subject_detections = detections.groupby("subject").size().to_dict()
+    subject_sessions = sessions.groupby("subject").size().to_dict()
+    subject_water = sessions_summary.groupby("subject")["water"].sum().to_dict()
+    subject_weight = sessions_summary.groupby("subject")["weight"].mean().to_dict()
+
+    # generate a dataframe
+    report_df = pd.DataFrame({
+        "Subject": subject_detections.keys(),
+        "Detections": subject_detections.values(),
+        "Sessions": subject_sessions.values(),
+        "Water Consumed (μl)": [subject_water.get(subj, 0) for subj in subject_detections.keys()],
+        "Average Weight (g)": [subject_weight.get(subj, np.nan) for subj in subject_detections.keys()]
+    })
+
+    return report_df, max_date
 
 if __name__ == "__main__":
     # Example usage
