@@ -174,42 +174,44 @@ def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
-    if df["stimulus_modality"].unique() == 'visual':
+    df_copy = df.copy(deep=True) 
+    if df_copy["stimulus_modality"].unique() == 'visual':
         stim_col = "visual_stimulus"
         ratio_col = "visual_stimulus_ratio"
-        df["visual_stimulus_ratio"] = df["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
+        df_copy["visual_stimulus_ratio"] = df_copy["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
         # df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
-        df["visual_stimulus_ratio"] = df.apply(
+        df_copy["visual_stimulus_ratio"] = df_copy.apply(
             lambda row: row["visual_stimulus_ratio"] if row['correct_side'] == 'left' else -row["visual_stimulus_ratio"],
             axis=1
         )
-    elif df["stimulus_modality"].unique() == "auditory":
-        df = add_auditory_real_statistics(df)
+    elif df_copy["stimulus_modality"].unique() == "auditory":
+        df_copy = add_auditory_real_statistics(df_copy)
     else:
         raise ValueError("modality must be either 'visual' or 'auditory'")
-    df = add_mouse_first_choice(df)
-    df['first_choice_numeric'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    df_copy = add_mouse_first_choice(df_copy)
+    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
 
-    return df
+    return df_copy
 
 
 def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
-    if df["current_training_stage"].str.contains("visual").any():
+    df_copy = df.copy(deep=True) 
+    if df_copy["current_training_stage"].str.contains("visual").any():
         stim_col = "visual_stimulus"
         diff_col = "visual_stimulus_diff"
-    elif df["current_training_stage"].str.contains("auditory").any():
+    elif df_copy["current_training_stage"].str.contains("auditory").any():
         stim_col = "auditory_stimulus"
         diff_col = "auditory_stimulus_diff"
     else:
         raise ValueError("modality must be one of 'visual' or 'auditory'")
 
-    df[diff_col] = df[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
-    df[diff_col] = df.apply(
+    df_copy[diff_col] = df_copy[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
+    df_copy[diff_col] = df_copy.apply(
         lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
         axis=1
     )
-    df['first_choice_numeric'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
-    return df
+    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df_copy
 
 
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
@@ -695,7 +697,7 @@ def get_reaction_times_by_date_df(df_in: pd.DataFrame) -> pd.DataFrame:
 #     print(summary_matrix_df)
 
 def get_left_auditory_stim(df: pd.DataFrame, param: str) -> pd.DataFrame:
-    pbd_df = df.copy()
+    pbd_df = df.copy(deep=True)
     pbd_df[param+'_left'] = pbd_df.apply(
         lambda row: row[param + '_high'] if row['correct_side'] == 'left' else row[param + '_low'],
         axis=1

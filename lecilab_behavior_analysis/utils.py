@@ -732,11 +732,10 @@ def verify_params_time_kernel(dic:dict, y:str):
         comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
     return comb_dict
 
-def filter_variables_for_model(dic:dict, X:list, y:str, max_lag=None, tau=None):
+def filter_variables_for_model(dic_fit:dict, X:list, y:str, max_lag=None, tau=None):
     corr_mat_list = []
     norm_contribution_df = pd.DataFrame([])
-    for df_name, df in zip(dic.keys(), dic.values()):
-        df_for_fit = dft.parameters_for_fit(df)
+    for df_name, df_for_fit in zip(dic_fit.keys(), dic_fit.values()):
         if (max_lag is not None) & (tau is not None):
             df_for_fit = dft.get_time_kernel_impact(df_for_fit, y=y, max_lag=max_lag, tau=tau)
         

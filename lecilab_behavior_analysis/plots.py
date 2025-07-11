@@ -349,7 +349,7 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
         bins = pd.cut(df_copy[x], bins = 6)
         labels = df_copy[x].groupby(bins).mean()
         df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = 6, labels = labels).astype(float)
-        # df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"])).round(4))
+        df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
         ax.set_xlabel(x)
     sns.pointplot(
         x=x + "_fit",
