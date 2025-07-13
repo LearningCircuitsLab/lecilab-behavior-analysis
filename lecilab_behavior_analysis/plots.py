@@ -962,7 +962,7 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
 
 def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.DataFrame, **kwargs) -> plt.Axes:
     fig, ax = plt.subplots(2, 1, figsize=(10, 10))
-    X = norm_contribution_df.index
+    X = corr_mat_list[0].index
     corr_mat_mean = np.mean(np.stack(corr_mat_list), axis=0)
     # # Create a mask for the upper triangle
     # mask = np.triu(np.ones_like(corr_mat_mean, dtype=bool), k=1)

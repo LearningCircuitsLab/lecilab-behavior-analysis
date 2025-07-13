@@ -694,7 +694,7 @@ def hierarchical_partitioning(df, x_cols, y_col, method='newton'):
     avg_contrib = {var: np.mean(contrib) for var, contrib in contributions.items()}
     total = sum(avg_contrib.values())
     norm_contrib = {var: val / total for var, val in avg_contrib.items()}
-    return pd.Series(norm_contrib).sort_values(ascending=False)
+    return pd.Series(norm_contrib)
 
 def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
     kernel = np.exp(-np.arange(max_lag+1, 1, -1) / tau)
@@ -739,7 +739,7 @@ def filter_variables_for_model(dic_fit:dict, X:list, y:str, max_lag=None, tau=No
         if (max_lag is not None) & (tau is not None):
             df_for_fit = dft.get_time_kernel_impact(df_for_fit, y=y, max_lag=max_lag, tau=tau)
         
-        corr_fit_X_df = df_for_fit[X].corr().values
+        corr_fit_X_df = df_for_fit[X].corr()
         corr_mat_list.append(corr_fit_X_df)
 
         norm_contribution = hierarchical_partitioning(df_for_fit, x_cols = X, y_col = y, method='bfgs')
