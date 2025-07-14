@@ -350,7 +350,7 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
         labels = df_copy[x].groupby(bins).mean()
         df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = 6, labels = labels).astype(float)
         df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
-        ax.set_xlabel(x)
+        ax.set_xlabel("log_"+x + "*10")
     sns.pointplot(
         x=x + "_fit",
         y=y,
@@ -362,7 +362,7 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
     p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
-    ax.set_ylabel(y)
+    ax.set_ylabel("Leftward Choices")
     ax.set_ylim(0, 1)
     ax.legend()
     return ax
