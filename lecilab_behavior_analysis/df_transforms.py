@@ -86,6 +86,7 @@ def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
     """
     df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
     # Get side port pokes before the stimulus state
+    # TODO: I am mixing here choices and pokes... really bad
     df["last_choice_before_stimulus"] = df.apply(utils.get_last_poke_before_stimulus_state, axis=1)
     # Get the last port in each trial
     if "last_choice" not in df.columns:

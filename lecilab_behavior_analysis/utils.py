@@ -10,6 +10,7 @@ import statsmodels.api as sm
 import itertools
 from collections import defaultdict
 from sklearn.metrics import r2_score
+import os
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
@@ -751,6 +752,36 @@ def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hou
     })
 
     return report_df, max_date
+
+
+def load_all_events(project_name: str) -> pd.DataFrame:
+    """
+    Load all events from the local machine for a given project.
+    """
+    outpath = get_outpath()
+    events_path = f"{outpath}/{project_name}/events.csv"
+    if not os.path.exists(events_path):
+        raise FileNotFoundError(f"Events file for project {project_name} does not exist.")
+    
+    events_df = pd.read_csv(events_path, sep=";")
+
+    # read events in old_events if they exist
+    events_dfs_list = []
+    old_events_path = f"{outpath}/{project_name}/old_events"
+    # list files in the old_events folder
+    if os.path.exists(old_events_path):
+        old_events_files = [f for f in os.listdir(old_events_path) if f.endswith('.csv')]
+        # sort files by name to ensure they are in the correct order
+        old_events_files.sort()
+        # read each file and concatenate to events_df
+        for old_file in old_events_files:
+            old_file_path = os.path.join(old_events_path, old_file)
+            old_events_df = pd.read_csv(old_file_path, sep=";")
+            events_dfs_list.append(old_events_df)
+    events_df = pd.concat(events_dfs_list + [events_df], ignore_index=True)
+    return events_df
+    
+
 
 if __name__ == "__main__":
     # Example usage

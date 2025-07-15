@@ -125,7 +125,7 @@ def performance_vs_trials_plot(
         for sc in kwargs["session_changes"][1:]:
             tt = df.loc[sc]["total_trial"]
             ax.axvline(tt, linestyle="--", color="gray")
-    ax.set_xlim(left=0)
+    # ax.set_xlim(left=0)
     if "ylim" in kwargs:
         ax.set_ylim(kwargs["ylim"])
     ax.set_xlabel("Trial number")
@@ -280,7 +280,7 @@ def repeat_or_alternate_performance_plot(
     ax.axhline(50, linestyle="--", color="gray")
     ax.spines[["top", "right"]].set_visible(False)
     # x axis always starts at 0
-    ax.set_xlim(left=0)
+    # ax.set_xlim(left=0)
     if "ylim" in kwargs:
         ax.set_ylim(kwargs["ylim"])
     # put the legend at the top in one row
