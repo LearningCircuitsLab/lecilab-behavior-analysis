@@ -342,8 +342,14 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     column_checker(df, required_columns={x, y})
     df_copy = df.copy(deep=True)
     if valueType == 'discrete':
-        df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
-        ax.set_xlabel("log_"+x)
+        if 0 in df_copy[x].unique():
+            # if there are 0s in the data, we need to add a small value to avoid log(0)
+            df_copy[x + "_fit"] = df_copy[x]
+            df_copy[x + "_fit"].replace(0, 0.0001, inplace=True)
+            ax.set_xlabel(x)
+        else:
+            df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
+            ax.set_xlabel("log_"+x)
     else:
         # bin the continuous values when valueType is not discrete
         bins = pd.cut(df_copy[x], bins = 6)
@@ -362,7 +368,10 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
     p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
-    ax.set_ylabel("Leftward Choices")
+    if y == "first_choice_numeric":
+        ax.set_ylabel("P(Leftward Choices)")
+    elif y == "correct_choice_numeric":
+        ax.set_ylabel("P(Correct Choices)")
     ax.set_ylim(0, 1)
     ax.legend()
     return ax
