@@ -324,26 +324,27 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     column_checker(df, required_columns={x, y})
     df_copy = df.copy(deep=True)
     if valueType == 'discrete':
-        df_copy[x] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
-        ax.set_xlabel('log_' + x)
+        df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
+        ax.set_xlabel("log_"+x)
     else:
         # bin the continuous values when valueType is not discrete
-        df_copy[x + "_binned"] = pd.cut(df_copy[x], bins = 6, labels=False)
-        x = x + "_binned"
-        ax.set_xlabel(x)
+        bins = pd.cut(df_copy[x], bins = 6)
+        labels = df_copy[x].groupby(bins).mean()
+        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = 6, labels = labels).astype(float)
+        df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
+        ax.set_xlabel("log_"+x + "*10")
     sns.pointplot(
-        x=x,
+        x=x + "_fit",
         y=y,
         data=df_copy,
         estimator=lambda x: np.mean(x),
         ax=ax,
         **point_kwargs
     )
-
-    xs = np.linspace(df_copy[x].min(), df_copy[x].max(), 100).reshape(-1, 1)
-    p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x], df_copy[y])
+    xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
+    p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
-    ax.set_ylabel(y)
+    ax.set_ylabel("Leftward Choices")
     # ax.set_ylim(0, 1)
     ax.legend()
     return ax
@@ -972,3 +973,20 @@ def plot_table_from_df(df: pd.DataFrame, **kwargs) -> go.Figure:
     )
 
     return fig
+
+
+def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.DataFrame, **kwargs) -> plt.Axes:
+    fig, ax = plt.subplots(2, 1, figsize=(10, 10))
+    X = corr_mat_list[0].index
+    corr_mat_mean = np.mean(np.stack(corr_mat_list), axis=0)
+    # # Create a mask for the upper triangle
+    # mask = np.triu(np.ones_like(corr_mat_mean, dtype=bool), k=1)
+    sns.heatmap(corr_mat_mean, ax=ax[0], cmap='coolwarm', annot=True, fmt=".2f")
+    ax[0].set_xticklabels(X, rotation=16, ha="right", rotation_mode="anchor")
+    ax[0].set_yticklabels(X, rotation=8, ha="right", rotation_mode="anchor")
+    ax[0].set_title("Mean Correlation Matrix")
+
+    norm_contribution_df.mean(axis=1).sort_values().plot(kind='barh', ax=ax[1])
+    ax[1].set_xlabel('Mean Contribution')
+    plt.tight_layout()
+    plt.show()

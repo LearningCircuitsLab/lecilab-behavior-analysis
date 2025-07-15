@@ -11,6 +11,7 @@ import itertools
 from collections import defaultdict
 from sklearn.metrics import r2_score
 import os
+import lecilab_behavior_analysis.df_transforms as dft
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
@@ -687,19 +688,18 @@ def hierarchical_partitioning(df, x_cols, y_col, method='newton'):
     avg_contrib = {var: np.mean(contrib) for var, contrib in contributions.items()}
     total = sum(avg_contrib.values())
     norm_contrib = {var: val / total for var, val in avg_contrib.items()}
-    return pd.Series(norm_contrib).sort_values(ascending=False)
+    return pd.Series(norm_contrib)
 
 def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
-    kernel = np.exp(np.arange(1, max_lag+1) / tau)
-    padded = np.concatenate([[0]*len(kernel), series])
-    # time kernel convolve
+    kernel = np.exp(-np.arange(max_lag+1, 1, -1) / tau)
+    padded = np.concatenate([[0]*max_lag, series])
     return np.array([
-        np.dot(kernel, padded[i:i+len(kernel)])
-        for i in range(len(series))
+        np.dot(kernel, padded[i - max_lag:i])
+        for i in range(max_lag, len(padded))
     ])
 
-def verify_params_time_kernel(dic:dict, X:list, y:str):
-    combinations = list(itertools.product(range(1, 10), range(1, 30)))
+def verify_params_time_kernel(dic:dict, y:str):
+    combinations = list(itertools.product(range(1,20), range(1, 20)))
     comb_dict = {}
     # iterate all the combinations of max_lag and tau of time kernel
     for comb in combinations:
@@ -707,15 +707,22 @@ def verify_params_time_kernel(dic:dict, X:list, y:str):
         tau = comb[1]
         previous_impact_on_kernel_mice = []
         for df_name, df in zip(dic.keys(), dic.values()):
-            df['first_choice_numeric'] = df['first_choice'].apply(
+            if y == 'first_choice_numeric':
+                # df = dft.add_mouse_first_choice(df)
+                df['first_choice_numeric'] = df['first_choice'].apply(
                         lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
                         )
+            elif y == 'correct_numeric':
+                df['correct_numeric'] = df['correct'].astype(int)
+            else:
+                raise ValueError("impact should be either 'first_choice_numeric' or 'correct_numeric'")
+            
             for session in df['session'].unique():
                 df_session = df[df['session'] == session]
-                df_session['previous_impact_on_kernel'] = previous_impact_on_time_kernel(df_session['first_choice_numeric'], max_lag=max_lag, tau=tau)
+                df_session['previous_impact_on_kernel'] = previous_impact_on_time_kernel(df_session[y], max_lag=max_lag, tau=tau)
                 df.loc[df_session.index, 'previous_impact_on_kernel'] = df_session['previous_impact_on_kernel']
-            _, model = logi_model_fit(df, X=X, y=y)
-            previous_impact_on_kernel_mice.append(model.pvalues['previous_impact_on_kernel'])
+            _, model = logi_model_fit(df, X=['previous_impact_on_kernel'], y=y)
+            previous_impact_on_kernel_mice.append(abs(model.params['previous_impact_on_kernel']))
         comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
     return comb_dict
 
@@ -787,3 +794,19 @@ if __name__ == "__main__":
     # Example usage
     print(get_server_projects())
     print(get_animals_in_project("visual_and_COT_data"))
+
+def filter_variables_for_model(dic_fit:dict, X:list, y:str, max_lag=None, tau=None):
+    corr_mat_list = []
+    norm_contribution_df = pd.DataFrame([])
+    for df_name, df_for_fit in zip(dic_fit.keys(), dic_fit.values()):
+        if (max_lag is not None) & (tau is not None):
+            df_for_fit = dft.get_time_kernel_impact(df_for_fit, y=y, max_lag=max_lag, tau=tau)
+        
+        corr_fit_X_df = df_for_fit[X].corr()
+        corr_mat_list.append(corr_fit_X_df)
+
+        norm_contribution = hierarchical_partitioning(df_for_fit, x_cols = X, y_col = y, method='bfgs')
+        norm_contribution_df[df_name] = norm_contribution
+
+    return corr_mat_list, norm_contribution_df
+

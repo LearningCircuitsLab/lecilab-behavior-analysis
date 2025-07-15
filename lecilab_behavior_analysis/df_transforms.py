@@ -187,47 +187,43 @@ def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
-    # TODO for Nuo:
-    # - this needs to work for the case that the df has both visual and auditory modalities
-    # - the name of the function is confusing as there is no performance being calculated
-    # - proposal: run a function for every row (apply) that calculates the evidence value based on the modality.
-    # each trial should have an evidence value independent on which modality it has. Then the plotting function
-    # can always use that.
-    # - this function is also adding the leftward choices, which is not the best place to do it. This should
-    # be done outside this function, and we should call both functions when we want to plot the performance by difficulty
-    if df["stimulus_modality"].unique() == 'visual':
-        df["visual_stimulus_ratio"] = df["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
+    df_copy = df.copy(deep=True) 
+    if df_copy["stimulus_modality"].unique() == 'visual':
+        stim_col = "visual_stimulus"
+        ratio_col = "visual_stimulus_ratio"
+        df_copy["visual_stimulus_ratio"] = df_copy["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
         # df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
-        df["visual_stimulus_ratio"] = df.apply(
+        df_copy["visual_stimulus_ratio"] = df_copy.apply(
             lambda row: row["visual_stimulus_ratio"] if row['correct_side'] == 'left' else -row["visual_stimulus_ratio"],
             axis=1
         )
-    elif df["stimulus_modality"].unique() == "auditory":
-        df = add_auditory_real_statistics(df)
+    elif df_copy["stimulus_modality"].unique() == "auditory":
+        df_copy = add_auditory_real_statistics(df_copy)
     else:
         raise ValueError("modality must be either 'visual' or 'auditory'")
     df = get_left_choice(df)
 
-    return df
+    return df_copy
 
 
 def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
-    if df["current_training_stage"].str.contains("visual").any():
+    df_copy = df.copy(deep=True) 
+    if df_copy["current_training_stage"].str.contains("visual").any():
         stim_col = "visual_stimulus"
         diff_col = "visual_stimulus_diff"
-    elif df["current_training_stage"].str.contains("auditory").any():
+    elif df_copy["current_training_stage"].str.contains("auditory").any():
         stim_col = "auditory_stimulus"
         diff_col = "auditory_stimulus_diff"
     else:
         raise ValueError("modality must be one of 'visual' or 'auditory'")
 
-    df[diff_col] = df[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
-    df[diff_col] = df.apply(
+    df_copy[diff_col] = df_copy[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
+    df_copy[diff_col] = df_copy.apply(
         lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
         axis=1
     )
-    df['first_choice_numeric'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
-    return df
+    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df_copy
 
 
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
@@ -712,9 +708,16 @@ def get_reaction_times_by_date_df(df_in: pd.DataFrame) -> pd.DataFrame:
 #     summary_matrix_df = summary_matrix(df)
 #     print(summary_matrix_df)
 
+def get_left_auditory_stim(df: pd.DataFrame, param: str) -> pd.DataFrame:
+    pbd_df = df.copy(deep=True)
+    pbd_df[param+'_left'] = pbd_df.apply(
+        lambda row: row[param + '_high'] if row['correct_side'] == 'left' else row[param + '_low'],
+        axis=1
+    )
+    return pbd_df
 
 def get_choice_before(df):
-    df_copy = df.copy(deep=False)
+    df_copy = df.copy(deep=True)
     utils.column_checker(df_copy, required_columns={"first_choice", "last_choice", "previous_port_before_stimulus", "correct"})
 
     for mouse in df_copy['subject'].unique():
@@ -784,7 +787,7 @@ def parameters_for_fit(df):
     """
     Get the parameters for the fit
     """
-    df_copy = df.copy(deep=False)
+    df_copy = df.copy(deep=True)
     df_copy = add_mouse_first_choice(df_copy)
     df_copy = add_mouse_last_choice(df_copy)
     df_copy = add_port_where_animal_comes_from(df_copy)
@@ -792,7 +795,7 @@ def parameters_for_fit(df):
         df_copy = get_performance_by_difficulty_ratio(df_copy)
         df_copy = get_performance_by_difficulty_diff(df_copy)
         df_copy['abs_visual_stimulus_ratio'] = df_copy['visual_stimulus_ratio'].abs()
-        df_copy['visual_ratio_diff_interact'] = df_copy['abs_visual_stimulus_ratio'] * (df_copy['visual_stimulus_diff'].abs())
+        df_copy['visual_ratio_diff_interact'] = df_copy['visual_stimulus_ratio'] * (df_copy['visual_stimulus_diff'].abs())
         df_copy['left_bright'] = df_copy.apply(
             lambda row: ast.literal_eval(row['visual_stimulus'])[0] if row['correct_side'] == 'left' else ast.literal_eval(row['visual_stimulus'])[1],
             axis=1
@@ -800,7 +803,16 @@ def parameters_for_fit(df):
         df_copy['visual_ratio_bright_interact'] = df_copy['abs_visual_stimulus_ratio'] * df_copy['left_bright']
         df_copy['wrong_bright'] = df_copy['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
     elif df['stimulus_modality'].unique() == 'auditory':
-        df = add_auditory_real_statistics(df)
+        df_copy = add_auditory_real_statistics(df_copy)
+        df_copy = get_left_auditory_stim(df_copy, 'total_percentage_of_tones')
+        df_copy = get_left_auditory_stim(df_copy, 'number_of_tones')
+        df_copy = get_left_auditory_stim(df_copy, 'percentage_of_timebins_with_evidence')
+        df_copy['high_tones'] = df_copy['auditory_stimulus'].apply(lambda row: eval(row)['high_tones'])
+        df_copy['high_tones_amplitude_sum'] = df_copy['high_tones'].apply(lambda row: np.sum(pd.DataFrame(row).values))
+        df_copy['low_tones'] = df_copy['auditory_stimulus'].apply(lambda row: eval(row)['low_tones'])
+        df_copy['low_tones_amplitude_sum'] = df_copy['low_tones'].apply(lambda row: np.sum(pd.DataFrame(row).values))
+        df_copy['amplitude_strength'] = ((df_copy['high_tones_amplitude_sum']/df_copy['number_of_tones_high']) / (df_copy['low_tones_amplitude_sum']/df_copy['number_of_tones_low']))
+
 
     df_copy['previous_port_before_stimulus_numeric'] = df_copy['previous_port_before_stimulus'].apply(
                 lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
@@ -834,7 +846,7 @@ def parameters_for_fit(df):
     return df_copy
 
 def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
-    df_copy = df.copy(deep=False)
+    df_copy = df.copy(deep=True)
     if y == 'first_choice_numeric':
         df_copy = add_mouse_first_choice(df_copy)
         df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(
@@ -847,3 +859,4 @@ def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
     df_copy['time_kernel_impact'] = utils.previous_impact_on_time_kernel(df_copy[y], max_lag=max_lag, tau=tau)
     
     return df_copy
+

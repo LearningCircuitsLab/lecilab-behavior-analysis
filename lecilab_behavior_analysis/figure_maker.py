@@ -247,47 +247,33 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     for mod in ['visual', 'auditory']:
         ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
         if mod in df['stimulus_modality'].unique():
-            stage_name = "TwoAFC_" + mod + "_hard"
-            if stage_name in df["current_training_stage"].unique():
-                df_mod_hard = df[df["current_training_stage"] == stage_name]
-                psych_df = dft.get_performance_by_difficulty_ratio(df_mod_hard)
-                if mod == 'visual':
-                    plots.psychometric_plot(psych_df, x = 'visual_stimulus_ratio', y = 'left_choice', ax = ax_name)
-                elif mod == 'auditory':
-                    plots.psychometric_plot(psych_df, x = 'total_evidence_strength', y = 'left_choice', ax = ax_name, valueType='continue')
-                ax_name.set_title(mod + " psychometric plot", fontsize=10)
-            else:
-                ax_name.text(0.1, 0.5, "No hard trials in " + mod, fontsize=10, color='k')
+            df_mod = df[df["stimulus_modality"] == mod]
+            psych_df = dft.get_performance_by_difficulty_ratio(df_mod)
+            if mod == 'visual':
+                plots.psychometric_plot(psych_df, x = 'visual_stimulus_ratio', y = 'first_choice_numeric', ax = ax_name)
+            elif mod == 'auditory':
+                plots.psychometric_plot(psych_df, x = 'total_evidence_strength', y = 'first_choice_numeric', ax = ax_name, valueType='continue')
+            ax_name.set_title(mod + " psychometric plot", fontsize=10)
         else:
             ax_name.text(0.1, 0.5, "No trials in " + mod, fontsize=10, color='k')
 
-    # modalities = [
-    #     {
-    #         "name": "visual",
-    #         "stage": "TwoAFC_visual_hard",
-    #         "ax": visual_psych_by_difficulty_ratio_ax,
-    #     },
-    #     {
-    #         "name": "auditory",
-    #         "stage": "TwoAFC_auditory_hard",
-    #         "ax": auditory_psych_by_difficulty_ratio_ax,
-    #     },
-    # ]
 
-    # for mod in modalities:
-    #     df_mod = df[df["current_training_stage"].str.contains(mod["name"], na=False)]
-    #     if not df_mod.empty:
-    #         if mod["stage"] in df_mod["current_training_stage"].unique():
-    #             df_mod_hard = df_mod[df_mod["current_training_stage"] == mod["stage"]]
+    # for mod in ['visual', 'auditory']:
+    #     ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
+    #     if mod in df['stimulus_modality'].unique():
+    #         df_mod = df[df["stimulus_modality"] == mod]
+    #         if 'hard' in df_mod["difficulty"].unique():
+    #             df_mod_hard = df_mod[df_mod["difficulty"] == 'hard']
     #             psych_df = dft.get_performance_by_difficulty_ratio(df_mod_hard)
-    #             plots.psychometric_plot(psych_df, x = mod["name"] + '_stimulus_ratio', y = 'left_choice', ax = mod["ax"])
-    #             mod["ax"].set_title(mod["name"] + " psychometric plot", fontsize=10)
+    #             if mod == 'visual':
+    #                 plots.psychometric_plot(psych_df, x = 'visual_stimulus_ratio', y = 'first_choice_numeric', ax = ax_name)
+    #             elif mod == 'auditory':
+    #                 plots.psychometric_plot(psych_df, x = 'total_evidence_strength', y = 'first_choice_numeric', ax = ax_name, valueType='continue')
+    #             ax_name.set_title(mod + " psychometric plot", fontsize=10)
     #         else:
-    #             mod["ax"].text(0.1, 0.5, "No hard trials in " + mod["name"], fontsize=10, color='k')
+    #              ax_name.text(0.1, 0.5, "No hard trials in " + mod, fontsize=10, color='k')
     #     else:
-    #         mod["ax"].text(0.1, 0.5, "No trials in " + mod["name"], fontsize=10, color='k')
-
-
+    #         ax_name.text(0.1, 0.5, "No trials in " + mod, fontsize=10, color='k')
 
     df["port2_holds"] = df.apply(lambda row: utils.get_trial_port_hold(row, 2), axis=1)
     p2hn_ax = plots.plot_number_of_pokes_histogram(df, port_number=2, ax=p2hn_ax)

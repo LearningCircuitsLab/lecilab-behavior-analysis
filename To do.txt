@@ -5,8 +5,8 @@ Reiterate print design. Goal: having two printed pieces to hold the mirrors
 
 - Psychometric curves: focus on the visual stimulus ratio for now, and look not only
 at the lapses but also at the other coefficients (bias and slope), and how they differ
-between animals and evolve with time. Compare the visual with the auditory (the auditory
-is more stable, but for now there is less data).√
+between animals and evolve with time.√ Compare the visual with the auditory (the auditory
+is more stable, but for now there is less data).
 
 - Use a the logarithm value on the x axis for better fits √
 
@@ -20,10 +20,10 @@ It might improve with a better prompt, but it looks like a good plan for now. �
 
 - A few regressors to explore: previous correct answer, previous choice of the animal,
 and port where the animal comes from. Explore first the correlations of these regressors.
-For example, in correct trials, the three of them should be the same.
+For example, in correct trials, the three of them should be the same.√
 
-- Psychometric for auditory. Test using log value of the evidence strength.
-Reduce a bit the number of bins to make it less noisy in the middle. Explore other
+- Psychometric for auditory. Test using log value of the evidence strength.√(The values are under 1, so their values will be changed after log)
+Reduce a bit the number of bins to make it less noisy in the middle.√ Explore other
 properties of the cloud of tones, and the impact they have on decisions. For instance,
 several tones can sound simultaneously in the same timebin. One question is:
 are mice affected more by the total number of tones, or by the total number of timebins
