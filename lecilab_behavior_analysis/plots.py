@@ -180,7 +180,7 @@ def summary_text_plot(
     if ax is None:
         ax = plt.gca()
     if kind == "session":
-        text = get_text_from_subset_df(df)
+        text = get_text_from_subset_df(df, reduced=True)
     elif kind == "subject":
         text = get_text_from_subject_df(df)
     else:
@@ -293,8 +293,10 @@ def repeat_or_alternate_performance_plot(
 
 
 def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
-                                   point_kwargs=None,
-                                   line_kwargs=None, valueType = 'discrete') -> plt.Axes:
+                                   point_kwargs = None,
+                                   line_kwargs = None,
+                                   valueType = 'discrete',
+                                   bins = 6) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     
@@ -325,14 +327,15 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     df_copy = df.copy(deep=True)
     if valueType == 'discrete':
         df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
-        ax.set_xlabel("log_"+x)
+        ax.set_xlabel("log_" + x)
     else:
         # bin the continuous values when valueType is not discrete
-        bins = pd.cut(df_copy[x], bins = 6)
-        labels = df_copy[x].groupby(bins).mean()
-        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = 6, labels = labels).astype(float)
-        df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
-        ax.set_xlabel("log_"+x + "*10")
+        bin_groups = pd.cut(df_copy[x], bins = bins)
+        labels = df_copy[x].groupby(bin_groups).mean()
+        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = bins, labels = labels).astype(float)
+        # df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
+        # ax.set_xlabel("log_" + x + "*10")
+        ax.set_xlabel(x + " (binned)")
     sns.pointplot(
         x=x + "_fit",
         y=y,
@@ -345,12 +348,9 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
     ax.set_ylabel("Leftward Choices")
-    # ax.set_ylim(0, 1)
+    ax.set_ylim(0, 1)
     ax.legend()
     return ax
-
-
-
 
 
 def summary_matrix_plot(

@@ -144,7 +144,7 @@ def column_checker(df: pd.DataFrame, required_columns: set):
         )
 
 
-def get_text_from_subset_df(df: pd.DataFrame) -> str:
+def get_text_from_subset_df(df: pd.DataFrame, reduced: bool = False) -> str:
     # make sure that there is only one subject in the dataframe
     if df.subject.nunique() != 1:
         raise ValueError("The dataframe contains more than one subject.")
@@ -164,6 +164,11 @@ def get_text_from_subset_df(df: pd.DataFrame) -> str:
     water = df.water.sum()
     # get the subject
     mouse_name = df.subject.unique()[0]
+
+    if reduced:
+        if len(session) > 3:
+            session = f"{session[0]}-...-{session[-1]}"
+            date = f"{date[0]}-...-{date[-1]}"
 
     # write the text
     text = f"""\
@@ -748,6 +753,16 @@ def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hou
     subject_sessions = sessions.groupby("subject").size().to_dict()
     subject_water = sessions_summary.groupby("subject")["water"].sum().to_dict()
     subject_weight = sessions_summary.groupby("subject")["weight"].mean().to_dict()
+
+    # select only subjects that have detections
+    subjects = set(subject_detections.keys())
+    # sort it
+    subjects = sorted(subjects)
+    subject_detections = {subj: subject_detections.get(subj, 0) for subj in subjects}
+    subject_sessions = {subj: subject_sessions.get(subj, 0) for subj in subjects}
+    subject_water = {subj: subject_water.get(subj, 0) for subj in subjects}
+    subject_weight = {subj: subject_weight.get(subj, np.nan) for subj in subjects}
+
 
     # generate a dataframe
     report_df = pd.DataFrame({

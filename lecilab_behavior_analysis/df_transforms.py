@@ -201,7 +201,8 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
         df_copy = add_auditory_real_statistics(df_copy)
     else:
         raise ValueError("modality must be either 'visual' or 'auditory'")
-    df = get_left_choice(df)
+    df_copy = add_mouse_first_choice(df_copy)
+    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
 
     return df_copy
 

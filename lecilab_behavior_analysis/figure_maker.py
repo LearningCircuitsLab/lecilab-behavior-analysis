@@ -253,7 +253,10 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
                 plots.psychometric_plot(psych_df, x = 'visual_stimulus_ratio', y = 'first_choice_numeric', ax = ax_name)
             elif mod == 'auditory':
                 plots.psychometric_plot(psych_df, x = 'total_evidence_strength', y = 'first_choice_numeric', ax = ax_name, valueType='continue')
+            # set the title of the axis
             ax_name.set_title(mod + " psychometric plot", fontsize=10)
+            # remove legend
+            ax_name.get_legend().remove()
         else:
             ax_name.text(0.1, 0.5, "No trials in " + mod, fontsize=10, color='k')
 
