@@ -1,0 +1,24 @@
+/* Make the body and page container take full width */
+body, .page-columns {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Prevent horizontal scroll on figures */
+figure, img {
+  max-width: 100%;
+  height: auto;
+  overflow: visible !important;
+}
+
+/* Optional: For responsive images that never overflow */
+.quarto-figure {
+  overflow-x: hidden;
+}
+
+/* Optional: Make entire viewport take full height too */
+html, body {
+  height: 100%;
+}

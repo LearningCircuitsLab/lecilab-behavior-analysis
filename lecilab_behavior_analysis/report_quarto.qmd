@@ -1,0 +1,385 @@
+---
+title: "📊 TV01 Report"
+date: today
+format:
+  html:
+    theme: lux
+    toc: true
+    toc-depth: 2
+    page-layout: custom
+    css: styles.css
+    code-tools: false
+    smooth-scroll: true
+    anchor-sections: true
+execute:
+  echo: false
+  warning: false
+  message: false
+  fig-align: center
+jupyter: python3
+---
+::: {.panel-tabset}
+# Overview
+
+```{python}
+import pandas as pd
+import numpy as np
+import lecilab_behavior_analysis.utils as utils
+from pathlib import Path
+import matplotlib.pyplot as plt
+from lecilab_behavior_analysis.figure_maker import subject_progress_figure
+import lecilab_behavior_analysis.df_transforms as dft
+import lecilab_behavior_analysis.plots as plots
+from ydata_profiling import ProfileReport
+import seaborn as sns
+import plotly.express as px
+from lecilab_behavior_analysis.figure_maker import session_summary_figure
+from lecilab_behavior_analysis.df_transforms import add_trial_of_day_column_to_df, add_day_column_to_df
+tv_projects = utils.get_server_projects()
+
+from datetime import date
+today = date.today()
+today_date = today.strftime("%Y-%m-%d")
+
+#tv_projects[1] is out of range, changed to explicit visual_and_COT_data and mouse selection
+animals = ["ACV001","ACV002","ACV003","ACV004","ACV005","ACV006","ACV007","ACV008","ACV009","ACV010"]
+df_list = []
+for mouse in animals:
+    local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+    df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+    df_list.append(dft.get_performance_through_trials(df, window=50))
+df = pd.concat(df_list, ignore_index=True)
+df = dft.analyze_df(df)
+```
+
+```{python}
+fig = px.line(df, x='total_trial', y='performance_w', color='subject')
+plt.close('all')
+fig
+```
+
+Table depicting the number of trials in every training stage for each mice
+```{python}
+df['current_training_stage'] = df['current_training_stage'].replace('not saved', 'Habituation')
+tr_stage_df = df.groupby(['subject', 'current_training_stage']).size().unstack(fill_value=0).reset_index()
+fig, ax = plt.subplots(figsize=(10, 5))
+ax.axis('off')
+table = ax.table(cellText=tr_stage_df.values,
+                 colLabels=tr_stage_df.columns,
+                 loc='center',
+                 cellLoc='center')
+table.auto_set_font_size(False)
+table.set_fontsize(8)
+table.scale(1, 1.5)
+plt.tight_layout()
+
+```
+
+Number of trials for each mouse in the last 4 days
+```{python}
+
+
+ndays = 4
+
+df_nt_per = df.groupby(['subject', 'year_month_day']).agg(
+    N=('trial', 'count'),
+    P=('correct', 'mean')
+).reset_index()
+
+df_nt_per['P'] = df_nt_per['P'].apply(lambda x: f"{x:.3f}")
+
+df_nt_per = df_nt_per.pivot(index='subject', columns='year_month_day', values=['N', 'P'])
+
+df_nt_per_last = df_nt_per.loc[:, df_nt_per.columns.get_level_values(1).isin(df_nt_per.columns.levels[1][-ndays:])]
+
+df_nt_per_last.reset_index(inplace=True)
+
+fig, ax = plt.subplots(figsize=(15, 5))
+ax.axis('off')
+
+df_nt_per_last.columns = df_nt_per_last.columns.map(lambda x: f"{x[0]}_{x[1]}" if x[1] else x[0])
+table = ax.table(cellText=df_nt_per_last.values,
+                 colLabels=df_nt_per_last.columns,
+                 loc='center',
+                 cellLoc='center',
+                 )
+table.auto_set_font_size(False)
+table.set_fontsize(12)
+plt.tight_layout()
+plt.show()
+
+```
+
+Behavioral Box occupancy and training times heatmap
+```{python}
+
+
+occupancy_df = dft.get_start_and_end_of_sessions_df(df)
+daily_percentages = dft.get_daily_occupancy_percentages(occupancy_df)
+occupancy_heatmap = dft.get_occupancy_heatmap(occupancy_df, window_size=30)
+fig, axs = plt.subplots(1, 2, figsize=(9, 4), gridspec_kw={'width_ratios': [3, 2]})
+plots.plot_percentage_of_occupancy_per_day(daily_percentages, ax=axs[0])
+fig.delaxes(axs[1])
+axs[1] = fig.add_subplot(1, 2, 2, projection='polar')
+plots.plot_training_times_clock_heatmap(occupancy_heatmap, ax=axs[1])
+plt.tight_layout()
+plt.show()
+
+```
+
+Overall number of trials and performance for the whole training cohort
+```{python}
+
+df_to_plot = df.groupby(['subject', 'year_month_day', 'current_training_stage']).size().reset_index(name='trials')
+df_to_plot_correct = df.groupby(['subject', 'year_month_day', 'current_training_stage'])[['correct', 'miss_trial']].mean().reset_index()
+df_to_plot = df_to_plot.merge(df_to_plot_correct, on=['subject', 'year_month_day', 'current_training_stage'])
+df_to_plot = df_to_plot.sort_values(by=['year_month_day'])
+df_to_plot['current_training_stage'] = df_to_plot['current_training_stage'].replace({
+    'not saved': 'Habituation',
+})
+fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+axs = axs.ravel()
+sns.lineplot(data=df_to_plot, x='year_month_day', y='trials', hue='current_training_stage', ax=axs[0])
+axs[0].set_title('Number of trials per day')
+sns.lineplot(data=df_to_plot, x='year_month_day', y='correct', hue='current_training_stage', ax=axs[1])
+axs[1].set_title('Correct percentage per day')
+for ax in axs:
+    ax.set_xlabel('Date')
+    ax.tick_params(axis='x', rotation=45)
+    ax.set_xticks(ax.get_xticks())
+    ax.set_xticklabels(ax.get_xticklabels(), ha='right')
+for ax in axs[1:]:
+    ax.legend_.remove()
+plt.show()
+
+```
+
+# ACV001
+```{python}
+mouse = "ACV001"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```
+
+# ACV002
+```{python}
+mouse = "ACV002"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except KeyError as e:
+    print(f"Plotting failed due to missing key: {e}. Skipping figure for {date}.")
+```
+
+# ACV003
+```{python}
+mouse = "ACV003"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```
+
+# ACV004
+```{python}
+mouse = "ACV004"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```
+
+# ACV005
+```{python}
+mouse = "ACV005"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```
+
+# ACV006
+```{python}
+mouse = "ACV006"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```
+
+# ACV007
+```{python}
+mouse = "ACV007"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```
+
+# ACV008
+```{python}
+mouse = "ACV008"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```
+
+# ACV009
+```{python}
+mouse = "ACV009"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```
+
+# ACV010
+```{python}
+mouse = "ACV010"
+local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
+df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
+fig1 = subject_progress_figure(df, perf_window=100, summary_matrix_plot=False)
+plt.close('all')
+fig1
+```
+```{python}
+#FAILS
+date = "2025-06-25"
+df_summary = add_day_column_to_df(df)
+df_summary = add_trial_of_day_column_to_df(df_summary)
+sdf = df_summary[df_summary["year_month_day"] == date]
+try:
+    fig = session_summary_figure(sdf, perf_window=50, width=15, height=10)
+    plt.close('all')
+    display(fig)
+except (KeyError, ValueError) as e:
+    plt.close('all')
+    print(f"Skipping session_summary_figure for {date}: {type(e).__name__} - {e}")
+```

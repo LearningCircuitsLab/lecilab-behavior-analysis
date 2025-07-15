@@ -306,6 +306,11 @@ def get_idibaps_cluster_credentials():
             "username": "kudongdong",
             "host": "mini",
         }
+    elif hostname == "lorena-ThinkPad-E550":
+        return {
+            "username": "lecilab",
+            "host": "mini",
+        }
     else:
         raise ValueError("Unknown host")
 
@@ -321,11 +326,9 @@ def get_folders_from_server(credentials: dict, path: str) -> List[str]:
         f"ssh {credentials['username']}@{credentials['host']} "
         f"'ls {path}'"
     )
-    print(ssh_command)
     result = subprocess.run(
         ssh_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    print("B")
     # Decode the output and split it into a list of folder names
     if result.returncode == 0:
         folders = result.stdout.decode("utf-8").strip().split("\n")
