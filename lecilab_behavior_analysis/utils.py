@@ -293,7 +293,8 @@ def get_outpath():
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
         "localhost": "/home/kudongdong/data/LeciLab/behavioral_data",
-        "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data"
+        "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
+        "minibaps": "/archive/training_village",
     }
     return paths.get(hostname, "default/path")
 
