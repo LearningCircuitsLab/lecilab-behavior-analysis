@@ -11,6 +11,8 @@ dependencies = [
   "seaborn",
   "networkx",
   "scikit-learn",
+  "statsmodels",
+  "plotly-calplot",
 ]
 
 license = {text = "BSD-3-Clause"}
