@@ -227,27 +227,6 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     return df_copy
 
 
-def side_and_difficulty_to_numeric(row: pd.Series) -> float:
-    match row.difficulty:
-        case "easy":
-            numval = 3
-        case "medium":
-            numval = 2
-        case "hard":
-            numval = 1
-        case _:
-            numval = 0
-    match row.correct_side:
-        case "left":
-            pass
-        case "right":
-            numval *= -1
-        case _:
-            numval = 0
-    
-    return round(numval / 3, 3)
-
-
 def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
     utils.column_checker(df, required_columns={"session"})
     # Initialize lists to save important data
