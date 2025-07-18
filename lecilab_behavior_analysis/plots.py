@@ -970,8 +970,14 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
 
 
 def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.DataFrame, **kwargs) -> plt.Axes:
+    """ Plot the mean correlation matrix and the mean contribution of each variable.
+    corr_mat_list: list of correlation matrices
+    norm_contribution_df: DataFrame with the normalized contribution of each variable
+    """
     fig, ax = plt.subplots(2, 1, figsize=(10, 10))
-    X = corr_mat_list[0].index
+    # get the variable names from the first correlation matrix
+    X = corr_mat_list[0].index 
+    # Calculate the mean correlation matrix
     corr_mat_mean = np.mean(np.stack(corr_mat_list), axis=0)
     # # Create a mask for the upper triangle
     # mask = np.triu(np.ones_like(corr_mat_mean, dtype=bool), k=1)
@@ -979,7 +985,7 @@ def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.Data
     ax[0].set_xticklabels(X, rotation=16, ha="right", rotation_mode="anchor")
     ax[0].set_yticklabels(X, rotation=8, ha="right", rotation_mode="anchor")
     ax[0].set_title("Mean Correlation Matrix")
-
+    # Plot the mean contribution of each variable
     norm_contribution_df.mean(axis=1).sort_values().plot(kind='barh', ax=ax[1])
     ax[1].set_xlabel('Mean Contribution')
     plt.tight_layout()
