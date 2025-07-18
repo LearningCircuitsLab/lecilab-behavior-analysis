@@ -77,6 +77,10 @@ def trials_by_day_plot(
     handles = [plt.Rectangle((0, 0), 1, 1, color=color) for color in leg_cols]
     ax.legend(handles, labels, bbox_to_anchor=(0.5, 1.25), loc="upper center", ncol=3, borderaxespad=0.0)
     ax.get_legend().get_frame().set_linewidth(0.0)
+    # rotate the x-axis labels and align them to the end
+    ax.tick_params(axis="x", rotation=45, labelsize=7)
+    for label in ax.get_xticklabels():
+        label.set_horizontalalignment("right")
     
     return ax
 
@@ -267,6 +271,10 @@ def repeat_or_alternate_performance_plot(
             "total_trial",
         },
     )
+    if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
+        for sc in kwargs["session_changes"][1:]:
+            tt = df.loc[sc]["total_trial"]
+            ax.axvline(tt, linestyle="--", color="gray")
     sns.lineplot(
         data=df,
         x="total_trial",
@@ -345,11 +353,43 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
         **point_kwargs
     )
     xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
-    p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
+    p_left, _ = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
     ax.set_ylabel("Leftward Choices")
     ax.set_ylim(0, 1)
     ax.legend()
+    # despine
+    ax.spines[["top", "right"]].set_visible(False)
+    return ax
+
+
+def choice_by_difficulty_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    """
+    Plot the performance by difficulty of each trial.
+    """
+    column_checker(df, required_columns={"side_difficulty", "first_choice_numeric"})
+    if ax is None:
+        ax = plt.gca()
+    
+    sns.pointplot(
+        x="side_difficulty",
+        y="first_choice_numeric",
+        data=df,
+        estimator=lambda x: np.mean(x),
+        ax=ax,
+        # remove line
+        linestyles="",
+        # do categorical
+        native_scale= False,
+        **kwargs
+    )
+    ax.set_ylim(0, 1)
+    ax.set_ylabel("Leftward Choices")
+    ax.set_xlabel("Leftward Evidence Level")
+    # despine
+    ax.spines[["top", "right"]].set_visible(False)
+
+
     return ax
 
 
@@ -886,7 +926,7 @@ def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt
                  color="gray",
                  stat="probability",
                  kde=True)
-    ax.set_xlabel(f"Port{port_number} holding time (ms)")
+    ax.set_xlabel(f"Port{port_number} holding time (s)")
     ax.set_ylabel("Frequency")
     # remove the top and right spines
     ax.spines["top"].set_visible(False)
@@ -969,7 +1009,7 @@ def plot_table_from_df(df: pd.DataFrame, **kwargs) -> go.Figure:
         fig.update_layout(title_text=kwargs["title"], title_x=0.5)
     fig.update_layout(
         margin=dict(l=10, r=10, t=50, b=10),
-        height=30 * len(df),  # Dynamically adjust height based on number of rows
+        height=max(250, 30 * len(df)),  # Ensure a minimum height of 100
     )
 
     return fig

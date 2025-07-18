@@ -146,7 +146,7 @@ def column_checker(df: pd.DataFrame, required_columns: set):
 
 def get_text_from_subset_df(df: pd.DataFrame, reduced: bool = False) -> str:
     # make sure that there is only one subject in the dataframe
-    if df.subject.nunique() != 1:
+    if df.subject.nunique() > 1:
         raise ValueError("The dataframe contains more than one subject.")
     # get the session
     session = df.session.unique()
@@ -739,7 +739,7 @@ def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hou
 
     # get the highest date in the events and sessions_summary dataframes
     max_date = max(events["date"].max(), sessions_summary["date"].max())
-    time_hours_ago = pd.Timestamp.now() - pd.Timedelta(hours=hours)
+    time_hours_ago = pd.Timestamp(max_date) - pd.Timedelta(hours=hours)
 
     detections = events[
         (events["description"] == "Subject detected")
@@ -754,6 +754,8 @@ def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hou
     subject_sessions = sessions.groupby("subject").size().to_dict()
     subject_water = sessions_summary.groupby("subject")["water"].sum().to_dict()
     subject_weight = sessions_summary.groupby("subject")["weight"].mean().to_dict()
+    # reduce the weight to two decimal places
+    subject_weight = {k: round(v, 2) if not np.isnan(v) else np.nan for k, v in subject_weight.items()}
 
     # select only subjects that have detections
     subjects = set(subject_detections.keys())
@@ -805,11 +807,26 @@ def load_all_events(project_name: str) -> pd.DataFrame:
     return events_df
     
 
+def side_and_difficulty_to_numeric(row: pd.Series) -> float:
+    match row.difficulty:
+        case "easy":
+            numval = 3
+        case "medium":
+            numval = 2
+        case "hard":
+            numval = 1
+        case _:
+            numval = 0
+    match row.correct_side:
+        case "left":
+            pass
+        case "right":
+            numval *= -1
+        case _:
+            numval = 0
+    
+    return round(numval / 3, 3)
 
-if __name__ == "__main__":
-    # Example usage
-    print(get_server_projects())
-    print(get_animals_in_project("visual_and_COT_data"))
 
 def filter_variables_for_model(dic_fit:dict, X:list, y:str, max_lag=None, tau=None):
     corr_mat_list = []
@@ -906,3 +923,10 @@ def get_session_box_usage(session_df: pd.DataFrame, session_duration_df: pd.Data
         ],
         "accuracy": [accuracy] * 5,
     })
+
+
+
+if __name__ == "__main__":
+    # Example usage
+    print(get_server_projects())
+    print(get_animals_in_project("visual_and_COT_data"))
