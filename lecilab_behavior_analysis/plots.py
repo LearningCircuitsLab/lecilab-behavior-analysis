@@ -1030,3 +1030,27 @@ def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.Data
     ax[1].set_xlabel('Mean Contribution')
     plt.tight_layout()
     plt.show()
+
+
+def plot_trial_time_of_start(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    """
+    Plot the time of start of each trial.
+    """
+    column_checker(df, required_columns={"time_from_start", "trial"})
+    if ax is None:
+        ax = plt.gca()
+    
+    sns.scatterplot(data=df, x="time_from_start", y="trial", ax=ax, s=4)
+
+    if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
+        for sc in kwargs["session_changes"][1:]:
+            tt = df.loc[sc]["time_from_start"]
+            ax.axvline(tt, linestyle="--", color="gray")
+
+    ax.set_ylabel("Trial number")
+    ax.set_xlabel("Trial start time (s)")
+    # remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    
+    return ax

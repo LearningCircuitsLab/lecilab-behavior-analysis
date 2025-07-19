@@ -925,6 +925,11 @@ def get_session_box_usage(session_df: pd.DataFrame, session_duration_df: pd.Data
     })
 
 
+def add_time_from_session_start(df_in: pd.DataFrame) -> pd.DataFrame:
+    # Group by both 'subject' and 'session' to calculate time from session start
+    df_in['time_from_start'] = df_in.groupby(['subject', 'session'])['TRIAL_START'].transform(lambda x: x - x.iloc[0])
+    return df_in
+
 
 if __name__ == "__main__":
     # Example usage

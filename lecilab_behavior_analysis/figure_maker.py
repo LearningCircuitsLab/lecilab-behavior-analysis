@@ -200,7 +200,7 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     auditory_psych_by_difficulty_ratio_ax = fig.add_subplot(mid_gs[0, 2])
     p2hn_ax = fig.add_subplot(mid_gs[0, 3])
     p2ht_ax = fig.add_subplot(mid_gs[0, 4])
-    bias_ax = fig.add_subplot(bot_gs[0, 0])
+    tst_ax = fig.add_subplot(bot_gs[0, 0])
     ax_rt = fig.add_subplot(bot_gs[0, 1])
 
 
@@ -295,14 +295,20 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     p2hn_ax = plots.plot_number_of_pokes_histogram(df, port_number=2, ax=p2hn_ax)
     p2ht_ax = plots.plot_port_holding_time_histogram(df, port_number=2, ax=p2ht_ax)
 
-    # add the bias plot
-    # get the first choice of the mouse
-    df = dft.add_mouse_first_choice(df)
-    # is it repeating or alternating?
-    df["roa_choice"] = dft.get_repeat_or_alternate_series(df.first_choice)
-    # turn bias into a number (-1 for left, 1 for right, 0 for alternating)
-    df['bias'] = df.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
-    bias_ax = plots.bias_vs_trials_plot(df, bias_ax)
+    # TODO: think about the best way to represent the bias
+    # # add the bias plot
+    # # get the first choice of the mouse
+    # df = dft.add_mouse_first_choice(df)
+    # # is it repeating or alternating?
+    # df["roa_choice"] = dft.get_repeat_or_alternate_series(df.first_choice)
+    # # turn bias into a number (-1 for left, 1 for right, 0 for alternating)
+    # df['bias'] = df.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
+    # bias_ax = plots.bias_vs_trials_plot(df, bias_ax)
+
+    # add the speed of doing trials
+    df = utils.add_time_from_session_start(df)
+    sdf = dft.adjust_trials_and_time_of_start_to_first_session(df)
+    tst_ax = plots.plot_trial_time_of_start(sdf, ax=tst_ax, session_changes=session_changes)
 
     df = dft.calculate_time_between_trials_and_reaction_time(df)
     reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
