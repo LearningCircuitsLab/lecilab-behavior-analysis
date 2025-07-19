@@ -171,7 +171,7 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     # melt the dataframe
     pbd_df = pbd_df.melt(id_vars=["difficulty"])
     # assing a numeric value to the side and the difficulty for plotting purposes
-    pbd_df["leftward_evidence"] = pbd_df.apply(side_and_difficulty_to_numeric, axis=1)
+    pbd_df["leftward_evidence"] = pbd_df.apply(utils.side_and_difficulty_to_numeric, axis=1)
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
 
@@ -840,3 +840,36 @@ def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
     
     return df_copy
 
+
+# def add_time_from_session_start(df_in: pd.DataFrame) -> pd.DataFrame:
+#     for subject in df_in['subject'].unique():
+#         subject_df = df_in[df_in['subject'] == subject].copy()
+#         df_session_list = []
+#         for session in subject_df['session'].unique():
+#             df_session = subject_df[subject_df['session'] == session].copy()
+#             session_start_time = df_session['TRIAL_START'].iloc[0]
+#             df_session['time_from_start'] = df_session['TRIAL_START'] - session_start_time
+#             df_session_list.append(df_session)
+#     return pd.concat(df_session_list, ignore_index=True)
+
+
+def adjust_trials_and_time_of_start_to_first_session(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adjusts the 'TRIAL_START' and 'trial' columns to start from the first session.
+    """
+    df = df_in.copy()
+
+    # get the indeces of session changes
+    session_changes = df[df.session != df.session.shift(1)].index[1:]
+    # adjust "trial" and "time_from_start" columns
+    for i in range(len(session_changes)):
+        idx = session_changes[i]
+        past_trial = df.loc[idx - 1, 'trial']
+        past_time_from_start = df.loc[idx - 1, 'time_from_start']
+        if i < len(session_changes) - 1:
+            next_idx = session_changes[i + 1] - 1
+        else:
+            next_idx = df.index[-1]
+        df.loc[idx:next_idx, 'trial'] = df.loc[idx:next_idx, 'trial'] + past_trial
+        df.loc[idx:next_idx, 'time_from_start'] = df.loc[idx:next_idx, 'time_from_start'] + past_time_from_start
+    return df
