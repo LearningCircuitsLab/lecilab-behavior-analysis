@@ -870,16 +870,16 @@ def find_next_end_task_time_in_events(events_df: pd.DataFrame, date: str, subjec
     return end_event['date'].iloc[0], duration
 
 
-def get_session_box_usage(session_df: pd.DataFrame, session_duration_df: pd.DataFrame) -> pd.DataFrame:
+def get_session_box_usage(session_df: pd.DataFrame, session_duration: float) -> pd.DataFrame:
 
     if session_df.date.unique().size != 1:
         raise ValueError("Session dataframe must contain data for a single date.")
 
     #TODO: do the column checker
 
+
     date = session_df.date.unique()[0]
     subject = session_df.subject.unique()[0]
-    session_duration = session_duration_df[session_duration_df['date'] == date].duration.values[0]
     time_to_complete_first_trial = session_df.iloc[0].trial_duration
     start_of_first_trial = session_df.iloc[0].TRIAL_START
     last_trial_completed_time = session_df.iloc[-1].TRIAL_END - start_of_first_trial
