@@ -51,6 +51,8 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     ax_htime = fig.add_subplot(gs3[0, 2])
     # reaction time
     ax_rt = fig.add_subplot(gs4[0, 0])
+    # engagement plot
+    ax_eng = fig.add_subplot(gs4[0, 1])
 
     # summary plot if requested
     if summary_matrix_plot_requested:
@@ -137,12 +139,28 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     df_ch = dft.get_center_hold_df(df)
     ax_htime = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="number_of_pokes", group_trials_by="year_month_day", ax=ax_htime, color='tab:green')
     ax_htime = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="hold_time", group_trials_by="year_month_day", ax=ax_htime, color='tab:red')
+    # remove x label
+    ax_htime.set_xlabel("")
 
     # add the reaction time plot
     rt_df = dft.get_reaction_times_by_date_df(df)
     ax_rt = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="reaction_time", group_trials_by="year_month_day", ax=ax_rt, color='tab:blue', ylog=True)
     ax_rt = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="time_between_trials", group_trials_by="year_month_day", ax=ax_rt, color='tab:orange', ylog=True)
+    ax_rt.set_xlabel("")
 
+    # add the engagement plot. Make sure that events_df is in kwargs
+    if "events_df" not in kwargs:
+        # print the warning in the plot
+        ax_eng.text(0.5, 0.5, "No events_df provided", fontsize=12, color='red', ha='center', va='center')
+    else:
+        events_df = kwargs["events_df"]
+        df = dft.add_trial_duration_column_to_df(df)
+        df = dft.add_engagement_column(df, engagement_sd_criteria=2)
+        sbu_df = dft.get_box_usage_df(df, events_df, print=False)
+        sbu_df = dft.add_day_column_to_df(sbu_df)
+        ax_eng = plots.plot_box_usage_by_date(sbu_df, ax=ax_eng)
+        ax_eng.set_xlabel("")
+    
     # Summary plot
     if summary_matrix_plot_requested:
         summat_df, summat_info = dft.get_training_summary_matrix(df)

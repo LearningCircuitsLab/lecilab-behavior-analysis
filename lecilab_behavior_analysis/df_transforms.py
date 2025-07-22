@@ -873,3 +873,35 @@ def adjust_trials_and_time_of_start_to_first_session(df_in: pd.DataFrame) -> pd.
         df.loc[idx:next_idx, 'trial'] = df.loc[idx:next_idx, 'trial'] + past_trial
         df.loc[idx:next_idx, 'time_from_start'] = df.loc[idx:next_idx, 'time_from_start'] + past_time_from_start
     return df
+
+
+def add_engagement_column(df_in: pd.DataFrame, engagement_sd_criteria: float = 2) -> pd.DataFrame:
+    utils.column_checker(df_in, required_columns={"trial_duration"})
+    # make sure there is only one subject
+    if df_in['subject'].nunique() > 1:
+        raise ValueError("The dataframe should contain only one subject.")
+    # make a copy of the dataframe to avoid modifying the original
+    df = df_in.copy()
+    # get the median and std of the log of the trial_duration
+    df['td_log'] = df['trial_duration'].copy().apply(lambda x: np.log(x))
+    median_td_log = df['td_log'].median()
+    std_td_log = df['td_log'].std()
+
+    # classify trials as engaged or not engaged depending on the td_log
+    df['engaged'] = df['td_log'] < (median_td_log + engagement_sd_criteria * std_td_log)
+
+    return df
+
+
+def get_box_usage_df(df: pd.DataFrame, events_df: pd.DataFrame, print: bool = True) -> pd.DataFrame:
+    gsbu_dfs = []
+    for date in df['date'].unique():
+        df_session = df[df['date'] == date]
+        subject = df_session['subject'].unique()[0]
+        _, session_duration = utils.find_next_end_task_time_in_events(events_df, date, subject)
+        if session_duration is None:
+            if print:
+                print(f"Session duration not found for {subject} on {date}. Skipping this session.")
+            continue
+        gsbu_dfs.append(utils.get_session_box_usage(df_session, session_duration=session_duration))
+    return pd.concat(gsbu_dfs, ignore_index=True)

@@ -1054,3 +1054,27 @@ def plot_trial_time_of_start(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) ->
     ax.spines["right"].set_visible(False)
     
     return ax
+
+
+def plot_box_usage_by_date(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    """
+    Plot the box usage by date.
+    """
+    column_checker(df, required_columns={"year_month_day", "percentage_of_time", "time_type"})
+    if ax is None:
+        ax = plt.gca()
+    
+    hue_order = ['engaged_time', 'disengaged_time', 'time_to_complete_first_trial', 'time_to_exit_box']
+    sns.lineplot(data=df, x='year_month_day', y='percentage_of_time', hue='time_type', ax=ax, hue_order=hue_order)
+    # despine
+    ax.spines[["top", "right"]].set_visible(False)
+    # legend to top in 2 columns
+    ax.legend(loc='upper center', ncol=2, bbox_to_anchor=(0.5, 1.05), frameon=False, fontsize=8)
+    # rotate the x-axis labels and align them to the end
+    for label in ax.get_xticklabels():
+        label.set_rotation(45)
+        label.set_horizontalalignment("right")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Percentage of time (%)")
+    
+    return ax
