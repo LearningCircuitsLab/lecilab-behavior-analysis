@@ -792,3 +792,14 @@ def filter_variables_for_model(dic_fit:dict, X:list, y:str, max_lag=None, tau=No
 
     return corr_mat_list, norm_contribution_df
 
+def get_timebin_evidence(trial):
+    evidence_timebin = np.zeros(len(trial['high_tones']))
+    for t, n in zip(trial['high_tones'], range(len(trial['high_tones']))):
+        for freq in trial['high_tones'][t]:
+            if trial['high_tones'][t][freq] > 0:
+                evidence_timebin[n] += 1
+        for freq in trial['low_tones'][t]:
+            if trial['low_tones'][t][freq] > 0:
+                evidence_timebin[n] -= 1
+    return evidence_timebin
+
