@@ -70,6 +70,10 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     # write the subject name and some info
     ax_name = plots.summary_text_plot(df, kind="subject", ax=ax_name, fontsize=15)
 
+    # if the dataframe is empty, return the figure with the text
+    if df.empty:
+        return fig
+
     # generate the calendar plot
     dates_df = dft.get_dates_df(df)
     cal_image = plots.rasterize_plot(plots.training_calendar_plot(dates_df), dpi=600)
@@ -232,6 +236,9 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     # TODO: Performance by trial with blocks if available
 
     text_ax = plots.summary_text_plot(df, kind="session", ax=text_ax)
+    # if the dataframe is empty, return the figure with the text
+    if df.empty:
+        return fig
     # Add the performance vs trials plot
     window = kwargs.get("perf_window", 50)
     df = dft.get_performance_through_trials(df, window=window)
