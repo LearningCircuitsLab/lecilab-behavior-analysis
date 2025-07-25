@@ -159,7 +159,10 @@ def get_text_from_subset_df(df: pd.DataFrame, reduced: bool = False) -> str:
     # get the number of correct trials
     n_correct = int(df.correct.sum())
     # get the performance
-    performance = n_correct / n_trials * 100
+    try:
+        performance = n_correct / n_trials * 100
+    except ZeroDivisionError:
+        performance = np.nan
     # get the water consumed
     water = df.water.sum()
     # get the subject
