@@ -183,7 +183,10 @@ def summary_text_plot(
     """
     if ax is None:
         ax = plt.gca()
-    if kind == "session":
+    # if the dataframe is empty
+    if df.empty:
+        text = "No data available"
+    elif kind == "session":
         text = get_text_from_subset_df(df, reduced=True)
     elif kind == "subject":
         text = get_text_from_subject_df(df)
