@@ -145,13 +145,17 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     ax_htime = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="hold_time", group_trials_by="year_month_day", ax=ax_htime, color='tab:red')
     # remove x label
     ax_htime.set_xlabel("")
+    # reduce the number of x ticks to a maximum of 16
+    ax_htime.xaxis.set_major_locator(plt.MaxNLocator(16))
 
     # add the reaction time plot
     rt_df = dft.get_reaction_times_by_date_df(df)
     ax_rt = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="reaction_time", group_trials_by="year_month_day", ax=ax_rt, color='tab:blue', ylog=True)
     ax_rt = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="time_between_trials", group_trials_by="year_month_day", ax=ax_rt, color='tab:orange', ylog=True)
     ax_rt.set_xlabel("")
-
+    # reduce the number of x ticks to a maximum of 16
+    ax_rt.xaxis.set_major_locator(plt.MaxNLocator(16))
+    
     # add the engagement plot. Make sure that events_df is in kwargs
     if "events_df" not in kwargs:
         # print the warning in the plot
@@ -164,6 +168,7 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
         sbu_df = dft.add_day_column_to_df(sbu_df)
         ax_eng = plots.plot_box_usage_by_date(sbu_df, ax=ax_eng)
         ax_eng.set_xlabel("")
+        ax_eng.xaxis.set_major_locator(plt.MaxNLocator(16))
     
     # Summary plot
     if summary_matrix_plot_requested:
