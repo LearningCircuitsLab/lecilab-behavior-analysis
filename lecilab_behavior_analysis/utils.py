@@ -935,6 +935,17 @@ def add_time_from_session_start(df_in: pd.DataFrame) -> pd.DataFrame:
     return df_in
 
 
+def get_previous_row_index(df: pd.DataFrame, current_index) -> int:
+    # Get the position of the current index
+    current_pos = df.index.get_loc(current_index)
+    # Ensure it's not the first row
+    if current_pos > 0:
+        # Return the previous index
+        return df.index[current_pos - 1]
+    else:
+        raise IndexError("No previous row exists for the given index.")
+
+
 if __name__ == "__main__":
     # Example usage
     print(get_server_projects())

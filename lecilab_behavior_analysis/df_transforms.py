@@ -864,8 +864,10 @@ def adjust_trials_and_time_of_start_to_first_session(df_in: pd.DataFrame) -> pd.
     # adjust "trial" and "time_from_start" columns
     for i in range(len(session_changes)):
         idx = session_changes[i]
-        past_trial = df.loc[idx - 1, 'trial']
-        past_time_from_start = df.loc[idx - 1, 'time_from_start']
+        # find the index of the previous entry in the df
+        prev_idx = utils.get_previous_row_index(df, idx)
+        past_trial = df.loc[prev_idx, 'trial']
+        past_time_from_start = df.loc[prev_idx, 'time_from_start']
         if i < len(session_changes) - 1:
             next_idx = session_changes[i + 1] - 1
         else:
