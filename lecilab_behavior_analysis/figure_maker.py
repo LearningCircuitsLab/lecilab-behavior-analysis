@@ -160,7 +160,7 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
         events_df = kwargs["events_df"]
         df = dft.add_trial_duration_column_to_df(df)
         df = dft.add_engagement_column(df, engagement_sd_criteria=2)
-        sbu_df = dft.get_box_usage_df(df, events_df, print=False)
+        sbu_df = dft.get_box_usage_df(df, events_df, verbose=False)
         sbu_df = dft.add_day_column_to_df(sbu_df)
         ax_eng = plots.plot_box_usage_by_date(sbu_df, ax=ax_eng)
         ax_eng.set_xlabel("")

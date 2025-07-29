@@ -855,7 +855,8 @@ def find_next_end_task_time_in_events(events_df: pd.DataFrame, date: str, subjec
     filtered_events = events_df[events_df['description'] == "The subject has returned home."]
     
     # get the first event after the given date
-    end_event = filtered_events[filtered_events['date'] > date]
+    dates_in_datetime = pd.to_datetime(filtered_events['date'])
+    end_event = filtered_events[dates_in_datetime > pd.to_datetime(date)]
     # if there are no events after the given date, return None
     if end_event.empty:
         print(f"No end event found after date {date}.")

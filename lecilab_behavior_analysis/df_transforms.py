@@ -893,14 +893,14 @@ def add_engagement_column(df_in: pd.DataFrame, engagement_sd_criteria: float = 2
     return df
 
 
-def get_box_usage_df(df: pd.DataFrame, events_df: pd.DataFrame, print: bool = True) -> pd.DataFrame:
+def get_box_usage_df(df: pd.DataFrame, events_df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
     gsbu_dfs = []
     for date in df['date'].unique():
         df_session = df[df['date'] == date]
         subject = df_session['subject'].unique()[0]
         _, session_duration = utils.find_next_end_task_time_in_events(events_df, date, subject)
         if session_duration is None:
-            if print:
+            if verbose:
                 print(f"Session duration not found for {subject} on {date}. Skipping this session.")
             continue
         gsbu_dfs.append(utils.get_session_box_usage(df_session, session_duration=session_duration))
