@@ -49,7 +49,28 @@ def get_day_number_of_trials(df, day: str) -> int:
 
 def get_start_and_end_times(df):
     """
-    Get the start and end times of the session.
+    Get the start and end times of a behavioral session.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing trial data with columns 'session', 'trial', 
+        'TRIAL_START', and 'TRIAL_END'.
+        
+    Returns
+    -------
+    tuple
+        A tuple containing (start_time, end_time) as pandas datetime objects.
+        
+    Raises
+    ------
+    ValueError
+        If the dataframe contains more than one session.
+        
+    Notes
+    -----
+    The function finds the earliest TRIAL_START and latest TRIAL_END times
+    in the session and converts them from Unix timestamps to datetime objects.
     """
     # ensure that there is only one session in the dataframe
     if df['session'].nunique() != 1:
@@ -66,8 +87,18 @@ def get_start_and_end_times(df):
 
 def get_block_size_truncexp_mean30() -> int:
     """
-    This method returns a block size following a truncated exponential distribution.
-    Optimized to get the mean of the distribution to be 30 using ChatGPT.
+    Generate a block size following a truncated exponential distribution.
+    
+    Returns
+    -------
+    int
+        Block size sampled from truncated exponential distribution with mean=30.
+        
+    Notes
+    -----
+    Uses a truncated exponential distribution with bounds [20, 50] and 
+    optimal lambda=0.0607 to achieve a mean of approximately 30.
+    The distribution parameters were optimized using ChatGPT.
     """
     lower_bound = 20
     upper_bound = 50
@@ -84,13 +115,31 @@ def get_block_size_truncexp_mean30() -> int:
 
 def get_right_bias(side_and_correct_dict: dict) -> float:
     """
-    This method calculates the right bias in the data.
-
-    Args:
-        dictionary with 'side' and 'correct' keys: the side ('left' or 'right') and correct answer (boolean)
-
-    Returns:
-        float: bias to the right side, from -1 to 1
+    Calculate the right-side bias in behavioral choice data.
+    
+    Parameters
+    ----------
+    side_and_correct_dict : dict
+        Dictionary with 'side' and 'correct' keys containing:
+        - 'side': array-like of choice sides ('left' or 'right')
+        - 'correct': array-like of boolean correctness values
+        
+    Returns
+    -------
+    float
+        Bias towards the right side, ranging from -1 to 1.
+        Positive values indicate right bias, negative values indicate left bias.
+        
+    Raises
+    ------
+    ValueError
+        If dictionary doesn't have exactly 'side' and 'correct' keys.
+        
+    Notes
+    -----
+    The bias is calculated based on incorrect choices only. It measures
+    the proportion of wrong choices made to each side, with the bias
+    being left_wrong_proportion - right_wrong_proportion.
     """
     if len(side_and_correct_dict) != 2:
         raise ValueError("Input dict must have exactly two keys")
@@ -116,11 +165,22 @@ def get_right_bias(side_and_correct_dict: dict) -> float:
 
 def get_block_size_uniform_pm30(mean: int) -> int:
     """
-    This method returns a block size following a uniform distribution,
-    calculated as the mean of the distribution +/- 30% of the mean.
-
-    Args:
-        mean (int): Mean of the distribution
+    Generate a block size from a uniform distribution around a mean value.
+    
+    Parameters
+    ----------
+    mean : int
+        The mean value around which to generate the block size.
+        
+    Returns
+    -------
+    int
+        Block size sampled from uniform distribution [mean-30%, mean+30%].
+        
+    Notes
+    -----
+    The block size is drawn from a uniform distribution with bounds
+    calculated as mean ± 30% of the mean value.
     """
     lower_bound = int(mean - 0.3 * mean)
     upper_bound = int(mean + 0.3 * mean)
@@ -131,11 +191,24 @@ def get_block_size_uniform_pm30(mean: int) -> int:
 
 def column_checker(df: pd.DataFrame, required_columns: set):
     """
-    This method checks if the required columns are present in the dataframe.
-
-    Args:
-        df (pd.DataFrame): Dataframe to check
-        required_columns (set): Set of required columns
+    Validate that required columns are present in a DataFrame.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to validate.
+    required_columns : set
+        Set of column names that must be present in the DataFrame.
+        
+    Raises
+    ------
+    ValueError
+        If any required columns are missing from the DataFrame.
+        
+    Notes
+    -----
+    This is a utility function commonly used to validate input DataFrames
+    before processing to ensure all necessary columns are available.
     """
     if not required_columns.issubset(df.columns):
         raise ValueError(
@@ -145,6 +218,33 @@ def column_checker(df: pd.DataFrame, required_columns: set):
 
 
 def get_text_from_subset_df(df: pd.DataFrame, reduced: bool = False) -> str:
+    """
+    Generate a text summary of behavioral session data.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing behavioral data for a single subject.
+        Must contain columns: 'subject', 'session', 'date', 'current_training_stage', 'correct'.
+    reduced : bool, optional
+        If True, generates a reduced summary with fewer details (default: False).
+        
+    Returns
+    -------
+    str
+        Formatted text summary containing session information, performance metrics,
+        and behavioral statistics.
+        
+    Raises
+    ------
+    ValueError
+        If the dataframe contains more than one subject.
+        
+    Notes
+    -----
+    The summary includes session details, trial counts, performance percentages,
+    and additional behavioral metrics depending on the `reduced` parameter.
+    """
     # make sure that there is only one subject in the dataframe
     if df.subject.nunique() != 1:
         raise ValueError("The dataframe contains more than one subject.")

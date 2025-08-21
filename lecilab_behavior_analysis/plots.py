@@ -15,6 +15,24 @@ from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subse
 
 
 def training_calendar_plot(dates_df: pd.DataFrame) -> plt.Figure:
+    """
+    Create a calendar heatmap showing training activity over time.
+    
+    Parameters
+    ----------
+    dates_df : pd.DataFrame
+        DataFrame with date index and 'trial' column containing trial counts.
+        
+    Returns
+    -------
+    plt.Figure
+        Matplotlib figure containing the calendar heatmap.
+        
+    Notes
+    -----
+    Uses the calplot library to generate a calendar visualization where
+    the intensity of each day represents the number of trials performed.
+    """
     # make the calendar plot and convert it to an image
     column_checker(dates_df, required_columns={"trial"})
     cpfig, _ = calplot.calplot(
@@ -25,6 +43,26 @@ def training_calendar_plot(dates_df: pd.DataFrame) -> plt.Figure:
 
 
 def rasterize_plot(plot: plt.Figure, dpi: int = 300) -> np.ndarray:
+    """
+    Convert a matplotlib figure to a rasterized RGB array.
+    
+    Parameters
+    ----------
+    plot : plt.Figure
+        Matplotlib figure to rasterize.
+    dpi : int, default 300
+        Dots per inch for the rasterization.
+        
+    Returns
+    -------
+    np.ndarray
+        RGB array representation of the figure with shape (height, width, 3).
+        
+    Notes
+    -----
+    The function converts the figure to an RGB array by drawing it to a canvas
+    and extracting the pixel data. The original figure is closed after conversion.
+    """
     plot.set_dpi(dpi)
     canvas = FigureCanvasAgg(plot)
     canvas.draw()
@@ -175,7 +213,36 @@ def summary_text_plot(
     df: pd.DataFrame, kind: str = "session", ax: plt.Axes = None, **kwargs
 ) -> plt.Axes:
     """
-    summary of a particular session or subject
+    Create a text-based summary plot showing behavioral data statistics.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing behavioral data to summarize.
+    kind : str, default "session"
+        Type of summary to generate ('session' or 'subject').
+    ax : plt.Axes, optional
+        Matplotlib axes to plot on. If None, uses current axes.
+    **kwargs
+        Additional arguments including:
+        - fontsize : int, default 10
+            Font size for the text display
+            
+    Returns
+    -------
+    plt.Axes
+        Axes containing the text summary with axis turned off.
+        
+    Raises
+    ------
+    ValueError
+        If kind is not 'session' or 'subject'.
+        
+    Notes
+    -----
+    Generates a formatted text summary of key behavioral metrics
+    appropriate for the specified data type (session vs subject).
+    The plot appears as text on a clean background with no axes.
     """
     if ax is None:
         ax = plt.gca()

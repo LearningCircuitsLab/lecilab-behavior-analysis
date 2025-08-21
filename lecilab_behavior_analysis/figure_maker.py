@@ -9,7 +9,41 @@ import lecilab_behavior_analysis.utils as utils
 
 def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     """
-    Information about the trials done in a session and the water consumption
+    Create a comprehensive figure showing a subject's training progress over time.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing behavioral data for a single subject with columns
+        including 'subject', trial data, performance metrics, etc.
+    **kwargs
+        Additional keyword arguments:
+        - width : int, default 15
+            Figure width in inches
+        - height : int, default 10  
+            Figure height in inches
+        - summary_matrix_plot : bool, default False
+            Whether to include a summary matrix plot
+            
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Complex figure with multiple subplots showing training progress,
+        performance metrics, water consumption, and other behavioral measures.
+        
+    Raises
+    ------
+    ValueError
+        If the dataframe contains more than one subject.
+        
+    Notes
+    -----
+    The figure includes multiple panels showing:
+    - Training calendar and session timeline
+    - Performance evolution over time  
+    - Water consumption tracking
+    - Trial statistics and behavioral metrics
+    - Optional summary matrix visualization
     """
     # TODO: add a plot to show the evolution of weight
 
@@ -167,7 +201,39 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
 
 def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     """
-    Summary of a particular session.
+    Create a detailed summary figure for a single behavioral session.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing trial data for a single session with behavioral
+        metrics, performance data, reaction times, etc.
+    **kwargs
+        Additional keyword arguments:
+        - width : int, default 10
+            Figure width in inches
+        - height : int, default 6
+            Figure height in inches
+        - window : int, optional
+            Window size for performance calculations
+        - session_changes : array-like, optional
+            Trial numbers where session parameters changed
+            
+    Returns
+    -------
+    plt.Figure
+        Multi-panel figure showing session details including:
+        - Session text summary and performance metrics
+        - Psychometric curves for different sensory modalities  
+        - Repeat/alternate performance analysis
+        - Reaction time distributions
+        - Trial sequence analysis
+        
+    Notes
+    -----
+    The figure provides a comprehensive view of behavioral performance
+    during a single training session, with separate analyses for
+    visual and auditory stimuli when available.
     """
     # if more than one session is there, raise an error
     # if df.date.nunique() > 1:

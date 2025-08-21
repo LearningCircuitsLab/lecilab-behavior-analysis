@@ -7,7 +7,27 @@ import ast
 
 def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Fill missing data in the dataframe.
+    Fill missing values in behavioral data DataFrame with default values.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with behavioral data that may contain missing values.
+        
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with missing values filled:
+        - Categorical columns filled with "not saved"
+        - 'correct' column filled with True
+        
+    Notes
+    -----
+    Handles missing data for key behavioral analysis columns:
+    - stimulus_modality, current_training_stage, difficulty, correct_side: filled with "not saved"
+    - correct: filled with True (assumes correct responses for missing data)
+    
+    Columns that don't exist are created with default values.
     """
     columns_to_fill = ["stimulus_modality", "current_training_stage", "difficulty", "correct_side"]
     for column in columns_to_fill:
@@ -25,6 +45,25 @@ def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_dates_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create a summary DataFrame grouped by date and training stage.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Behavioral data DataFrame with 'date' and 'current_training_stage' columns.
+        
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with date as index (converted to datetime) and columns showing
+        trial counts grouped by training stage.
+        
+    Notes
+    -----
+    The resulting DataFrame has date as the index and provides a count of trials
+    for each combination of date and training stage.
+    """
     utils.column_checker(df, required_columns={"date", "current_training_stage"})
     dates_df = df.groupby(["date", "current_training_stage"]).count().reset_index()
     # set as index the date
@@ -34,6 +73,26 @@ def get_dates_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_water_df(df: pd.DataFrame, grouping_column: str = "date") -> pd.DataFrame:
+    """
+    Calculate total water consumption grouped by a specified column.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing water consumption data.
+    grouping_column : str, default "date"
+        Column name to group by for calculating water totals.
+        
+    Returns
+    -------
+    pd.DataFrame
+        Series with total water consumption for each group.
+        
+    Notes
+    -----
+    Requires the DataFrame to contain both the grouping column and a 'water' column.
+    Returns the sum of water consumption for each unique value in the grouping column.
+    """
     utils.column_checker(df, required_columns={grouping_column, "water"})
     water_df = df.groupby(grouping_column)["water"].sum()
     return water_df
@@ -41,12 +100,26 @@ def get_water_df(df: pd.DataFrame, grouping_column: str = "date") -> pd.DataFram
 
 def get_repeat_or_alternate_series(series: pd.Series) -> pd.Series:
     """
-    Given a series of values, return a series of the same length
-    with "repeat" or "alternate" depending on whether the value
-    is the same as the previous one or not.
-
-    Meant to be used for the trial side column (correct_side)
-    Or the columns with the first choice of the mouse
+    Classify consecutive values as 'repeat' or 'alternate' based on previous value.
+    
+    Parameters
+    ----------
+    series : pd.Series
+        Series of values to analyze (e.g., choice sides, trial types).
+        
+    Returns
+    -------
+    pd.Series
+        Series of same length with values 'repeat', 'alternate', or None.
+        - 'repeat': current value matches previous value
+        - 'alternate': current value differs from previous value  
+        - None: for first element or when values are missing
+        
+    Notes
+    -----
+    Commonly used to analyze behavioral patterns like side bias or
+    choice persistence. The first element is always None since there's
+    no previous value to compare against.
     """
     prev_choices = series.shift(1, fill_value=np.nan)
     return repeat_or_alternate_series_comparison(series, prev_choices)
@@ -56,9 +129,27 @@ def repeat_or_alternate_series_comparison(
     series: pd.Series, comparison_series: pd.Series
 ) -> pd.Series:
     """
-    Given a series of values, return a series of the same length
-    with "repeat" or "alternate" depending on whether the value
-    is the same between the two series or not.
+    Compare two series and classify each position as 'repeat' or 'alternate'.
+    
+    Parameters
+    ----------
+    series : pd.Series
+        Primary series to analyze.
+    comparison_series : pd.Series
+        Series to compare against (typically a shifted version of series).
+        
+    Returns
+    -------
+    pd.Series
+        Series with values 'repeat', 'alternate', or None.
+        - 'repeat': values match between the two series
+        - 'alternate': values differ between the two series
+        - None: when either value is missing (NaN)
+        
+    Notes
+    -----
+    This is the core comparison function used by get_repeat_or_alternate_series
+    and other functions that need to classify sequential patterns.
     """
     repeat_or_alternate = np.where(
         series.isna() | comparison_series.isna(),
@@ -166,6 +257,31 @@ def get_left_choice(df):
 
 
 def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculate performance (accuracy) grouped by difficulty and correct side.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with behavioral data containing 'difficulty', 'correct', 
+        and 'correct_side' columns.
+        
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns:
+        - difficulty: difficulty levels
+        - correct_side: left or right side
+        - value: proportion correct for that difficulty/side combination
+        - leftward_evidence: numeric encoding of difficulty and side
+        - leftward_choices: proportion of leftward choices
+        
+    Notes
+    -----
+    This function is commonly used to generate psychometric curve data,
+    showing how performance varies with stimulus difficulty and side.
+    The leftward_evidence provides a single numeric axis for plotting.
+    """
     utils.column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
     pbd_df = df.groupby(["difficulty", "correct_side"]).correct.mean().unstack().reset_index()
     # melt the dataframe
@@ -177,6 +293,30 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extract and add columns from auditory_real_statistics dictionary column.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with 'auditory_real_statistics' column containing
+        string representations of dictionaries with auditory trial statistics.
+        
+    Returns
+    -------
+    pd.DataFrame
+        Original DataFrame with additional columns:
+        - number_of_tones_high/low: count of high/low frequency tones
+        - total_percentage_of_tones_high/low: percentage of high/low tones  
+        - percentage_of_timebins_with_evidence_high/low: evidence strength metrics
+        - total_evidence_strength: overall evidence strength measure
+        
+    Notes
+    -----
+    This function parses string representations of dictionaries containing
+    detailed auditory stimulus statistics and converts them to separate columns
+    for easier analysis. Uses eval() which assumes trusted data.
+    """
     df['number_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['number_of_tones'])
     df['number_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['number_of_tones'])
     df['total_percentage_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['total_percentage_of_tones'])
