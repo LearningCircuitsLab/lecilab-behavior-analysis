@@ -18,7 +18,24 @@ IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 
 def get_session_performance(df, session: int) -> float:
     """
-    This method calculates the performance of a session.
+    Calculate the performance (proportion correct) for a specific session.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing behavioral data with 'session' and 'correct' columns.
+    session : int
+        Session number to calculate performance for.
+        
+    Returns
+    -------
+    float
+        Performance as proportion correct (0.0 to 1.0) for the specified session.
+        
+    Notes
+    -----
+    Performance is calculated as the mean of the 'correct' column for trials
+    belonging to the specified session.
     """
 
     return df[df.session == session].correct.mean()
@@ -26,7 +43,24 @@ def get_session_performance(df, session: int) -> float:
 
 def get_day_performance(df, day: str) -> float:
     """
-    This method calculates the performance of a day.
+    Calculate the performance (proportion correct) for a specific day.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing behavioral data with 'year_month_day' and 'correct' columns.
+    day : str
+        Day identifier to calculate performance for.
+        
+    Returns
+    -------
+    float
+        Performance as proportion correct (0.0 to 1.0) for the specified day.
+        
+    Notes
+    -----
+    Performance is calculated as the mean of the 'correct' column for trials
+    occurring on the specified day.
     """
 
     return df[df.year_month_day == day].correct.mean()
@@ -34,7 +68,24 @@ def get_day_performance(df, day: str) -> float:
 
 def get_session_number_of_trials(df, session: int) -> int:
     """
-    This method calculates the number of trials in a session.
+    Count the number of trials in a specific session.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing behavioral data with 'session' column.
+    session : int
+        Session number to count trials for.
+        
+    Returns
+    -------
+    int
+        Number of trials (rows) for the specified session.
+        
+    Notes
+    -----
+    Simply counts the number of rows in the DataFrame that belong
+    to the specified session.
     """
 
     return df[df.session == session].shape[0]
@@ -42,7 +93,24 @@ def get_session_number_of_trials(df, session: int) -> int:
 
 def get_day_number_of_trials(df, day: str) -> int:
     """
-    This method calculates the number of trials in a day.
+    Count the number of trials for a specific day.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing behavioral data with 'year_month_day' column.
+    day : str
+        Day identifier to count trials for.
+        
+    Returns
+    -------
+    int
+        Number of trials (rows) for the specified day.
+        
+    Notes
+    -----
+    Simply counts the number of rows in the DataFrame that correspond
+    to trials performed on the specified day.
     """
     return df[df.year_month_day == day].shape[0]
 
@@ -286,6 +354,33 @@ def get_text_from_subset_df(df: pd.DataFrame, reduced: bool = False) -> str:
 
 
 def get_text_from_subject_df(df: pd.DataFrame) -> str:
+    """
+    Generate a text summary of overall subject performance across sessions.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing behavioral data for a single subject.
+        Must contain columns: 'subject', 'session', 'water', 'year_month_day'.
+        
+    Returns
+    -------
+    str
+        Formatted text summary showing subject name and daily averages:
+        - Sessions per day
+        - Trials per day  
+        - Water consumption per day (μl)
+        
+    Raises
+    ------
+    ValueError
+        If the dataframe contains more than one subject.
+        
+    Notes
+    -----
+    Provides high-level statistics averaged across all training days
+    for a single subject, useful for progress monitoring and comparison.
+    """
     # make sure that there is only one subject in the dataframe
     if df.subject.nunique() != 1:
         raise ValueError("The dataframe contains more than one subject.")
@@ -313,6 +408,24 @@ def get_text_from_subject_df(df: pd.DataFrame) -> str:
 
 
 def load_example_data(mouse_name) -> pd.DataFrame:
+    """
+    Load example behavioral data for a specified mouse.
+    
+    Parameters
+    ----------
+    mouse_name : str
+        Name of the mouse to load example data for.
+        
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing example behavioral data for the specified mouse.
+        
+    Notes
+    -----
+    Loads data from the example_data directory structure, expecting files
+    in the format: {outpath}/example_data/{mouse_name}/{mouse_name}_fakedata.csv
+    """
     outpath = get_outpath()
     df = pd.read_csv(outpath + "/example_data/" + mouse_name + "/" + mouse_name + "_fakedata.csv", sep=";")
 
@@ -388,6 +501,21 @@ def sound_evidence_strength(x, y):
 
 
 def get_outpath():
+    """
+    Get the appropriate data output path based on the current hostname.
+    
+    Returns
+    -------
+    str
+        File system path to the behavioral data directory for the current machine.
+        Returns "default/path" if hostname is not recognized.
+        
+    Notes
+    -----
+    Maps known hostnames to their corresponding data directory paths.
+    Used to handle different data storage locations across different
+    computers and environments.
+    """
     hostname = socket.gethostname()
     paths = {
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
