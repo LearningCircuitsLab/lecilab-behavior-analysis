@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from utils import get_outpath
+from .utils import get_outpath
 import random
 
 def generate_fake_dataset(outfile: str) -> None:
