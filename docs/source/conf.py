@@ -71,7 +71,13 @@ templates_path = ["_templates"]
 
 # Automatically generate stub pages for API
 autosummary_generate = True
-autodoc_default_flags = ["members", "inherited-members"]
+
+# Ensure all members, including undocumented ones, are included in the documentation
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+    'show-inheritance': True,
+}
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

@@ -15,16 +15,16 @@
    {% endblock %}
 
    {% block functions %}
-   {% if functions %}
    .. rubric:: {{ _('Functions') }}
 
    .. autosummary::
       :toctree:
       :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
    {% for item in functions %}
       {{ item }}
    {%- endfor %}
-   {% endif %}
    {% endblock %}
 
    {% block classes %}
