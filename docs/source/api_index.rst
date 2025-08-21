@@ -1,22 +1,6 @@
 API
 ===
 
-.. currentmodule:: village
-
-Devices
----------
-.. autosummary::
-   :toctree: api_generated
-   :template: 
-   :recursive:
-   :nosignatures:
-
-    village.devices
-    
-
-API
-===
-
 .. currentmodule:: lecilab_behavior_analysis
 
 utils
