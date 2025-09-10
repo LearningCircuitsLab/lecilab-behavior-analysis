@@ -7,26 +7,17 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import ast
+import matplotlib.pyplot as plt
 
-mouse = "ACV009"
-local_path = Path(utils.get_outpath()) / Path("visual_and_COT_data") / Path("sessions") / Path(mouse)
-
-df = pd.read_csv(local_path / Path(f'{mouse}.csv'), sep=";")
-
-# fill information in df if it is missing
-df = dft.analyze_df(df)
-#%%
-df = df[df.current_training_stage == "TwoAFC_visual_hard"]
-#%%
-df.dropna(subset=['visual_stimulus'], inplace=True)
-
-#%%
-# This cell will show you the actual values
-df['visual_stimulus_devi'] = df['visual_stimulus'].apply(lambda x: abs(round(eval(x)[0] / eval(x)[1], 4)))
-df['visual_stimulus_devi'].value_counts()
-# %%
-# This cell will show you the problem you had
-df['visual_stimulus_devi'] = df['visual_stimulus'].apply(lambda x: abs(round(eval(x)[0] / eval(x)[1], 0)))
-df['visual_stimulus_devi'].value_counts()
-
-# rounding to 0 decimals (default if you dont specify), makes the values of 2.5 to sometimes be 2 and sometimes be 3
+mouse = "ACV008"
+project = "visual_and_COT_data"
+local_path = Path(utils.get_outpath()) / Path(project) / Path("videos") / Path(mouse)
+# create the directory if it doesn't exist
+local_path.mkdir(parents=True, exist_ok=True)
+# download the session data
+utils.rsync_cluster_data(
+    project_name=project,
+    file_path="videos/ACV008/ACV008_TwoAFC_20250401_160725.mp4",
+    local_path=str(local_path),
+    credentials=utils.get_idibaps_cluster_credentials(),
+)

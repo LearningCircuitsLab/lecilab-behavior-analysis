@@ -10,6 +10,7 @@ import statsmodels.api as sm
 import itertools
 from collections import defaultdict
 from sklearn.metrics import r2_score
+import os
 import lecilab_behavior_analysis.df_transforms as dft
 
 IDIBAPS_TV_PROJECTS = "/archive/training_village/"
@@ -143,9 +144,9 @@ def column_checker(df: pd.DataFrame, required_columns: set):
         )
 
 
-def get_text_from_subset_df(df: pd.DataFrame) -> str:
+def get_text_from_subset_df(df: pd.DataFrame, reduced: bool = False) -> str:
     # make sure that there is only one subject in the dataframe
-    if df.subject.nunique() != 1:
+    if df.subject.nunique() > 1:
         raise ValueError("The dataframe contains more than one subject.")
     # get the session
     session = df.session.unique()
@@ -158,11 +159,19 @@ def get_text_from_subset_df(df: pd.DataFrame) -> str:
     # get the number of correct trials
     n_correct = int(df.correct.sum())
     # get the performance
-    performance = n_correct / n_trials * 100
+    try:
+        performance = n_correct / n_trials * 100
+    except ZeroDivisionError:
+        performance = np.nan
     # get the water consumed
     water = df.water.sum()
     # get the subject
     mouse_name = df.subject.unique()[0]
+
+    if reduced:
+        if len(session) > 3:
+            session = f"{session[0]}-...-{session[-1]}"
+            date = f"{date[0]}-...-{date[-1]}"
 
     # write the text
     text = f"""\
@@ -287,7 +296,8 @@ def get_outpath():
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
         "localhost": "/home/kudongdong/data/LeciLab/behavioral_data",
-        "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data"
+        "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
+        "minibaps": "/archive/training_village",
     }
     return paths.get(hostname, "default/path")
 
@@ -325,11 +335,9 @@ def get_folders_from_server(credentials: dict, path: str) -> List[str]:
         f"ssh {credentials['username']}@{credentials['host']} "
         f"'ls {path}'"
     )
-    print(ssh_command)
     result = subprocess.run(
         ssh_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
-    print("B")
     # Decode the output and split it into a list of folder names
     if result.returncode == 0:
         folders = result.stdout.decode("utf-8").strip().split("\n")
@@ -355,37 +363,37 @@ def get_animals_in_project(project_name: str) -> List[str]:
     return folders
 
 
-def rsync_session_data(
+def rsync_cluster_data(
     project_name: str,
-    animal: str,
+    file_path: str,
     credentials: dict,
     local_path: str,
 ) -> bool:
     """
     This method syncs the session data from the server to the local machine.
     """
-    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions/{animal}/{animal}.csv"
+    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/{file_path}"
     rsync_command = f"rsync -avz {remote_path} {local_path}"
     result = subprocess.run(rsync_command, shell=True)
     if result.returncode != 0:
-        print(f"Error syncing data for {animal}: {result.stderr.decode('utf-8')}")
+        print(f"Error syncing data for {file_path}: {result.stderr.decode('utf-8')}")
     return result.returncode == 0
 
 
-def rsync_sessions_summary(
-    project_name: str,
-    credentials: dict,
-    local_path: str,
-) -> bool:
-    """
-    This method syncs the session data from the server to the local machine.
-    """
-    remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions_summary.csv"
-    rsync_command = f"rsync -avz {remote_path} {local_path}"
-    result = subprocess.run(rsync_command, shell=True)
-    if result.returncode != 0:
-        print(f"Error syncing session summary data for {project_name}: {result.stderr.decode('utf-8')}")
-    return result.returncode == 0
+# def rsync_sessions_summary(
+#     project_name: str,
+#     credentials: dict,
+#     local_path: str,
+# ) -> bool:
+#     """
+#     This method syncs the session data from the server to the local machine.
+#     """
+#     remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/sessions_summary.csv"
+#     rsync_command = f"rsync -avz {remote_path} {local_path}"
+#     result = subprocess.run(rsync_command, shell=True)
+#     if result.returncode != 0:
+#         print(f"Error syncing session summary data for {project_name}: {result.stderr.decode('utf-8')}")
+#     return result.returncode == 0
 
 
 def list_to_colors(ids: np.array, cmap: str) -> Tuple[List[tuple], Dict]:
@@ -633,11 +641,6 @@ def get_trial_port_hold(row, port_number):
     return np.array(outs) - np.array(ins)
 
 
-if __name__ == "__main__":
-    # Example usage
-    print(get_server_projects())
-    print(get_animals_in_project("visual_and_COT_data"))
-
 def logi_model_fit_input(df: pd.DataFrame, X, y, method='newton'):
     column_checker(df, {x for x in X})
     column_checker(df, {y})
@@ -762,6 +765,102 @@ def verify_params_time_kernel(dic:dict, y:str):
         comb_dict[comb] = np.mean(previous_impact_on_kernel_mice)
     return comb_dict
 
+
+def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hours: int = 24):
+    events["date"] = pd.to_datetime(events["date"])
+    sessions_summary["date"] = pd.to_datetime(sessions_summary["date"])
+
+    # get the highest date in the events and sessions_summary dataframes
+    max_date = max(events["date"].max(), sessions_summary["date"].max())
+    time_hours_ago = pd.Timestamp(max_date) - pd.Timedelta(hours=hours)
+
+    detections = events[
+        (events["description"] == "Subject detected")
+        & (events["date"] >= time_hours_ago)
+    ]
+    sessions = events[
+        (events["type"] == "START") & (events["date"] >= time_hours_ago)
+    ]
+    sessions_summary = sessions_summary[sessions_summary["date"] >= time_hours_ago]
+
+    subject_detections = detections.groupby("subject").size().to_dict()
+    subject_sessions = sessions.groupby("subject").size().to_dict()
+    subject_water = sessions_summary.groupby("subject")["water"].sum().to_dict()
+    subject_weight = sessions_summary.groupby("subject")["weight"].mean().to_dict()
+    # reduce the weight to two decimal places
+    subject_weight = {k: round(v, 2) if not np.isnan(v) else np.nan for k, v in subject_weight.items()}
+
+    # select only subjects that have detections
+    subjects = set(subject_detections.keys())
+    # sort it
+    subjects = sorted(subjects)
+    subject_detections = {subj: subject_detections.get(subj, 0) for subj in subjects}
+    subject_sessions = {subj: subject_sessions.get(subj, 0) for subj in subjects}
+    subject_water = {subj: subject_water.get(subj, 0) for subj in subjects}
+    subject_weight = {subj: subject_weight.get(subj, np.nan) for subj in subjects}
+
+
+    # generate a dataframe
+    report_df = pd.DataFrame({
+        "Subject": subject_detections.keys(),
+        "Detections": subject_detections.values(),
+        "Sessions": subject_sessions.values(),
+        "Water Consumed (μl)": [subject_water.get(subj, 0) for subj in subject_detections.keys()],
+        "Average Weight (g)": [subject_weight.get(subj, np.nan) for subj in subject_detections.keys()]
+    })
+
+    return report_df, max_date
+
+
+def load_all_events(project_name: str) -> pd.DataFrame:
+    """
+    Load all events from the local machine for a given project.
+    """
+    outpath = get_outpath()
+    events_path = f"{outpath}/{project_name}/events.csv"
+    if not os.path.exists(events_path):
+        raise FileNotFoundError(f"Events file for project {project_name} does not exist.")
+    
+    events_df = pd.read_csv(events_path, sep=";")
+
+    # read events in old_events if they exist
+    events_dfs_list = []
+    old_events_path = f"{outpath}/{project_name}/old_events"
+    # list files in the old_events folder
+    if os.path.exists(old_events_path):
+        old_events_files = [f for f in os.listdir(old_events_path) if f.endswith('.csv')]
+        # sort files by name to ensure they are in the correct order
+        old_events_files.sort()
+        # read each file and concatenate to events_df
+        for old_file in old_events_files:
+            old_file_path = os.path.join(old_events_path, old_file)
+            old_events_df = pd.read_csv(old_file_path, sep=";")
+            events_dfs_list.append(old_events_df)
+    events_df = pd.concat(events_dfs_list + [events_df], ignore_index=True)
+    return events_df
+    
+
+def side_and_difficulty_to_numeric(row: pd.Series) -> float:
+    match row.difficulty:
+        case "easy":
+            numval = 3
+        case "medium":
+            numval = 2
+        case "hard":
+            numval = 1
+        case _:
+            numval = 0
+    match row.correct_side:
+        case "left":
+            pass
+        case "right":
+            numval *= -1
+        case _:
+            numval = 0
+    
+    return round(numval / 3, 3)
+
+
 def filter_variables_for_model(dic_fit:dict, X:list, y:str, max_lag=None, tau=None):
     """
     This function filters the variables for the logistic regression model.
@@ -803,3 +902,107 @@ def get_timebin_evidence(trial):
                 evidence_timebin[n] -= 1
     return evidence_timebin
 
+
+def find_next_end_task_time_in_events(events_df: pd.DataFrame, date: str, subject: str) -> Tuple[Union[str, None], Union[float, None]]:
+    """
+    Find the end task time in the events dataframe for a given date.
+    """
+    # filter events
+    filtered_events = events_df[events_df['description'] == "The subject has returned home."]
+    
+    # get the first event after the given date
+    dates_in_datetime = pd.to_datetime(filtered_events['date'])
+    end_event = filtered_events[dates_in_datetime > pd.to_datetime(date)]
+    # if there are no events after the given date, return None
+    if end_event.empty:
+        print(f"No end event found after date {date}.")
+        return "No date", None
+    # calculate the duration from the given date to the end event
+    duration = (pd.to_datetime(end_event['date'].iloc[0]) - pd.to_datetime(date)).total_seconds()
+    # get the subject as well
+    subject_of_event = end_event['subject'].iloc[0]
+
+    if subject_of_event != subject:
+        print(f"Subject mismatch for {date}: expected {subject}, found {subject_of_event}.")
+        return None, None
+
+    # return the date of the first event
+    return end_event['date'].iloc[0], duration
+
+
+def get_session_box_usage(session_df: pd.DataFrame, session_duration: float) -> pd.DataFrame:
+
+    if session_df.date.unique().size != 1:
+        raise ValueError("Session dataframe must contain data for a single date.")
+
+    #TODO: do the column checker
+
+
+    date = session_df.date.unique()[0]
+    subject = session_df.subject.unique()[0]
+    time_to_complete_first_trial = session_df.iloc[0].trial_duration
+    start_of_first_trial = session_df.iloc[0].TRIAL_START
+    last_trial_completed_time = session_df.iloc[-1].TRIAL_END - start_of_first_trial
+    time_to_exit_box = session_duration - last_trial_completed_time
+    # add accuracy as well
+    accuracy = session_df['correct'].mean() * 100
+
+    # add the time of engagement and disengagement, removing the first trial
+    session_df = session_df.iloc[1:]  # remove the first trial for engagement calculation
+    engaged_time = session_df[session_df['engaged'] == True]['trial_duration'].sum()
+    disengaged_time = session_df[session_df['engaged'] == False]['trial_duration'].sum()
+
+    unaccounted_time = session_duration - (time_to_complete_first_trial + time_to_exit_box +
+                                           engaged_time + disengaged_time)
+    
+    total_session_time = time_to_complete_first_trial + time_to_exit_box + engaged_time + disengaged_time + unaccounted_time
+
+    return pd.DataFrame({
+        "date": [date] * 5,
+        "subject": [subject] * 5,
+        "time_type": [
+            "time_to_complete_first_trial",
+            "time_to_exit_box",
+            "engaged_time",
+            "disengaged_time",
+            "unaccounted_time"
+        ],
+        "absolute_time": [
+            time_to_complete_first_trial,
+            time_to_exit_box,
+            engaged_time,
+            disengaged_time,
+            unaccounted_time
+        ],
+        "percentage_of_time": [
+            time_to_complete_first_trial / total_session_time * 100,
+            time_to_exit_box / total_session_time * 100,
+            engaged_time / total_session_time * 100,
+            disengaged_time / total_session_time * 100,
+            unaccounted_time / total_session_time * 100
+        ],
+        "accuracy": [accuracy] * 5,
+    })
+
+
+def add_time_from_session_start(df_in: pd.DataFrame) -> pd.DataFrame:
+    # Group by both 'subject' and 'session' to calculate time from session start
+    df_in['time_from_start'] = df_in.groupby(['subject', 'session'])['TRIAL_START'].transform(lambda x: x - x.iloc[0])
+    return df_in
+
+
+def get_previous_row_index(df: pd.DataFrame, current_index) -> int:
+    # Get the position of the current index
+    current_pos = df.index.get_loc(current_index)
+    # Ensure it's not the first row
+    if current_pos > 0:
+        # Return the previous index
+        return df.index[current_pos - 1]
+    else:
+        raise IndexError("No previous row exists for the given index.")
+
+
+if __name__ == "__main__":
+    # Example usage
+    print(get_server_projects())
+    print(get_animals_in_project("visual_and_COT_data"))

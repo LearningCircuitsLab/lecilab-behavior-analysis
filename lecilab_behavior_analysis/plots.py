@@ -8,6 +8,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+import plotly.graph_objects as go
 
 import lecilab_behavior_analysis.utils as utils
 from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
@@ -76,6 +77,10 @@ def trials_by_day_plot(
     handles = [plt.Rectangle((0, 0), 1, 1, color=color) for color in leg_cols]
     ax.legend(handles, labels, bbox_to_anchor=(0.5, 1.25), loc="upper center", ncol=3, borderaxespad=0.0)
     ax.get_legend().get_frame().set_linewidth(0.0)
+    # rotate the x-axis labels and align them to the end
+    ax.tick_params(axis="x", rotation=45, labelsize=7)
+    for label in ax.get_xticklabels():
+        label.set_horizontalalignment("right")
     
     return ax
 
@@ -124,7 +129,7 @@ def performance_vs_trials_plot(
         for sc in kwargs["session_changes"][1:]:
             tt = df.loc[sc]["total_trial"]
             ax.axvline(tt, linestyle="--", color="gray")
-    ax.set_xlim(left=0)
+    # ax.set_xlim(left=0)
     if "ylim" in kwargs:
         ax.set_ylim(kwargs["ylim"])
     ax.set_xlabel("Trial number")
@@ -178,8 +183,11 @@ def summary_text_plot(
     """
     if ax is None:
         ax = plt.gca()
-    if kind == "session":
-        text = get_text_from_subset_df(df)
+    # if the dataframe is empty
+    if df.empty:
+        text = "No data available"
+    elif kind == "session":
+        text = get_text_from_subset_df(df, reduced=True)
     elif kind == "subject":
         text = get_text_from_subject_df(df)
     else:
@@ -266,6 +274,10 @@ def repeat_or_alternate_performance_plot(
             "total_trial",
         },
     )
+    if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
+        for sc in kwargs["session_changes"][1:]:
+            tt = df.loc[sc]["total_trial"]
+            ax.axvline(tt, linestyle="--", color="gray")
     sns.lineplot(
         data=df,
         x="total_trial",
@@ -279,7 +291,7 @@ def repeat_or_alternate_performance_plot(
     ax.axhline(50, linestyle="--", color="gray")
     ax.spines[["top", "right"]].set_visible(False)
     # x axis always starts at 0
-    ax.set_xlim(left=0)
+    # ax.set_xlim(left=0)
     if "ylim" in kwargs:
         ax.set_ylim(kwargs["ylim"])
     # put the legend at the top in one row
@@ -291,28 +303,11 @@ def repeat_or_alternate_performance_plot(
     return ax
 
 
-# def psychometric_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
-#     if ax is None:
-#         ax = plt.gca()
-#     column_checker(df, required_columns={"leftward_evidence", "leftward_choices"})
-#     sns.scatterplot(
-#         data=df,
-#         x="leftward_evidence",
-#         y="leftward_choices",
-#         # hue="difficulty",
-#         ax=ax,
-#     )
-#     ax.set_xlabel("Leftward evidence")
-#     ax.set_ylabel("P(Left)")
-#     ax.set_xlim(-1.1, 1.1)
-#     ax.set_ylim(-.1, 1.1)
-#     ax.axhline(0.5, linestyle="--", color="gray")
-#     ax.spines[["top", "right"]].set_visible(False)
-#     return ax
-
 def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None, 
-                                   point_kwargs=None,
-                                   line_kwargs=None, valueType = 'discrete') -> plt.Axes:
+                                   point_kwargs = None,
+                                   line_kwargs = None,
+                                   valueType = 'discrete',
+                                   bins = 6) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     
@@ -352,11 +347,12 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
             ax.set_xlabel("log_"+x)
     else:
         # bin the continuous values when valueType is not discrete
-        bins = pd.cut(df_copy[x], bins = 6)
-        labels = df_copy[x].groupby(bins).mean()
-        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = 6, labels = labels).astype(float)
-        df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
-        ax.set_xlabel("log_"+x + "*10")
+        bin_groups = pd.cut(df_copy[x], bins = bins)
+        labels = df_copy[x].groupby(bin_groups).mean()
+        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = bins, labels = labels).astype(float)
+        # df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
+        # ax.set_xlabel("log_" + x + "*10")
+        ax.set_xlabel(x + " (binned)")
     sns.pointplot(
         x=x + "_fit",
         y=y,
@@ -366,7 +362,7 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
         **point_kwargs
     )
     xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
-    p_left, fitted_params = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
+    p_left, _ = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
     if y == "first_choice_numeric":
         ax.set_ylabel("P(Leftward Choices)")
@@ -374,10 +370,39 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
         ax.set_ylabel("P(Correct Choices)")
     ax.set_ylim(0, 1)
     ax.legend()
+    # despine
+    ax.spines[["top", "right"]].set_visible(False)
     return ax
 
 
+def choice_by_difficulty_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    """
+    Plot the performance by difficulty of each trial.
+    """
+    column_checker(df, required_columns={"side_difficulty", "first_choice_numeric"})
+    if ax is None:
+        ax = plt.gca()
+    
+    sns.pointplot(
+        x="side_difficulty",
+        y="first_choice_numeric",
+        data=df,
+        estimator=lambda x: np.mean(x),
+        ax=ax,
+        # remove line
+        linestyles="",
+        # do categorical
+        native_scale= False,
+        **kwargs
+    )
+    ax.set_ylim(0, 1)
+    ax.set_ylabel("Leftward Choices")
+    ax.set_xlabel("Leftward Evidence Level")
+    # despine
+    ax.spines[["top", "right"]].set_visible(False)
 
+
+    return ax
 
 
 def summary_matrix_plot(
@@ -913,7 +938,7 @@ def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt
                  color="gray",
                  stat="probability",
                  kde=True)
-    ax.set_xlabel(f"Port{port_number} holding time (ms)")
+    ax.set_xlabel(f"Port{port_number} holding time (s)")
     ax.set_ylabel("Frequency")
     # remove the top and right spines
     ax.spines["top"].set_visible(False)
@@ -969,6 +994,39 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
     return ax
 
 
+def plot_table_from_df(df: pd.DataFrame, **kwargs) -> go.Figure:
+    # Create table
+    fig = go.Figure(data=[go.Table(
+        columnwidth=[80] + [60]*len(df.columns),  # Adjust column widths
+        header=dict(
+            values=[f"<b>{col.replace('_', '<br>')}</b>" for col in df.columns],
+            align='center',
+            font=dict(size=14),
+            height=40,
+            line_color='darkslategray',
+            fill_color='lightgray'
+        ),
+        cells=dict(
+            values=[df[col].tolist() for col in df.columns],
+            align='center',
+            font=dict(size=12),
+            height=35,
+            line_color='darkslategray',
+            fill_color='white'
+        )
+    )])
+
+    # Update layout
+    if "title" in kwargs:
+        fig.update_layout(title_text=kwargs["title"], title_x=0.5)
+    fig.update_layout(
+        margin=dict(l=10, r=10, t=50, b=10),
+        height=max(250, 30 * len(df)),  # Ensure a minimum height of 100
+    )
+
+    return fig
+
+
 def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.DataFrame, **kwargs) -> plt.Axes:
     """ Plot the mean correlation matrix and the mean contribution of each variable.
     corr_mat_list: list of correlation matrices
@@ -990,3 +1048,51 @@ def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.Data
     ax[1].set_xlabel('Mean Contribution')
     plt.tight_layout()
     plt.show()
+
+
+def plot_trial_time_of_start(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    """
+    Plot the time of start of each trial.
+    """
+    column_checker(df, required_columns={"time_from_start", "trial"})
+    if ax is None:
+        ax = plt.gca()
+    
+    sns.scatterplot(data=df, x="time_from_start", y="trial", ax=ax, s=4)
+
+    if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
+        for sc in kwargs["session_changes"][1:]:
+            tt = df.loc[sc]["time_from_start"]
+            ax.axvline(tt, linestyle="--", color="gray")
+
+    ax.set_ylabel("Trial number")
+    ax.set_xlabel("Trial start time (s)")
+    # remove the top and right spines
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    
+    return ax
+
+
+def plot_box_usage_by_date(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
+    """
+    Plot the box usage by date.
+    """
+    column_checker(df, required_columns={"year_month_day", "percentage_of_time", "time_type"})
+    if ax is None:
+        ax = plt.gca()
+    
+    hue_order = ['engaged_time', 'disengaged_time', 'time_to_complete_first_trial', 'time_to_exit_box']
+    sns.lineplot(data=df, x='year_month_day', y='percentage_of_time', hue='time_type', ax=ax, hue_order=hue_order)
+    # despine
+    ax.spines[["top", "right"]].set_visible(False)
+    # legend to top in 2 columns
+    ax.legend(loc='upper center', ncol=2, bbox_to_anchor=(0.5, 1.05), frameon=False, fontsize=8)
+    # rotate the x-axis labels and align them to the end
+    for label in ax.get_xticklabels():
+        label.set_rotation(45)
+        label.set_horizontalalignment("right")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Percentage of time (%)")
+    
+    return ax

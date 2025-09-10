@@ -1,25 +1,48 @@
 API
 ===
 
-math
-----
+.. currentmodule:: lecilab_behavior_analysis
 
-.. currentmodule:: lecilab_behavior_analysis.math
-
-.. autosummary::
-    :toctree: api_generated
-    :template: function.rst
-
-    add_two_integers
-    subtract_two_integers
-
-greetings
----------
-
-.. currentmodule:: lecilab_behavior_analysis.greetings
+utils
+-----
 
 .. autosummary::
     :toctree: api_generated
-    :template: class.rst
+    :template: custom_module_template.rst
+    :recursive:
+    :nosignatures:
+    
+    lecilab_behavior_analysis.utils
 
-    Greetings
+df_transforms
+-------------
+
+.. autosummary::
+    :toctree: api_generated
+    :template: custom_module_template.rst
+    :recursive:
+    :nosignatures:
+
+    lecilab_behavior_analysis.df_transforms
+
+plots
+-----
+
+.. autosummary::
+    :toctree: api_generated
+    :template: custom_module_template.rst
+    :recursive:
+    :nosignatures:
+
+    lecilab_behavior_analysis.plots
+
+figure_maker
+------------
+
+.. autosummary::
+    :toctree: api_generated
+    :template: custom_module_template.rst
+    :recursive:
+    :nosignatures:
+
+    lecilab_behavior_analysis.figure_maker

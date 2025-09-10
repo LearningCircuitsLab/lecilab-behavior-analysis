@@ -86,6 +86,7 @@ def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
     """
     df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
     # Get side port pokes before the stimulus state
+    # TODO: I am mixing here choices and pokes... really bad
     df["last_choice_before_stimulus"] = df.apply(utils.get_last_poke_before_stimulus_state, axis=1)
     # Get the last port in each trial
     if "last_choice" not in df.columns:
@@ -153,15 +154,27 @@ def get_repeat_or_alternate_performance(
     return df
 
 
+def get_evidence_ratio(df):
+    # raise error
+    raise ValueError("Not implemented yet")
+    return df
+
+def get_left_choice(df):
+    df = add_mouse_first_choice(df)
+    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    return df
+
+
 def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     utils.column_checker(df, required_columns={"difficulty", "correct", "correct_side"})
     pbd_df = df.groupby(["difficulty", "correct_side"]).correct.mean().unstack().reset_index()
     # melt the dataframe
     pbd_df = pbd_df.melt(id_vars=["difficulty"])
     # assing a numeric value to the side and the difficulty for plotting purposes
-    pbd_df["leftward_evidence"] = pbd_df.apply(side_and_difficulty_to_numeric, axis=1)
+    pbd_df["leftward_evidence"] = pbd_df.apply(utils.side_and_difficulty_to_numeric, axis=1)
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
+
 
 def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
     df['number_of_tones_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['number_of_tones'])
@@ -212,27 +225,6 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     )
     df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
     return df_copy
-
-
-def side_and_difficulty_to_numeric(row: pd.Series) -> float:
-    match row.difficulty:
-        case "easy":
-            numval = 3
-        case "medium":
-            numval = 2
-        case "hard":
-            numval = 1
-        case _:
-            numval = 0
-    match row.correct_side:
-        case "left":
-            pass
-        case "right":
-            numval *= -1
-        case _:
-            numval = 0
-    
-    return round(numval / 3, 3)
 
 
 def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
@@ -848,3 +840,70 @@ def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
     
     return df_copy
 
+
+# def add_time_from_session_start(df_in: pd.DataFrame) -> pd.DataFrame:
+#     for subject in df_in['subject'].unique():
+#         subject_df = df_in[df_in['subject'] == subject].copy()
+#         df_session_list = []
+#         for session in subject_df['session'].unique():
+#             df_session = subject_df[subject_df['session'] == session].copy()
+#             session_start_time = df_session['TRIAL_START'].iloc[0]
+#             df_session['time_from_start'] = df_session['TRIAL_START'] - session_start_time
+#             df_session_list.append(df_session)
+#     return pd.concat(df_session_list, ignore_index=True)
+
+
+def adjust_trials_and_time_of_start_to_first_session(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adjusts the 'TRIAL_START' and 'trial' columns to start from the first session.
+    """
+    df = df_in.copy()
+
+    # get the indeces of session changes
+    session_changes = df[df.session != df.session.shift(1)].index[1:]
+    # adjust "trial" and "time_from_start" columns
+    for i in range(len(session_changes)):
+        idx = session_changes[i]
+        # find the index of the previous entry in the df
+        prev_idx = utils.get_previous_row_index(df, idx)
+        past_trial = df.loc[prev_idx, 'trial']
+        past_time_from_start = df.loc[prev_idx, 'time_from_start']
+        if i < len(session_changes) - 1:
+            next_idx = session_changes[i + 1] - 1
+        else:
+            next_idx = df.index[-1]
+        df.loc[idx:next_idx, 'trial'] = df.loc[idx:next_idx, 'trial'] + past_trial
+        df.loc[idx:next_idx, 'time_from_start'] = df.loc[idx:next_idx, 'time_from_start'] + past_time_from_start
+    return df
+
+
+def add_engagement_column(df_in: pd.DataFrame, engagement_sd_criteria: float = 2) -> pd.DataFrame:
+    utils.column_checker(df_in, required_columns={"trial_duration"})
+    # make sure there is only one subject
+    if df_in['subject'].nunique() > 1:
+        raise ValueError("The dataframe should contain only one subject.")
+    # make a copy of the dataframe to avoid modifying the original
+    df = df_in.copy()
+    # get the median and std of the log of the trial_duration
+    df['td_log'] = df['trial_duration'].copy().apply(lambda x: np.log(x))
+    median_td_log = df['td_log'].median()
+    std_td_log = df['td_log'].std()
+
+    # classify trials as engaged or not engaged depending on the td_log
+    df['engaged'] = df['td_log'] < (median_td_log + engagement_sd_criteria * std_td_log)
+
+    return df
+
+
+def get_box_usage_df(df: pd.DataFrame, events_df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
+    gsbu_dfs = []
+    for date in df['date'].unique():
+        df_session = df[df['date'] == date]
+        subject = df_session['subject'].unique()[0]
+        _, session_duration = utils.find_next_end_task_time_in_events(events_df, date, subject)
+        if session_duration is None:
+            if verbose:
+                print(f"Session duration not found for {subject} on {date}. Skipping this session.")
+            continue
+        gsbu_dfs.append(utils.get_session_box_usage(df_session, session_duration=session_duration))
+    return pd.concat(gsbu_dfs, ignore_index=True)
