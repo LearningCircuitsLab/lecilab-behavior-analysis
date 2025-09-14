@@ -295,7 +295,7 @@ def get_outpath():
     paths = {
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
-        "localhost": "/home/kudongdong/data/LeciLab/behavioral_data",
+        "tudou": "/home/kudongdong/data/LeciLab/behavioral_data",
         "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
         "minibaps": "/archive/training_village",
     }
@@ -310,7 +310,7 @@ def get_idibaps_cluster_credentials():
             "host": "mini",
             # "port": 443,
         }
-    elif hostname == "localhost":
+    elif hostname == "tudou":
         return {
             "username": "kudongdong",
             "host": "mini",
@@ -378,7 +378,6 @@ def rsync_cluster_data(
     if result.returncode != 0:
         print(f"Error syncing data for {file_path}: {result.stderr.decode('utf-8')}")
     return result.returncode == 0
-
 
 # def rsync_sessions_summary(
 #     project_name: str,
@@ -619,8 +618,8 @@ def get_trial_port_hold(row, port_number):
         raise ValueError("row must be a pandas Series")
     ins = row["Port" + str(port_number) + "In"]
     outs = row["Port" + str(port_number) + "Out"]
-    if ins == "[]" or outs == "[]":
-        return np.nan
+    if pd.isna(ins) or pd.isna(outs) or ins == "[]" or outs == "[]": # np.nan is float, eval cannot recognize it
+        return [] # return np.nan would report error when calculate length
     if type(ins) == str:
         ins = ast.literal_eval(ins)
         outs = ast.literal_eval(outs)
