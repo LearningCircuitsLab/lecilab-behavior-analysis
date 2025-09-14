@@ -277,8 +277,7 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     
     """
 
-    if 'Habituation' in df['task'].unique():
-        df_task = df[df['task'] != 'Habituation']
+    df_task = df[df['task'] != 'Habituation']
     for mod in ['visual', 'auditory']:
         ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
         if len(df_task) > 0:
