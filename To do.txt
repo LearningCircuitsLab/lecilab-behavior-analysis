@@ -39,4 +39,4 @@ which you could also incorporate in your model. This will help us understand how
 the stimulus. We can discuss this if this is confusing as there is a lot in here :)
 
 - Psychometric plots in session_summary_figure. Make them work for the different possibilities.
-We can allocate some time today if you wish to think about the best way to code this.
+We can allocate some time today if you wish to think about the best way to code this.√

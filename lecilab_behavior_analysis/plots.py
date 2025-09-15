@@ -337,8 +337,14 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     column_checker(df, required_columns={x, y})
     df_copy = df.copy(deep=True)
     if valueType == 'discrete':
-        df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
-        ax.set_xlabel("log_" + x)
+        if 0 in df_copy[x].unique():
+            # if there are 0s in the data, we need to add a small value to avoid log(0)
+            df_copy[x + "_fit"] = df_copy[x]
+            df_copy[x + "_fit"].replace(0, 0.0001, inplace=True)
+            ax.set_xlabel(x)
+        else:
+            df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
+            ax.set_xlabel("log_"+x)
     else:
         # bin the continuous values when valueType is not discrete
         bin_groups = pd.cut(df_copy[x], bins = bins)
@@ -358,7 +364,10 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
     p_left, _ = utils.fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     ax.plot(xs, p_left, **line_kwargs)
-    ax.set_ylabel("Leftward Choices")
+    if y == "first_choice_numeric":
+        ax.set_ylabel("P(Leftward Choices)")
+    elif y == "correct_choice_numeric":
+        ax.set_ylabel("P(Correct Choices)")
     ax.set_ylim(0, 1)
     ax.legend()
     # despine
@@ -1019,8 +1028,14 @@ def plot_table_from_df(df: pd.DataFrame, **kwargs) -> go.Figure:
 
 
 def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.DataFrame, **kwargs) -> plt.Axes:
+    """ Plot the mean correlation matrix and the mean contribution of each variable.
+    corr_mat_list: list of correlation matrices
+    norm_contribution_df: DataFrame with the normalized contribution of each variable
+    """
     fig, ax = plt.subplots(2, 1, figsize=(10, 10))
-    X = corr_mat_list[0].index
+    # get the variable names from the first correlation matrix
+    X = corr_mat_list[0].index 
+    # Calculate the mean correlation matrix
     corr_mat_mean = np.mean(np.stack(corr_mat_list), axis=0)
     # # Create a mask for the upper triangle
     # mask = np.triu(np.ones_like(corr_mat_mean, dtype=bool), k=1)
@@ -1028,7 +1043,7 @@ def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.Data
     ax[0].set_xticklabels(X, rotation=16, ha="right", rotation_mode="anchor")
     ax[0].set_yticklabels(X, rotation=8, ha="right", rotation_mode="anchor")
     ax[0].set_title("Mean Correlation Matrix")
-
+    # Plot the mean contribution of each variable
     norm_contribution_df.mean(axis=1).sort_values().plot(kind='barh', ax=ax[1])
     ax[1].set_xlabel('Mean Contribution')
     plt.tight_layout()

@@ -295,7 +295,7 @@ def get_outpath():
     paths = {
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
-        "localhost": "/home/kudongdong/data/LeciLab/behavioral_data",
+        "tudou": "/home/kudongdong/data/LeciLab/behavioral_data",
         "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
         "minibaps": "/archive/training_village",
     }
@@ -310,7 +310,7 @@ def get_idibaps_cluster_credentials():
             "host": "mini",
             # "port": 443,
         }
-    elif hostname == "localhost":
+    elif hostname == "tudou":
         return {
             "username": "kudongdong",
             "host": "mini",
@@ -378,7 +378,6 @@ def rsync_cluster_data(
     if result.returncode != 0:
         print(f"Error syncing data for {file_path}: {result.stderr.decode('utf-8')}")
     return result.returncode == 0
-
 
 # def rsync_sessions_summary(
 #     project_name: str,
@@ -619,8 +618,8 @@ def get_trial_port_hold(row, port_number):
         raise ValueError("row must be a pandas Series")
     ins = row["Port" + str(port_number) + "In"]
     outs = row["Port" + str(port_number) + "Out"]
-    if ins == "[]" or outs == "[]":
-        return np.nan
+    if pd.isna(ins) or pd.isna(outs) or ins == "[]" or outs == "[]": # np.nan is float, eval cannot recognize it
+        return [] # return np.nan would report error when calculate length
     if type(ins) == str:
         ins = ast.literal_eval(ins)
         outs = ast.literal_eval(outs)
@@ -693,6 +692,36 @@ def hierarchical_partitioning(df, x_cols, y_col, method='newton'):
                 delta = r2 - r2_reduced
                 contributions[var].append(delta)
     
+    # normalize the contributions
+    avg_contrib = {var: np.mean(contrib) for var, contrib in contributions.items()}
+    total = sum(avg_contrib.values())
+    norm_contrib = {var: val / total for var, val in avg_contrib.items()}
+    return pd.Series(norm_contrib)
+
+def drop_one_var_contribution(df, x_cols, y_col, method='newton'):
+    """
+    Calculate the contribution of each variable in a logistic regression model
+    by dropping one variable at a time and measuring the change in R^2.
+    Args:
+        df (pd.DataFrame): DataFrame containing the data.
+        x_cols (list): List of independent variable column names.
+        y_col (str): Dependent variable column name.
+        method (str): Optimization method for fitting the model.
+    Returns:
+        pd.Series: Normalized contributions of each variable.
+    """
+    # Calculate r^2 for the full model
+    contributions = {var: [] for var in x_cols}
+    X, y = logi_model_fit_input(df, x_cols, y_col)
+    model = sm.Logit(y, X).fit(method=method)
+    r2 = r2_score(y, model.predict(X))
+    # Iterate over each variable, drop it, and calculate the change in r^2
+    for var in x_cols:
+        X_reduced = X.drop(columns=[var])
+        model_reduced = sm.Logit(y, X_reduced).fit(method=method)
+        r2_reduced = r2_score(y, model_reduced.predict(X_reduced))
+        delta = r2 - r2_reduced
+        contributions[var].append(delta)
     # normalize the contributions
     avg_contrib = {var: np.mean(contrib) for var, contrib in contributions.items()}
     total = sum(avg_contrib.values())
@@ -832,19 +861,45 @@ def side_and_difficulty_to_numeric(row: pd.Series) -> float:
 
 
 def filter_variables_for_model(dic_fit:dict, X:list, y:str, max_lag=None, tau=None):
+    """
+    This function filters the variables for the logistic regression model.
+    Calculate the correlation matrix and the contribution of each variable
+    by dropping one variable at a time. For different subjects, calculate the mean values.
+    Args:
+        dic_fit (dict): Dictionary with dataframes for each subject.
+        X (list): List of independent variable column names.
+        y (str): Dependent variable column name.
+        max_lag (int, optional): Maximum lag for the time kernel impact.
+        tau (int, optional): Time constant for the time kernel impact.
+    Returns:
+        corr_mat_list (list): List of correlation matrices for each subject.
+        norm_contribution_df (pd.DataFrame): DataFrame with normalized contributions of each subject
+    """
     corr_mat_list = []
     norm_contribution_df = pd.DataFrame([])
     for df_name, df_for_fit in zip(dic_fit.keys(), dic_fit.values()):
+        # if there is "time_kernel_impact" in the variables, get the time kernel impact
         if (max_lag is not None) & (tau is not None):
             df_for_fit = dft.get_time_kernel_impact(df_for_fit, y=y, max_lag=max_lag, tau=tau)
-        
+        # calculate the correlation matrix of each two variables
         corr_fit_X_df = df_for_fit[X].corr()
         corr_mat_list.append(corr_fit_X_df)
-
-        norm_contribution = hierarchical_partitioning(df_for_fit, x_cols = X, y_col = y, method='bfgs')
+        # calculate the contribution of each variable by dropping one variable at a time
+        norm_contribution = drop_one_var_contribution(df_for_fit, x_cols = X, y_col = y, method='bfgs')
         norm_contribution_df[df_name] = norm_contribution
 
     return corr_mat_list, norm_contribution_df
+
+def get_timebin_evidence(trial):
+    evidence_timebin = np.zeros(len(trial['high_tones']))
+    for t, n in zip(trial['high_tones'], range(len(trial['high_tones']))):
+        for freq in trial['high_tones'][t]:
+            if trial['high_tones'][t][freq] > 0:
+                evidence_timebin[n] += 1
+        for freq in trial['low_tones'][t]:
+            if trial['low_tones'][t][freq] > 0:
+                evidence_timebin[n] -= 1
+    return evidence_timebin
 
 
 def find_next_end_task_time_in_events(events_df: pd.DataFrame, date: str, subject: str) -> Tuple[Union[str, None], Union[float, None]]:

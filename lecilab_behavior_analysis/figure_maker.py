@@ -276,32 +276,37 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     The trick here is to think of a robust logic to do all this without errors. 
     
     """
+
+    df_task = df[df['task'] != 'Habituation']
     for mod in ['visual', 'auditory']:
         ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
-        if mod in df['stimulus_modality'].unique():
-            df_mod = df[df["stimulus_modality"] == mod]
-            if df_mod['difficulty'].nunique() == 1 and df_mod['difficulty'].unique()[0] == 'easy':
-                    # if all trials are easy, do the normal plot by difficulty
-                    df_mod["side_difficulty"] = df_mod.apply(lambda row: utils.side_and_difficulty_to_numeric(row), axis=1)
-                    df_mod = dft.add_mouse_first_choice(df_mod)
-                    df_mod['first_choice_numeric'] = df_mod['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
-                    plots.choice_by_difficulty_plot(df_mod, ax=ax_name)
+        if len(df_task) > 0:
+            if mod in df_task['stimulus_modality'].unique():
+                df_mod = df_task[df_task["stimulus_modality"] == mod]
+                if df_mod['difficulty'].nunique() == 1 and df_mod['difficulty'].unique()[0] == 'easy':
+                        # if all trials are easy, do the normal plot by difficulty
+                        df_mod["side_difficulty"] = df_mod.apply(lambda row: utils.side_and_difficulty_to_numeric(row), axis=1)
+                        df_mod = dft.add_mouse_first_choice(df_mod)
+                        df_mod['first_choice_numeric'] = df_mod['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+                        plots.choice_by_difficulty_plot(df_mod, ax=ax_name)
+                else:
+                    if mod == 'visual':
+                        xvar = 'visual_stimulus_ratio'
+                        value_type = 'discrete'
+                    elif mod == 'auditory':
+                        xvar = 'total_evidence_strength'
+                        value_type = 'continue'
+                    psych_df = dft.get_performance_by_difficulty_ratio(df_mod)
+                    plots.psychometric_plot(psych_df, x = xvar, y = 'first_choice_numeric', ax = ax_name, valueType=value_type)
+                # set the title of the axis
+                ax_name.set_title("choices on " + mod + " trials", fontsize=10)
+                # remove legend if it exists
+                if ax_name.get_legend() is not None:
+                    ax_name.get_legend().remove()
             else:
-                if mod == 'visual':
-                    xvar = 'visual_stimulus_ratio'
-                    value_type = 'discrete'
-                elif mod == 'auditory':
-                    xvar = 'total_evidence_strength'
-                    value_type = 'continue'
-                psych_df = dft.get_performance_by_difficulty_ratio(df_mod)
-                plots.psychometric_plot(psych_df, x = xvar, y = 'first_choice_numeric', ax = ax_name, valueType=value_type)
-            # set the title of the axis
-            ax_name.set_title("choices on " + mod + " trials", fontsize=10)
-            # remove legend if it exists
-            if ax_name.get_legend() is not None:
-                ax_name.get_legend().remove()
+                ax_name.text(0.1, 0.5, "No trials in " + mod, fontsize=10, color='k')
         else:
-            ax_name.text(0.1, 0.5, "No trials in " + mod, fontsize=10, color='k')
+            ax_name.text(0.1, 0.5, "Habituation phase", fontsize=10, color='k')
 
 
     # for mod in ['visual', 'auditory']:
