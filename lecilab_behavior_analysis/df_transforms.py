@@ -161,7 +161,7 @@ def get_evidence_ratio(df):
 
 def get_left_choice(df):
     df = add_mouse_first_choice(df)
-    df['left_choice'] = df['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    df['left_choice'] = df['first_choice'].apply(utils.transform_side_choice_to_numeric)
     return df
 
 
@@ -202,7 +202,7 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
     else:
         raise ValueError("modality must be either 'visual' or 'auditory'")
     df_copy = add_mouse_first_choice(df_copy)
-    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(utils.transform_side_choice_to_numeric)
 
     return df_copy
 
@@ -223,7 +223,7 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
         lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
         axis=1
     )
-    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+    df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(utils.transform_side_choice_to_numeric)
     return df_copy
 
 
@@ -796,13 +796,13 @@ def parameters_for_fit(df):
 
 
     df_copy['previous_port_before_stimulus_numeric'] = df_copy['previous_port_before_stimulus'].apply(
-                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                utils.transform_side_choice_to_numeric
                 )
     df_copy['roa_choice_numeric'] = df_copy['roa_choice'].apply(
                 lambda x: 1 if x == 'repeat' else 0 if x == 'alternate' else np.nan
                 )
     df_copy['last_choice_numeric'] = df_copy['last_choice'].apply(
-                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                utils.transform_side_choice_to_numeric
                 )
 
     # Add the correct column as numeric, 1 for correct, 0 for incorrect
@@ -814,13 +814,13 @@ def parameters_for_fit(df):
     df_copy = get_choice_before(df_copy)
 
     df_copy['previous_first_choice_numeric'] = df_copy['previous_first_choice'].apply(
-                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                utils.transform_side_choice_to_numeric
                 )
     df_copy['previous_last_choice_numeric'] = df_copy['previous_last_choice'].apply(
-                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                utils.transform_side_choice_to_numeric
                 )
     df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(
-                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                utils.transform_side_choice_to_numeric
                 )
     df_copy['previous_correct_numeric'] = df_copy['previous_correct'].astype('Int64')
 
@@ -831,7 +831,7 @@ def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
     if y == 'first_choice_numeric':
         df_copy = add_mouse_first_choice(df_copy)
         df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(
-                lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                utils.transform_side_choice_to_numeric
                 )
     elif y == 'correct_numeric':
         df_copy['correct_numeric'] = df_copy['correct'].astype(int)

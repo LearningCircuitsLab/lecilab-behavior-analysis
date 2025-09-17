@@ -783,7 +783,7 @@ def verify_params_time_kernel(dic:dict, y:str):
             if y == 'first_choice_numeric':
                 # df = dft.add_mouse_first_choice(df)
                 df['first_choice_numeric'] = df['first_choice'].apply(
-                        lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+                        transform_side_choice_to_numeric
                         )
             elif y == 'correct_numeric':
                 df['correct_numeric'] = df['correct'].astype(int)
@@ -1034,6 +1034,16 @@ def get_previous_row_index(df: pd.DataFrame, current_index) -> int:
         return df.index[current_pos - 1]
     else:
         raise IndexError("No previous row exists for the given index.")
+
+
+def transform_side_choice_to_numeric(side: str) -> Union[int, float]:
+    match side:
+        case "left":
+            return 1
+        case "right":
+            return 0
+        case _:
+            return np.nan
 
 
 if __name__ == "__main__":

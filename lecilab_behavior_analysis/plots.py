@@ -428,7 +428,7 @@ def choice_by_difficulty_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -
         x="side_difficulty",
         y="first_choice_numeric",
         data=df,
-        estimator=lambda x: np.mean(x),
+        estimator=lambda x: np.nanmean(x),
         ax=ax,
         # remove line
         linestyles="",

@@ -1,5 +1,6 @@
 import matplotlib.gridspec as gridspec
 import pandas as pd
+import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
@@ -287,7 +288,7 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
                         # if all trials are easy, do the normal plot by difficulty
                         df_mod["side_difficulty"] = df_mod.apply(lambda row: utils.side_and_difficulty_to_numeric(row), axis=1)
                         df_mod = dft.add_mouse_first_choice(df_mod)
-                        df_mod['first_choice_numeric'] = df_mod['first_choice'].apply(lambda x: 1 if x == 'left' else 0)
+                        df_mod['first_choice_numeric'] = df_mod['first_choice'].apply(utils.transform_side_choice_to_numeric)
                         plots.choice_by_difficulty_plot(df_mod, ax=ax_name)
                 else:
                     if mod == 'visual':
