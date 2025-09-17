@@ -5,10 +5,11 @@ from typing import Tuple, Union
 import lecilab_behavior_analysis.utils as utils
 import ast
 
-def fill_missing_data(df: pd.DataFrame) -> pd.DataFrame:
+def fill_missing_data(df_in: pd.DataFrame) -> pd.DataFrame:
     """
     Fill missing data in the dataframe.
     """
+    df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
     columns_to_fill = ["stimulus_modality", "current_training_stage", "difficulty", "correct_side"]
     for column in columns_to_fill:
         try:
