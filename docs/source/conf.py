@@ -11,14 +11,16 @@ import sys
 
 import setuptools_scm
 
-# Used when building API docs, put the dependencies
-# of any class you are documenting here
-autodoc_mock_imports = []
+
+# Mock external dependencies to avoid import errors during documentation build
+autodoc_mock_imports = [
+    "pandas", "matplotlib", "seaborn", "scikit-learn", "statsmodels", "plotly", "networkx"
+]
 
 # Add the module path to sys.path here.
 # If the directory is relative to the documentation root,
 # use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath("../../"))
 
 project = "lecilab-behavior-analysis"
 copyright = "2022, Hernando M Vergara"
@@ -71,13 +73,10 @@ templates_path = ["_templates"]
 
 # Automatically generate stub pages for API
 autosummary_generate = True
+autodoc_default_flags = ["members", "inherited-members"]
 
-# Ensure all members, including undocumented ones, are included in the documentation
-autodoc_default_options = {
-    'members': True,
-    'undoc-members': True,
-    'show-inheritance': True,
-}
+# Remove module names from class documentation
+add_module_names = False
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -88,6 +87,11 @@ exclude_patterns = [
     # https://github.com/sphinx-doc/sphinx/issues/1965#issuecomment-124732907
     "**/includes/**",
 ]
+
+# Add notebook files to the exclude_patterns list to prevent Sphinx from processing them
+exclude_patterns.extend([
+    "**/*.ipynb",  # Exclude all Jupyter notebooks
+])
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

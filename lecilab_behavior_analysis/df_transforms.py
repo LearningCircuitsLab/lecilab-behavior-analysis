@@ -351,13 +351,13 @@ def add_trial_of_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def add_trial_misses(df: pd.DataFrame) -> pd.DataFrame:
+def add_trial_misses(df_in: pd.DataFrame) -> pd.DataFrame:
     """
     Add a trial misses column to the dataframe.
     """
     # Check if the required columns are present
-    utils.column_checker(df, required_columns={"STATE_stimulus_state_END", "TRIAL_END"})
-    df = df.copy()  # Make a copy to avoid modifying the original DataFrame
+    utils.column_checker(df_in, required_columns={"STATE_stimulus_state_END", "TRIAL_END"})
+    df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
     df["miss_trial"] = df.apply(utils.is_this_a_miss_trial, axis=1)
 
     return df
@@ -469,6 +469,7 @@ def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
     df = add_trial_misses(df)
     df = add_mouse_first_choice(df)
     df = add_mouse_last_choice(df)
+    df = add_early_pokeouts(df)
 
     # add a column with the total number of trials
     for subject in pd.unique(df['subject']):
@@ -907,3 +908,14 @@ def get_box_usage_df(df: pd.DataFrame, events_df: pd.DataFrame, verbose: bool = 
             continue
         gsbu_dfs.append(utils.get_session_box_usage(df_session, session_duration=session_duration))
     return pd.concat(gsbu_dfs, ignore_index=True)
+
+
+def add_early_pokeouts(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds a boolean column 'early_pokeout' to the dataframe indicating whether there was an early pokeout
+    in the center port before holding the required time. This is irrespective of whether the trial was correct or incorrect.
+    """
+    utils.column_checker(df_in, required_columns={"STATE_ready_to_initiate_START", "Port2In", "Port2Out"})
+    df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
+    df['early_pokeout'] = df.apply(utils.is_this_an_early_pokeout_trial, axis=1)
+    return df

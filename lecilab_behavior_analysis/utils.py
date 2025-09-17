@@ -422,6 +422,38 @@ def is_this_a_miss_trial(series: pd.Series) -> bool:
         return False
 
 
+def is_this_an_early_pokeout_trial(series: pd.Series) -> Union[bool, None]:
+    """
+    checks if there was an early pokeout in the center port before holding the required time
+    """
+    # check if this can be computed based on the data
+    try:
+        rti_states = ast.literal_eval(series["STATE_ready_to_initiate_START"])
+        port2ins = ast.literal_eval(series["Port2In"])
+        port2outs = ast.literal_eval(series["Port2Out"])
+    except ValueError:
+        # if the value is not a list, return None
+        return None
+    # if any of the lists are empty, return None
+    if len(rti_states) == 0 or len(port2ins) == 0 or len(port2outs) == 0:
+        return None
+    # get the first poke in the center port after ready_to_initiate state
+    first_rti_state = np.min(rti_states)
+    first_pokein_after_stimulus_state = np.min(
+        [i for i in port2ins if i > first_rti_state]
+    )
+    first_pokeout_after_first_pokein = np.min(
+        [i for i in port2outs if i > first_pokein_after_stimulus_state]
+    )
+    time_held = first_pokeout_after_first_pokein - first_pokein_after_stimulus_state
+
+    # print(f'{series["trial"]} | {time_held} | {series["holding_time"]}')
+    if time_held < series["holding_time"]:
+        return True
+    else:
+        return False
+
+
 def trial_reaction_time(series: pd.Series) -> float:
     """
     This method calculates the reaction time of a trial.
@@ -614,6 +646,9 @@ def fit_lapse_logistic_independent(x, y, initial_params=None):
     return p_left, (lapse_left, lapse_right, beta, x0)
 
 def get_trial_port_hold(row, port_number):
+    """
+    This calculates everything, including those occurring in the ITIs for example.
+    """
     if not type(row) == pd.Series:
         raise ValueError("row must be a pandas Series")
     ins = row["Port" + str(port_number) + "In"]

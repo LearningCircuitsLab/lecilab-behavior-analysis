@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 import plotly.graph_objects as go
-
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 import lecilab_behavior_analysis.utils as utils
 from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
 
@@ -202,24 +203,42 @@ def summary_text_plot(
 
 
 def number_of_correct_responses_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
-    if "stimulus_modality" not in df.columns:
-        return correct_left_and_right_plot(df, ax)
-    elif df['stimulus_modality'].nunique() == 1:
-        # if there is only one modality, plot the correct left and right plot
-        return correct_left_and_right_plot(df, ax)
+    if ax is None:
+        ax = plt.gca()
+    column_checker(df, required_columns={"correct_side", "correct"})
+    if "stimulus_modality" not in df.columns or df['stimulus_modality'].nunique() == 1:
+        pass
     else:
-        return correct_left_and_right_plot_multisensory(df, ax)
+        # Create a new column combining 'correct_side' and 'stimulus_modality' with a line break for the x-axis
+        df["column_name_to_substitute"] = df["stimulus_modality"] + "\n" + df["correct_side"]
+        # drop correct_side and rename x
+        df = df.drop(columns=["correct_side"])
+        df = df.rename(columns={"column_name_to_substitute": "correct_side"})
+    columns_to_plot = ["correct", "correct_side"]
+    if "early_pokeout" in df.columns:
+        columns_to_plot.append("early_pokeout")
+        # Prepare data for plotting
+        grouped = df.groupby(columns_to_plot).size().unstack(fill_value=0)
+        # Call the new function
+        return partially_stacked_barplot(grouped, ax=ax)
+    else:
+        return correct_left_and_right_plot(df, ax=ax)
 
 
 def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     column_checker(df, required_columns={"correct_side", "correct"})
-    sns.countplot(data=df, x="correct_side", hue="correct", ax=ax, hue_order=[False, True])
+    # Define colors
+    colors = {
+        True: "forestgreen",
+        False: "firebrick"
+    }
+    sns.countplot(data=df, x="correct_side", hue="correct", ax=ax, hue_order=[False, True], palette=colors)
     ax.set_xlabel("Correct side")
     ax.set_ylabel("Number of trials")
     ax.set_ylim(top=ax.get_ylim()[1]*1.1)
-    ax.legend(["Error", "Correct"], bbox_to_anchor=(0.5, 1.05), loc="upper center", ncol=1, borderaxespad=0.0)
+    ax.legend(["Error", "Correct"], bbox_to_anchor=(0.5, 1), loc="upper center", ncol=2, borderaxespad=0.0)
     ax.get_legend().get_frame().set_linewidth(0.0)
     ax.get_legend().set_frame_on(False)
     # change labels of the legend
@@ -227,37 +246,59 @@ def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Ax
     return ax
 
 
-def correct_left_and_right_plot_multisensory(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+def partially_stacked_barplot(grouped: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
-    column_checker(df, required_columns={"correct_side", "correct", "stimulus_modality"})
-    
-    # Group the data by 'stimulus_modality', 'correct_side', and 'correct' and count occurrences
-    grouped_df = (
-        df.groupby(["stimulus_modality", "correct_side", "correct"])
-        .size()
-        .reset_index(name="count")
+
+    # Define colors
+    colors = {
+        True: "forestgreen",
+        False: "firebrick"
+    }
+
+    # Plot bars
+    for i, correct in enumerate([True, False]):
+        if isinstance(grouped.index, pd.MultiIndex):
+            base = grouped.xs(correct, level="correct")
+        else:
+            base = grouped[grouped.index == correct]
+
+        base.plot(
+            kind="bar",
+            stacked=True,
+            color=[colors[correct] if not early else "none" for early in base.columns],
+            edgecolor=colors[correct],
+            ax=ax,
+            position=i,
+            width=0.4,
+            legend=False
+        )
+
+    # Customize plot
+    ax.set_xlabel("Correct side")
+    ax.set_ylabel("Number of trials")
+    ax.set_xticks(range(len(grouped.index.get_level_values("correct_side").unique())))
+    ax.set_xticklabels(grouped.index.get_level_values("correct_side").unique(), rotation=0)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+    # Adjust xlim to ensure bars are centered properly
+    ax.set_xlim(-0.5, len(grouped.index.get_level_values("correct_side").unique()) - 0.5)
+
+    # Add legend
+    legend_elements = [
+        Line2D([0], [0], marker="o", color="forestgreen", markersize=10, label="Correct"),
+        Line2D([0], [0], marker="o", color="firebrick", markersize=10, label="Incorrect"),
+        Patch(facecolor="gray", edgecolor="gray", label="Successful center hold")
+    ]
+    ax.legend(
+        handles=legend_elements, 
+        bbox_to_anchor=(0.5, 1), 
+        loc="lower center", 
+        ncol=2, 
+        frameon=False
     )
-    
-    # Create a new column combining 'correct_side' and 'stimulus_modality' with a line break for the x-axis
-    grouped_df["x"] = grouped_df["correct_side"] + "\n" + grouped_df["stimulus_modality"]
-    
-    # Create a bar plot using the grouped data
-    sns.barplot(
-        data=grouped_df,
-        x="x",
-        y="count",
-        hue="correct",
-        ax=ax,
-        hue_order=[False, True],
-        errorbar=None,
-    )
-    
-    ax.set_xlabel("")
-    ax.set_ylabel("Number of Trials")
-    ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(title="Correct", loc="upper right")
-    
+
     return ax
 
 
@@ -469,7 +510,7 @@ def summary_matrix_plot(
             mat_df_metadata[session][t_label] for session in mat_df.columns
         ]
         for tlu in np.unique(t_label_uniques):
-            tlu_idx = [i for i, x in enumerate(t_label_uniques) if x == tlu]
+            tlu_idx = [i for i, x in t_label_uniques if x == tlu]
             ax.scatter(
                 [x + 0.5 for x in tlu_idx],
                 np.repeat(len(evidence_levels) + shift_up, len(tlu_idx)),
