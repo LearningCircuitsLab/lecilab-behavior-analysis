@@ -438,14 +438,17 @@ def is_this_an_early_pokeout_trial(series: pd.Series) -> Union[bool, None]:
     if len(rti_states) == 0 or len(port2ins) == 0 or len(port2outs) == 0:
         return None
     # get the first poke in the center port after ready_to_initiate state
-    first_rti_state = np.min(rti_states)
-    first_pokein_after_stimulus_state = np.min(
-        [i for i in port2ins if i > first_rti_state]
-    )
-    first_pokeout_after_first_pokein = np.min(
-        [i for i in port2outs if i > first_pokein_after_stimulus_state]
-    )
-    time_held = first_pokeout_after_first_pokein - first_pokein_after_stimulus_state
+    try:
+        first_rti_state = np.min(rti_states)
+        first_pokein_after_stimulus_state = np.min(
+            [i for i in port2ins if i > first_rti_state]
+        )
+        first_pokeout_after_first_pokein = np.min(
+            [i for i in port2outs if i > first_pokein_after_stimulus_state]
+        )
+        time_held = first_pokeout_after_first_pokein - first_pokein_after_stimulus_state
+    except ValueError:
+        return None
 
     # print(f'{series["trial"]} | {time_held} | {series["holding_time"]}')
     if time_held < series["holding_time"]:
