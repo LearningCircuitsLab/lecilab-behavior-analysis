@@ -379,6 +379,21 @@ def rsync_cluster_data(
         print(f"Error syncing data for {file_path}: {result.stderr.decode('utf-8')}")
     return result.returncode == 0
 
+def rsync_specific_file(
+    file_path: str,
+    credentials: dict,
+    local_path: str,
+) -> bool:
+    """
+    This method syncs the session data from the server to the local machine.
+    """
+    remote_path = f"{credentials['username']}@{credentials['host']}:{file_path}"
+    rsync_command = f"rsync -avz {remote_path} {local_path}"
+    result = subprocess.run(rsync_command, shell=True)
+    if result.returncode != 0:
+        print(f"Error syncing data for {file_path}: {result.stderr.decode('utf-8')}")
+    return result.returncode == 0
+
 # def rsync_sessions_summary(
 #     project_name: str,
 #     credentials: dict,
