@@ -119,12 +119,23 @@ def performance_vs_trials_plot(
     #     sns.lineplot(
     #         data=stage_df, x="total_trial", y="performance_w", ax=ax, label=stage
     #     )
+    if "hue" in kwargs:
+        hue = kwargs["hue"]
+    else:
+        hue = "current_training_stage"
+    if "palette" in kwargs:
+        palette = kwargs["palette"]
+    else:    
+        # standard palette
+        palette = sns.color_palette("tab10", n_colors=df[hue].nunique())
+    
     sns.lineplot(
         data=df,
         x="total_trial",
         y="performance_w",
-        hue="current_training_stage",
+        hue=hue,
         ax=ax,
+        palette=palette,
     )
     if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
         for sc in kwargs["session_changes"][1:]:
