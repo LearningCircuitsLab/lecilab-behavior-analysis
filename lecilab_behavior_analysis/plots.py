@@ -11,6 +11,8 @@ import matplotlib.colors as mcolors
 import plotly.graph_objects as go
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
+from scipy.stats import mannwhitneyu, ttest_ind, ttest_rel
+
 import lecilab_behavior_analysis.utils as utils
 from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
 
@@ -364,23 +366,25 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
         ax = plt.gca()
     
     default_point_kwargs = {
-            'color': 'blue',
+            'color': 'cornflowerblue',
             'markers': 'o',
             'errorbar': ("ci", 95),
             'label': 'Observed Choices',
             'native_scale': True,
             'linestyles': '',
             'markersize': 5,
-            'capsize': 0.01
+            'capsize': 0.01,
+            'alpha': 1.0
         }
     if point_kwargs is None:
         point_kwargs = {}
     point_kwargs = {**default_point_kwargs, **point_kwargs}
     
     default_line_kwargs = {
-            'color': 'red',
+            'color': 'lightcoral',
             'label': 'Lapse Logistic Fit (Independent)',
-            'linestyle': '-'
+            'linestyle': '-',
+            'alpha': 1.0,
         }
     if line_kwargs is None:
         line_kwargs = {}
@@ -393,10 +397,8 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
             # if there are 0s in the data, we need to add a small value to avoid log(0)
             df_copy[x + "_fit"] = df_copy[x]
             df_copy[x + "_fit"].replace(0, 0.0001, inplace=True)
-            ax.set_xlabel(x)
-        else:
-            df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
-            ax.set_xlabel("log_"+x)
+        df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
+        ax.set_xlabel("log_"+x)
     else:
         # bin the continuous values when valueType is not discrete
         bin_groups = pd.cut(df_copy[x], bins = bins)
@@ -1099,6 +1101,111 @@ def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.Data
     norm_contribution_df.mean(axis=1).sort_values().plot(kind='barh', ax=ax[1])
     ax[1].set_xlabel('Mean Contribution')
     plt.tight_layout()
+    plt.show()
+
+
+def plot_model_vars_params_compare(dic_fit:dict, X:list, y:str):
+    df_model_p = pd.DataFrame()
+    df_model_coef = pd.DataFrame()
+    df_model_z =  pd.DataFrame()
+    for df_name, df, color in zip(dic_fit.keys(), dic_fit.values(), sns.color_palette("colorblind", len(dic_fit))):
+        _, model = utils.logi_model_fit(df, X=X, y=y)
+        # plot the results
+        df_model_p[df_name] = model.pvalues
+        df_model_coef[df_name] = model.params
+        df_model_z[df_name] = model.tvalues
+
+    # plot the p-values coefficients and z
+    fig, ax = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
+    palette = sns.color_palette("colorblind", len(dic_fit))
+    df_model_p.index = ['intercept'] + X
+    df_model_coef.index = ['intercept'] + X
+    df_model_z.index = ['intercept'] + X
+    df_model_p_long = df_model_p.reset_index().melt(id_vars='index', var_name='Mouse', value_name='Value')
+    sns.stripplot(data=df_model_p_long, ax=ax[0], x='index', y='Value', hue='Mouse', palette=palette, alpha=0.8, size=4)
+    sns.pointplot(data=df_model_p_long, x='index', y='Value', ax=ax[0], color='k', join=False, ci=95, markersize=5, estimator='median')
+    ax[0].axhline(y=0.05, color='red', linestyle='--', label='Significance Threshold (0.05)')
+    df_model_coef_long = df_model_coef.reset_index().melt(id_vars='index', var_name='Mouse', value_name='Value')
+    sns.stripplot(data=df_model_coef_long, ax=ax[1], x='index', y='Value', hue='Mouse', palette=palette, alpha=0.8, size=4)
+    sns.pointplot(data=df_model_coef_long, x='index', y='Value', ax=ax[1], color='k', join=False, ci=95, markersize=5, estimator='median')
+    df_model_z_long = df_model_z.reset_index().melt(id_vars='index', var_name='Mouse', value_name='Value')
+    sns.stripplot(data=df_model_z_long, ax=ax[2], x='index', y='Value', hue='Mouse', palette=palette, alpha=0.8, size=4)
+    sns.pointplot(data=df_model_z_long, x='index', y='Value', ax=ax[2], color='k', join=False, ci=95, markersize=5, estimator='median')
+    # make x label not overlapping
+    for a in ax:
+        if a == ax[2]:
+            a.set_xticklabels(a.get_xticklabels(), rotation=8, ha='right')
+            a.set_xlabel("")
+        else:
+            a.set_xlabel("")
+        a.legend([], [], frameon=False)         
+    ax[0].set_ylabel("P-values")
+    ax[1].set_ylabel("Coefficients")
+    ax[2].set_ylabel("Z-scores")
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_param_comparison(
+    df,
+    params,
+    conditions,
+    test="paired_t",
+    title=None,
+    figsize=(14, 4),
+    palette=None,
+):
+
+    custom_params = {"axes.spines.right": False, "axes.spines.top": False}
+    sns.set_theme(style="ticks", rc=custom_params)
+
+    fig, axes = plt.subplots(1, len(params), figsize=figsize, sharey=False)
+
+    for i, param in enumerate(params):
+        ax = axes[i]
+
+        sns.stripplot(
+            data=df, x="condition", y=param, alpha=0.7,
+            order=conditions,
+            jitter=True, ax=ax, palette=palette
+        )
+        sns.pointplot(
+            data=df, x="condition", y=param, ci=95, join=False,
+            order=conditions,
+            color="black", estimator='median', ax=ax
+        )
+
+        group1 = df.loc[df["condition"] == conditions[0], param]
+        group2 = df.loc[df["condition"] == conditions[1], param]
+
+        if test == "paired_t":
+            stat, p = ttest_rel(group1, group2)
+        elif test == "independent_t":
+            stat, p = ttest_ind(group1, group2, equal_var=False)
+        elif test == "mannwhitney":
+            stat, p = mannwhitneyu(group1, group2, alternative="two-sided")
+        else:
+            raise ValueError("Unsupported test type. Use 'paired_t', 'independent_t', or 'mannwhitney'.")
+
+        if p < 0.001:
+            sig = "***"
+        elif p < 0.01:
+            sig = "**"
+        elif p < 0.05:
+            sig = "*"
+        else:
+            sig = "n.s."
+
+        y_max = max(df[param]) * 1.1
+        ax.plot([0, 1], [y_max, y_max], color="black")
+        ax.text(0.5, y_max, sig, ha="center", va="bottom", fontsize=14)
+
+        ax.set_title(param)
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+
+    plt.tight_layout()
+    fig.suptitle(title, y=1.05, fontsize=16)
     plt.show()
 
 
