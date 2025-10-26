@@ -138,9 +138,10 @@ def column_checker(df: pd.DataFrame, required_columns: set):
         required_columns (set): Set of required columns
     """
     if not required_columns.issubset(df.columns):
+        missing_columns = required_columns - set(df.columns)
         raise ValueError(
             "The dataframe must have the following columns: "
-            + ", ".join(required_columns)
+            + ", ".join(missing_columns)
         )
 
 
@@ -628,6 +629,24 @@ def fit_lapse_logistic_independent(x, y, initial_params=None):
     p_left = lapse_left + (1 - lapse_left - lapse_right) / (1 + np.exp(-beta * (xs - x0)))
     return p_left, (lapse_left, lapse_right, beta, x0)
 
+def psychometric_curve_fitting_params(df: pd.DataFrame, x, y, valueType = 'discrete', bins = 6):
+    column_checker(df, required_columns={x, y})
+    df_copy = df.copy(deep=True)
+    if valueType == 'discrete':
+        if 0 in df_copy[x].unique():
+            # if there are 0s in the data, we need to add a small value to avoid log(0)
+            df_copy[x + "_fit"] = df_copy[x]
+            df_copy[x + "_fit"].replace(0, 0.0001, inplace=True)
+        df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
+    else:
+        # bin the continuous values when valueType is not discrete
+        bin_groups = pd.cut(df_copy[x], bins = bins)
+        labels = df_copy[x].groupby(bin_groups).mean()
+        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = bins, labels = labels).astype(float)
+    xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
+    p_left, params = fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
+    return p_left, params
+
 def get_trial_port_hold(row, port_number):
     if not type(row) == pd.Series:
         raise ValueError("row must be a pandas Series")
@@ -744,15 +763,16 @@ def drop_one_var_contribution(df, x_cols, y_col, method='newton'):
     return pd.Series(norm_contrib)
 
 def previous_impact_on_time_kernel(series, max_lag=10, tau=5):
-    kernel = np.exp(-np.arange(max_lag+1, 1, -1) / tau)
+    # kernel = np.exp(-np.arange(max_lag+1, 1, -1) / tau)  # exponential decay kernel
+    kernel = 1 / (1 + np.arange(max_lag+1, 1, -1) / tau)  # hyperbolic decay kernel
     padded = np.concatenate([[0]*max_lag, series])
     return np.array([
         np.dot(kernel, padded[i - max_lag:i])
         for i in range(max_lag, len(padded))
     ])
 
-def verify_params_time_kernel(dic:dict, y:str):
-    combinations = list(itertools.product(range(1,20), range(1, 20)))
+def verify_params_time_kernel(dic:dict, y:str, max_lag_range=range(1,10), tau_range=range(1,10)):
+    combinations = list(itertools.product(max_lag_range, tau_range))
     comb_dict = {}
     # iterate all the combinations of max_lag and tau of time kernel
     for comb in combinations:

@@ -787,12 +787,18 @@ def parameters_for_fit(df):
         df_copy = get_left_auditory_stim(df_copy, 'total_percentage_of_tones')
         df_copy = get_left_auditory_stim(df_copy, 'number_of_tones')
         df_copy = get_left_auditory_stim(df_copy, 'percentage_of_timebins_with_evidence')
+        df_copy['abs_total_evidence_strength'] = df_copy['total_evidence_strength'].abs()
         df_copy['high_tones'] = df_copy['auditory_stimulus'].apply(lambda row: eval(row)['high_tones'])
         df_copy['high_tones_amplitude_sum'] = df_copy['high_tones'].apply(lambda row: np.sum(pd.DataFrame(row).values))
         df_copy['low_tones'] = df_copy['auditory_stimulus'].apply(lambda row: eval(row)['low_tones'])
         df_copy['low_tones_amplitude_sum'] = df_copy['low_tones'].apply(lambda row: np.sum(pd.DataFrame(row).values))
         df_copy['amplitude_strength'] = ((df_copy['high_tones_amplitude_sum']/df_copy['number_of_tones_high']) / (df_copy['low_tones_amplitude_sum']/df_copy['number_of_tones_low']))
-
+        df_copy['left_tones_amplitude_sum'] = df_copy.apply(lambda row: row['high_tones_amplitude_sum'] if row['correct_side'] == 'left' else row['low_tones_amplitude_sum'], axis=1)
+        df_copy['amplitude_strength_left_right'] = df_copy.apply(lambda row: (
+                                                                ((row['high_tones_amplitude_sum'] / (row['number_of_tones_high'] or np.nan)) / (row['low_tones_amplitude_sum'] / (row['number_of_tones_low'] or np.nan)))
+                                                                if row['correct_side'] == 'left'
+                                                                else ((row['low_tones_amplitude_sum'] / (row['number_of_tones_low'] or np.nan)) / (row['high_tones_amplitude_sum'] / (row['number_of_tones_high'] or np.nan)))
+                                                            ), axis=1)
 
     df_copy['previous_port_before_stimulus_numeric'] = df_copy['previous_port_before_stimulus'].apply(
                 lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
@@ -832,11 +838,12 @@ def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
         df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(
                 lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
                 )
+        df_copy['time_kernel_impact_first_choice'] = utils.previous_impact_on_time_kernel(df_copy[y], max_lag=max_lag, tau=tau)
     elif y == 'correct_numeric':
         df_copy['correct_numeric'] = df_copy['correct'].astype(int)
+        df_copy['time_kernel_impact_correct'] = utils.previous_impact_on_time_kernel(df_copy[y], max_lag=max_lag, tau=tau)
     else:
         raise ValueError("impact should be either 'first_choice_numeric' and 'correct_numeric'")
-    df_copy['time_kernel_impact'] = utils.previous_impact_on_time_kernel(df_copy[y], max_lag=max_lag, tau=tau)
     
     return df_copy
 
