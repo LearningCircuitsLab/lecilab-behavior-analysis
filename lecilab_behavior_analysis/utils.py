@@ -980,8 +980,11 @@ def find_next_end_task_time_in_events(events_df: pd.DataFrame, date: str, subjec
     Find the end task time in the events dataframe for a given date.
     """
     # filter events
-    filtered_events = events_df[events_df['description'] == "The subject has returned home."]
-    
+    filtered_events = events_df[np.logical_or(
+        events_df['description'] == "The subject has returned home.",
+        events_df['description'].str.startswith("Subject back home:")
+    )]
+
     # get the first event after the given date
     dates_in_datetime = pd.to_datetime(filtered_events['date'])
     end_event = filtered_events[dates_in_datetime > pd.to_datetime(date)]
