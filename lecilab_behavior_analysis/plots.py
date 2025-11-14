@@ -111,16 +111,13 @@ def performance_vs_trials_plot(
     # check if the dataframe has the necessary columns
     column_checker(df, required_columns={"total_trial", "performance_w"})
 
+    if ax is None:
+        ax = plt.gca()
+    
     # if there is no "current_training_stage" column, generate a fake one
     if "current_training_stage" not in df.columns:
         df["current_training_stage"] = "All"
 
-    # plot the performance
-    # for stage in df["current_training_stage"].unique():
-    #     stage_df = df[df["current_training_stage"] == stage]
-    #     sns.lineplot(
-    #         data=stage_df, x="total_trial", y="performance_w", ax=ax, label=stage
-    #     )
     if "hue" in kwargs:
         hue = kwargs["hue"]
     else:
@@ -131,14 +128,45 @@ def performance_vs_trials_plot(
         # standard palette
         palette = sns.color_palette("tab10", n_colors=df[hue].nunique())
     
-    sns.lineplot(
-        data=df,
-        x="total_trial",
-        y="performance_w",
-        hue=hue,
-        ax=ax,
-        palette=palette,
-    )
+    # Sort data by trial number to ensure proper line plotting
+    df_sorted = df.sort_values("total_trial").reset_index(drop=True)
+    
+    # Find break points where hue column changes
+    hue_changes = df_sorted[hue] != df_sorted[hue].shift(1)
+    break_indices = df_sorted[hue_changes].index.tolist()
+    
+    # Add start and end indices for completeness
+    if 0 not in break_indices:
+        break_indices.insert(0, 0)
+    break_indices.append(len(df_sorted))
+    
+    # Keep track of which hue values have been labeled
+    labeled_hues = set()
+    
+    # Plot segments between hue changes
+    for i in range(len(break_indices) - 1):
+        start_idx = break_indices[i]
+        end_idx = break_indices[i + 1]
+        segment = df_sorted.iloc[start_idx:end_idx]
+        
+        if len(segment) > 0:
+            hue_value = segment[hue].iloc[0]
+            color_idx = list(df_sorted[hue].unique()).index(hue_value)
+            
+            # Only label the first occurrence of each hue value
+            label = hue_value if hue_value not in labeled_hues else ""
+            if hue_value not in labeled_hues:
+                labeled_hues.add(hue_value)
+            
+            if len(segment) > 1:
+                ax.plot(segment["total_trial"], segment["performance_w"], 
+                       color=palette[color_idx], 
+                       label=label)
+            else:
+                # Single point - plot as scatter
+                ax.scatter(segment["total_trial"], segment["performance_w"], 
+                          color=palette[color_idx], 
+                          label=label)
     if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
         for sc in kwargs["session_changes"][1:]:
             tt = df.loc[sc]["total_trial"]
@@ -153,9 +181,17 @@ def performance_vs_trials_plot(
     # remove box
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    
+    # Add legend for the different hue values
+    handles, labels = ax.get_legend_handles_labels()
+    if handles:  # Only create legend if there are handles
+        ax.legend()
+    
     if "legend" in kwargs:
         if kwargs["legend"] == False:
-            ax.get_legend().remove()
+            legend = ax.get_legend()
+            if legend:
+                legend.remove()
 
     return ax
 
@@ -1101,111 +1137,6 @@ def plot_filter_model_variables(corr_mat_list:list, norm_contribution_df:pd.Data
     norm_contribution_df.mean(axis=1).sort_values().plot(kind='barh', ax=ax[1])
     ax[1].set_xlabel('Mean Contribution')
     plt.tight_layout()
-    plt.show()
-
-
-def plot_model_vars_params_compare(dic_fit:dict, X:list, y:str):
-    df_model_p = pd.DataFrame()
-    df_model_coef = pd.DataFrame()
-    df_model_z =  pd.DataFrame()
-    for df_name, df, color in zip(dic_fit.keys(), dic_fit.values(), sns.color_palette("colorblind", len(dic_fit))):
-        _, model = utils.logi_model_fit(df, X=X, y=y)
-        # plot the results
-        df_model_p[df_name] = model.pvalues
-        df_model_coef[df_name] = model.params
-        df_model_z[df_name] = model.tvalues
-
-    # plot the p-values coefficients and z
-    fig, ax = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
-    palette = sns.color_palette("colorblind", len(dic_fit))
-    df_model_p.index = ['intercept'] + X
-    df_model_coef.index = ['intercept'] + X
-    df_model_z.index = ['intercept'] + X
-    df_model_p_long = df_model_p.reset_index().melt(id_vars='index', var_name='Mouse', value_name='Value')
-    sns.stripplot(data=df_model_p_long, ax=ax[0], x='index', y='Value', hue='Mouse', palette=palette, alpha=0.8, size=4)
-    sns.pointplot(data=df_model_p_long, x='index', y='Value', ax=ax[0], color='k', join=False, ci=95, markersize=5, estimator='median')
-    ax[0].axhline(y=0.05, color='red', linestyle='--', label='Significance Threshold (0.05)')
-    df_model_coef_long = df_model_coef.reset_index().melt(id_vars='index', var_name='Mouse', value_name='Value')
-    sns.stripplot(data=df_model_coef_long, ax=ax[1], x='index', y='Value', hue='Mouse', palette=palette, alpha=0.8, size=4)
-    sns.pointplot(data=df_model_coef_long, x='index', y='Value', ax=ax[1], color='k', join=False, ci=95, markersize=5, estimator='median')
-    df_model_z_long = df_model_z.reset_index().melt(id_vars='index', var_name='Mouse', value_name='Value')
-    sns.stripplot(data=df_model_z_long, ax=ax[2], x='index', y='Value', hue='Mouse', palette=palette, alpha=0.8, size=4)
-    sns.pointplot(data=df_model_z_long, x='index', y='Value', ax=ax[2], color='k', join=False, ci=95, markersize=5, estimator='median')
-    # make x label not overlapping
-    for a in ax:
-        if a == ax[2]:
-            a.set_xticklabels(a.get_xticklabels(), rotation=8, ha='right')
-            a.set_xlabel("")
-        else:
-            a.set_xlabel("")
-        a.legend([], [], frameon=False)         
-    ax[0].set_ylabel("P-values")
-    ax[1].set_ylabel("Coefficients")
-    ax[2].set_ylabel("Z-scores")
-    plt.tight_layout()
-    plt.show()
-
-
-def plot_param_comparison(
-    df,
-    params,
-    conditions,
-    test="paired_t",
-    title=None,
-    figsize=(14, 4),
-    palette=None,
-):
-
-    custom_params = {"axes.spines.right": False, "axes.spines.top": False}
-    sns.set_theme(style="ticks", rc=custom_params)
-
-    fig, axes = plt.subplots(1, len(params), figsize=figsize, sharey=False)
-
-    for i, param in enumerate(params):
-        ax = axes[i]
-
-        sns.stripplot(
-            data=df, x="condition", y=param, alpha=0.7,
-            order=conditions,
-            jitter=True, ax=ax, palette=palette
-        )
-        sns.pointplot(
-            data=df, x="condition", y=param, ci=95, join=False,
-            order=conditions,
-            color="black", estimator='median', ax=ax
-        )
-
-        group1 = df.loc[df["condition"] == conditions[0], param]
-        group2 = df.loc[df["condition"] == conditions[1], param]
-
-        if test == "paired_t":
-            stat, p = ttest_rel(group1, group2)
-        elif test == "independent_t":
-            stat, p = ttest_ind(group1, group2, equal_var=False)
-        elif test == "mannwhitney":
-            stat, p = mannwhitneyu(group1, group2, alternative="two-sided")
-        else:
-            raise ValueError("Unsupported test type. Use 'paired_t', 'independent_t', or 'mannwhitney'.")
-
-        if p < 0.001:
-            sig = "***"
-        elif p < 0.01:
-            sig = "**"
-        elif p < 0.05:
-            sig = "*"
-        else:
-            sig = "n.s."
-
-        y_max = max(df[param]) * 1.1
-        ax.plot([0, 1], [y_max, y_max], color="black")
-        ax.text(0.5, y_max, sig, ha="center", va="bottom", fontsize=14)
-
-        ax.set_title(param)
-        ax.set_xlabel("")
-        ax.set_ylabel("")
-
-    plt.tight_layout()
-    fig.suptitle(title, y=1.05, fontsize=16)
     plt.show()
 
 

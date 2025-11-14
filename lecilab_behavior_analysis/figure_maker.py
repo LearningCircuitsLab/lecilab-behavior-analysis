@@ -204,8 +204,8 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     #     raise ValueError("The dataframe contains more than one session")
 
     # create the main figure with GridSpec
-    width = kwargs.get("width", 10)
-    height = kwargs.get("height", 6)
+    width = kwargs.get("width", 15)
+    height = kwargs.get("height", 10)
     fig = plt.figure(figsize=(width, height))
     rows_gs = gridspec.GridSpec(3, 1, height_ratios=[1, 1, 1])
     # Create separate inner grids for each row with different width ratios
@@ -248,10 +248,20 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     # Add the performance vs trials plot
     window = kwargs.get("perf_window", 50)
     df = dft.get_performance_through_trials(df, window=window)
-    # find the index of the session changes
+    # find the index of the session changes and add as vertical lines to the performance plot
     session_changes = df[df.session != df.session.shift(1)].index
-    # add a vertical line to the performance plot
-    perf_ax = plots.performance_vs_trials_plot(df, perf_ax, legend=False, session_changes=session_changes)
+    # define the hue based on stimulus_modality or current_training_stage if there are more than one
+    perf_hue = kwargs.get("perf_hue", None)
+    if perf_hue is None:
+        if df.current_training_stage.nunique() > 1:
+            perf_hue = "current_training_stage"
+        else:
+            perf_hue = "stimulus_modality"
+    perf_ax = plots.performance_vs_trials_plot(df,
+                                               perf_ax,
+                                               legend=True,
+                                               session_changes=session_changes,
+                                               hue=perf_hue)
     lrc_ax = plots.number_of_correct_responses_plot(df, lrc_ax)
     df["repeat_or_alternate"] = dft.get_repeat_or_alternate_series(df.correct_side)
     df = dft.get_repeat_or_alternate_performance(df, window=window)
@@ -283,7 +293,7 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
         ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
         if len(df_task) > 0:
             if mod in df_task['stimulus_modality'].unique():
-                df_mod = df_task[df_task["stimulus_modality"] == mod]
+                df_mod = df_task[df_task["stimulus_modality"] == mod].copy()
                 if df_mod['difficulty'].nunique() == 1 and df_mod['difficulty'].unique()[0] == 'easy':
                         # if all trials are easy, do the normal plot by difficulty
                         df_mod["side_difficulty"] = df_mod.apply(lambda row: utils.side_and_difficulty_to_numeric(row), axis=1)
