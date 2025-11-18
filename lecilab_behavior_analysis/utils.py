@@ -297,7 +297,7 @@ def get_outpath():
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
         "tudou": "/home/kudongdong/data/LeciLab/behavioral_data",
-        "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
+        "nuo-rostower": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
         "minibaps": "/archive/training_village",
     }
     return paths.get(hostname, "default/path")
@@ -316,7 +316,7 @@ def get_idibaps_cluster_credentials():
             "username": "kudongdong",
             "host": "mini",
         }
-    elif hostname == "setup2":
+    elif hostname == "nuo-rostower":
         return {
             "username": "kudongdong",
             "host": "mini",
