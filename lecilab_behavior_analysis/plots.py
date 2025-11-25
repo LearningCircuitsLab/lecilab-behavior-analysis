@@ -438,7 +438,7 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     else:
         # bin the continuous values when valueType is not discrete
         bin_groups = pd.cut(df_copy[x], bins = bins)
-        labels = df_copy[x].groupby(bin_groups).mean()
+        labels = df_copy[x].groupby(bin_groups, observed=True).mean()
         df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = bins, labels = labels).astype(float)
         # df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
         # ax.set_xlabel("log_" + x + "*10")
@@ -460,6 +460,8 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
         ax.set_ylabel("P(Correct Choices)")
     ax.set_ylim(0, 1)
     ax.legend()
+    # remove legend box
+    ax.get_legend().get_frame().set_linewidth(0.0)
     # despine
     ax.spines[["top", "right"]].set_visible(False)
     return ax
@@ -634,7 +636,7 @@ def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) ->
     ax_right.invert_xaxis()  # Flip the x-axis to make the plot point towards the main plot
     ax_right.set_xlabel("")
     ax_right.yaxis.set_label_position('right')  # Force y-label on the right
-    ax_right.set_ylabel("Reaction Times (RT) [ms]", rotation=270, fontsize=28, labelpad=30)
+    ax_right.set_ylabel("Reaction times (s)", rotation=270, fontsize=28, labelpad=30)
 
     ax_right.tick_params(right=True, left=False, labelleft=False, labelright=True, bottom=False, labelbottom=False, labelsize=25, width=2)
     ax_right.spines['left'].set_visible(False)
@@ -682,7 +684,7 @@ def plot_time_between_trials_and_reaction_time(df_in: pd.DataFrame, **kwargs) ->
         sns.histplot(y=df['time_between_trials'], ax=ax_left, color="tab:blue")
 
     ax_left.set_xlabel("")
-    ax_left.set_ylabel("Time Between Trials (TBT) [ms]", fontsize=28)
+    ax_left.set_ylabel("Time between trials (s)", fontsize=28)
     ax_left.spines['left'].set_visible(False)
     ax_left.spines['right'].set_visible(False)
     ax_left.spines['top'].set_visible(False)
@@ -1064,16 +1066,40 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
         color = kwargs["color"]
     else:
         color = "black"
+    if "ticksize" in kwargs:
+        ticksize = kwargs["ticksize"]
+    else:
+        ticksize = 8
+    if "axislabelsize" in kwargs:
+        axislabelsize = kwargs["axislabelsize"]
+    else:
+        axislabelsize = 10
+    if "ylim_bottom" in kwargs:
+        ylim_bottom = kwargs["ylim_bottom"]
+    else:
+        ylim_bottom = None
+    if "ylim_top" in kwargs:
+        ylim_top = kwargs["ylim_top"]
+    else:
+        ylim_top = None
+
     sns.lineplot(data=df, x=group_trials_by, y=mean_col, ax=ax_to_use, color=color, linewidth=2)
-    ax_to_use.fill_between(df[group_trials_by], df[mean_col] - df[bot95_col],
-                            df[mean_col] + df[top95_col], color=color, alpha=0.2)
+    ax_to_use.fill_between(df[group_trials_by], df[bot95_col], df[top95_col], color=color, alpha=0.2)
     ax_to_use.set_ylabel(f"{item_to_show}", color=color)
     ax_to_use.spines["top"].set_visible(False)
+
+    # increase the font size of the ticks
+    ax_to_use.tick_params(axis='x', labelsize=ticksize)
+    ax_to_use.tick_params(axis='y', labelsize=ticksize)
+    # increase the size of the y axis labels
+    ax_to_use.yaxis.label.set_size(axislabelsize)
+    ax_to_use.set_ylim(bottom=ylim_bottom, top=ylim_top)
 
     if not add_stuff:
         ax_to_use.set_xlabel(group_trials_by)
         # remove the top and right spines
         ax_to_use.spines["right"].set_visible(False)
+        ax_to_use.xaxis.label.set_size(axislabelsize)
     # rotate the x-axis labels and align them to the end
     for label in ax_to_use.get_xticklabels():
         label.set_rotation(45)
@@ -1185,4 +1211,48 @@ def plot_box_usage_by_date(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> p
     ax.set_xlabel("Date")
     ax.set_ylabel("Percentage of time (%)")
     
+    return ax
+
+
+def pointplot_stimulus_dual_dependence(
+    df,
+    x_variable,
+    column_name,
+    hue_variable,
+    ax=None,
+    folded=False,
+    x_label=None,
+    y_label=None,
+    estimator=np.mean,
+):
+    """Plot a pointplot showing the dependence of a column on the stimulus evidence,
+    with different lines for a different variable (e.g., overall dB)."""
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(4,3))
+    x = f'{x_variable}_abs' if folded else x_variable
+    x_label = x_variable if x_label is None else x_label
+    x_label = f'{x_label} (abs)' if folded else x_label
+    ax = sns.pointplot(
+        data=df,
+        x=x,
+        y=column_name,
+        hue=hue_variable,
+        dodge=True,
+        markers='o',
+        linestyles='-',
+        palette='coolwarm',
+        native_scale=True,
+        ax=ax,
+        estimator=estimator,
+    )
+    ax.set_xlabel(x_label, size=14)
+    ax.set_ylabel(y_label if y_label is not None else column_name, size=14)
+    # change the size of the ticks using tick_params
+    ax.tick_params(axis='x', labelsize=12)
+    ax.tick_params(axis='y', labelsize=12)
+    # plt.xticks(rotation=45, ha='right')
+    #despine
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    # plt.tight_layout()
     return ax
