@@ -251,8 +251,8 @@ def get_sound_stats(sound_dict: dict) -> dict:
     low_mat_stats = analyze_sound_matrix(low_mat)
     # calculate the evidence strength for the high sound
     total_high_evidence_strength = sound_evidence_strength(
-        high_mat_stats["number_of_tones"],
-        low_mat_stats["number_of_tones"])
+        high_mat_stats["percentage_of_timebins_with_evidence"],
+        low_mat_stats["percentage_of_timebins_with_evidence"])
 
     sound_stats = {
         "high_tones": high_mat_stats,
@@ -291,6 +291,26 @@ def sound_evidence_strength(x, y):
     return (x - y) / (x + y)
 
 
+def get_decibels_of_cloud_of_tones(sound_dict: dict) -> dict:
+    # if the entries are dictionaries, convert them to dataframes
+    if isinstance(sound_dict["high_tones"], dict):
+        high_mat = pd.DataFrame(sound_dict["high_tones"])
+    else:
+        high_mat = sound_dict["high_tones"]
+    if isinstance(sound_dict["low_tones"], dict):
+        low_mat = pd.DataFrame(sound_dict["low_tones"])
+    else:
+        low_mat = sound_dict["low_tones"]
+    # get the mean of the values that are different than zero
+    high_db = high_mat[high_mat > 0].mean(axis=None)
+    low_db = low_mat[low_mat > 0].mean(axis=None)
+    # concatenate both dataframes
+    combined_db = pd.concat([high_mat, low_mat], axis=1)
+    overall_db = combined_db[combined_db > 0].mean(axis=None)
+
+    return {"high_db": high_db, "low_db": low_db, "overall_db": overall_db}
+
+
 def get_outpath():
     hostname = socket.gethostname()
     paths = {
@@ -308,7 +328,7 @@ def get_idibaps_cluster_credentials():
     if hostname == "tectum":
         return {
             "username": "hvergara",
-            "host": "mini",
+            "host": "mini2",
             # "port": 443,
         }
     elif hostname == "tudou":
@@ -500,6 +520,18 @@ def trial_reaction_time(series: pd.Series) -> float:
     return np.nanmin([port1_in, port3_in]) - out_time
 
 
+def trial_initiation_time(series: pd.Series) -> float:
+    """
+    This method calculates the initiation time of a trial.
+    """
+    try:
+        in_time = np.min(ast.literal_eval(series["Port2In"]))
+    except Exception:
+        return np.nan
+    trial_start = series["TRIAL_START"]
+    return in_time - trial_start
+
+
 def first_poke_after_stimulus_state(series: pd.Series) -> Union[str, None]:
     # convert the series to a dictionary
     ser_dict = series.to_dict()
@@ -676,7 +708,7 @@ def psychometric_curve_fitting_params(df: pd.DataFrame, x, y, valueType = 'discr
     else:
         # bin the continuous values when valueType is not discrete
         bin_groups = pd.cut(df_copy[x], bins = bins)
-        labels = df_copy[x].groupby(bin_groups).mean()
+        labels = df_copy[x].groupby(bin_groups, observed=True).mean()
         df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = bins, labels = labels).astype(float)
     xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
     p_left, params = fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])

@@ -184,7 +184,15 @@ def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
     df['total_percentage_of_tones_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['total_percentage_of_tones'])
     df['percentage_of_timebins_with_evidence_high'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['high_tones']['percentage_of_timebins_with_evidence'])
     df['percentage_of_timebins_with_evidence_low'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['low_tones']['percentage_of_timebins_with_evidence'])
-    df['total_evidence_strength'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['total_evidence_strength'])
+    # df['total_evidence_strength'] = df['auditory_real_statistics'].apply(lambda x: eval(x)['total_evidence_strength'])
+    # the total evidence strength needs to be recalculated as in the task it was done with suboptimal values (number of tones instead of percentage of timebins with evidence)
+    df['total_evidence_strength'] = df.apply(
+        lambda row: utils.sound_evidence_strength(
+            row['percentage_of_timebins_with_evidence_high'],
+            row['percentage_of_timebins_with_evidence_low']
+        ),
+        axis=1
+    )
     return df
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
@@ -272,18 +280,21 @@ def get_training_summary_matrix(df: pd.DataFrame) -> Tuple[pd.DataFrame, dict]:
 
 def calculate_time_between_trials_and_reaction_time(in_df: pd.DataFrame) -> pd.DataFrame:
     # TODO: separate this into two functions, one for time between trials and one for reaction time
-    
     """
     Calculate Time Between Trials and Reaction Time.
     """
     # Check if the required columns are present
-    utils.column_checker(in_df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out"})
+    utils.column_checker(in_df, required_columns={"Port1In", "Port1Out", "Port2In", "Port2Out", "Port3In", "Port3Out", "TRIAL_START"})
     df = in_df.copy()  # Make a copy to avoid modifying the original DataFrame
     for date in pd.unique(df['date']):
         date_df = df[df['date'] == date].copy()
-        port2outs = date_df['Port2Out'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
-        date_df['time_between_trials'] = port2outs.diff()
-        df.loc[df['date'] == date, 'time_between_trials'] = date_df['time_between_trials']
+        # port2outs = date_df['Port2Out'].apply(lambda x: np.max(ast.literal_eval(x)) if isinstance(x, str) else np.max(x))
+        time_between_trials = date_df["TRIAL_START"].diff()
+        # find the indeces of session changes
+        session_change_indices = date_df[date_df['session'].diff() != 0].index
+        # set the time between trials to nan for these indeces
+        time_between_trials.loc[session_change_indices] = np.nan
+        df.loc[df['date'] == date, 'time_between_trials'] = time_between_trials
     # Calculate the reaction time
     df['reaction_time'] = df.apply(utils.trial_reaction_time, axis=1)
 
@@ -315,6 +326,18 @@ def add_inter_trial_interval_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def add_trial_initiation_time_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a trial initiation time column to the dataframe.
+    """
+    # Check if the required columns are present
+    utils.column_checker(df_in, required_columns={"TRIAL_START", "Port2In"})
+    df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
+    df['trial_initiation_time'] = df.apply(utils.trial_initiation_time, axis=1)
+
+    return df
+
+
 def add_trial_duration_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
     """
     Add a trial duration column to the dataframe.
@@ -327,7 +350,6 @@ def add_trial_duration_column_to_df(df_in: pd.DataFrame) -> pd.DataFrame:
     df['trial_duration'] = trial_duration_date
 
     return df
-
 
 
 def add_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
