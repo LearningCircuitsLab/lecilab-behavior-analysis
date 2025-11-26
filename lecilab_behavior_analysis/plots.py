@@ -1256,3 +1256,4 @@ def pointplot_stimulus_dual_dependence(
     ax.spines['right'].set_visible(False)
     # plt.tight_layout()
     return ax
+

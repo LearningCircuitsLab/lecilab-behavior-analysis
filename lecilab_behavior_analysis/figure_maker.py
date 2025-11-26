@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
+import plotly.graph_objects as go
 
 import lecilab_behavior_analysis.df_transforms as dft
 import lecilab_behavior_analysis.plots as plots
@@ -363,5 +364,47 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     ax_rt.axis("off")
 
     fig.tight_layout()
+
+    return fig
+
+
+def make_temperature_humidity_figure(df):
+    fig = go.Figure()
+
+    # Temperature (left y-axis)
+    fig.add_trace(
+        go.Scatter(
+            x=df["date"],
+            y=df["temperature"],
+            mode="lines",
+            name="Temperature",
+            line=dict(width=2, color="#1f77b4")  # blue
+        )
+    )
+
+    # Humidity (right y-axis)
+    fig.add_trace(
+        go.Scatter(
+            x=df["date"],
+            y=df["humidity"],
+            mode="lines",
+            name="Humidity",
+            line=dict(width=2, color="#ff7f0e"),  # orange
+            yaxis="y2"
+        )
+    )
+
+    fig.update_layout(
+        title="Temperature and Humidity in the Past Week",
+        xaxis=dict(title="Date"),
+        yaxis=dict(title="Temperature", range=[20, 24]),
+        yaxis2=dict(
+            title="Humidity",
+            overlaying="y",
+            side="right",
+            range=[20, 90],
+        ),
+        template="plotly_white",
+    )
 
     return fig
