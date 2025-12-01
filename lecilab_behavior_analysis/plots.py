@@ -887,7 +887,7 @@ def plot_training_times_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes = None)
     return ax
 
 
-def plot_training_times_clock_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes = None) -> plt.Axes:
+def plot_training_times_clock_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes = None, **kwargs) -> plt.Axes:
     if ax is None:
         _, ax = plt.subplots(figsize=(3, 3), subplot_kw={'projection': 'polar'})
     # Create a polar plot
@@ -895,6 +895,10 @@ def plot_training_times_clock_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes =
 
     # Plot the heatmap as a polar bar plot
     ax.bar(theta, heatmap_vector, width=2 * np.pi / 1440, color=plt.cm.YlGnBu(heatmap_vector / np.max(heatmap_vector)), edgecolor='none')
+
+    # change the limit of the radius if specified
+    if "ylim" in kwargs:
+        ax.set_ylim(kwargs["ylim"])
 
     # shade in light gray from 20:00 to 8:00 and put it behind the bars
     # get the maximum value of the plot radius
@@ -1093,6 +1097,10 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
     ax_to_use.tick_params(axis='y', labelsize=ticksize)
     # increase the size of the y axis labels
     ax_to_use.yaxis.label.set_size(axislabelsize)
+
+    if "ylog" in kwargs and kwargs["ylog"]:
+        ax_to_use.set_yscale("log")
+    
     ax_to_use.set_ylim(bottom=ylim_bottom, top=ylim_top)
 
     if not add_stuff:
@@ -1105,8 +1113,6 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
         label.set_rotation(45)
         label.set_horizontalalignment("right")
     
-    if "ylog" in kwargs and kwargs["ylog"]:
-        ax_to_use.set_yscale("log")
     return ax
 
 
