@@ -879,9 +879,14 @@ def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hou
     time_hours_ago = pd.Timestamp(max_date) - pd.Timedelta(hours=hours)
 
     detections = events[
-        (events["description"] == "Subject detected")
-        & (events["date"] >= time_hours_ago)
-    ]
+            (
+                events["description"].str.startswith(
+                    ("Subject not", "Detection in", "Large", "Multiple")
+                )
+                | (events["type"] == "START")
+            )
+            & (events["date"] >= time_hours_ago)
+        ]
     sessions = events[
         (events["type"] == "START") & (events["date"] >= time_hours_ago)
     ]
