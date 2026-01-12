@@ -945,7 +945,7 @@ def add_early_pokeouts(df_in: pd.DataFrame) -> pd.DataFrame:
     Adds a boolean column 'early_pokeout' to the dataframe indicating whether there was an early pokeout
     in the center port before holding the required time. This is irrespective of whether the trial was correct or incorrect.
     """
-    utils.column_checker(df_in, required_columns={"STATE_ready_to_initiate_START", "Port2In", "Port2Out"})
+    utils.column_checker(df_in, required_columns={"STATE_ready_to_initiate_START", "Port2In", "Port2Out", "holding_time"})
     df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
     df['early_pokeout'] = df.apply(utils.is_this_an_early_pokeout_trial, axis=1)
     return df

@@ -921,20 +921,20 @@ def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hou
     return report_df, max_date
 
 
-def load_all_events(project_name: str) -> pd.DataFrame:
+def load_all_events(events_subfolder_location: str) -> pd.DataFrame:
     """
     Load all events from the local machine for a given project.
     """
     outpath = get_outpath()
-    events_path = f"{outpath}/{project_name}/events.csv"
+    events_path = f"{outpath}/{events_subfolder_location}/events.csv"
     if not os.path.exists(events_path):
-        raise FileNotFoundError(f"Events file for project {project_name} does not exist.")
+        raise FileNotFoundError(f"Events file for project {events_subfolder_location} does not exist.")
     
     events_df = pd.read_csv(events_path, sep=";")
 
     # read events in old_events if they exist
     events_dfs_list = []
-    old_events_path = f"{outpath}/{project_name}/old_events"
+    old_events_path = f"{outpath}/{events_subfolder_location}/old_events"
     # list files in the old_events folder
     if os.path.exists(old_events_path):
         old_events_files = [f for f in os.listdir(old_events_path) if f.endswith('.csv')]
