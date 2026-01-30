@@ -929,7 +929,7 @@ def load_all_events(events_subfolder_location: str) -> pd.DataFrame:
     outpath = get_outpath()
     events_path = f"{outpath}/{events_subfolder_location}/events.csv"
     if not os.path.exists(events_path):
-        raise FileNotFoundError(f"Events file for project {events_subfolder_location} does not exist.")
+        raise FileNotFoundError(f"Events file for project {outpath}{events_subfolder_location} does not exist.")
     
     events_df = pd.read_csv(events_path, sep=";")
 
