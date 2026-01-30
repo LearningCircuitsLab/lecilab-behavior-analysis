@@ -319,6 +319,7 @@ def get_outpath():
         "tudou": "/home/kudongdong/data/LeciLab/behavioral_data",
         "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
         "minibaps": "/archive/training_village",
+        "minibaps2": "/archive/training_village",
     }
     return paths.get(hostname, "default/path")
 

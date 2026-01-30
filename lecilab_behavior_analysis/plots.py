@@ -1019,7 +1019,10 @@ def plot_number_of_pokes_histogram(df: pd.DataFrame, port_number: int, ax: plt.A
     return ax
 
 
-def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt.Axes = None) -> plt.Axes:
+def plot_port_holding_time_histogram(df: pd.DataFrame,
+                                     port_number: int,
+                                     ax: plt.Axes = None,
+                                     **kwargs) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     port_hold_column = f"port{port_number}_holds"
@@ -1027,10 +1030,14 @@ def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt
     # plot the histogram of the holding times
     port_holds = df[port_hold_column].tolist()
     port_holds = [item for sublist in port_holds for item in sublist]
+    if "bins" in kwargs:
+        bins = kwargs["bins"]
+    else:
+        bins = 100
 
     sns.histplot(port_holds,
                  ax=ax,
-                 bins=100,
+                 bins=bins,
                  color="gray",
                  stat="probability",
                  kde=True)
