@@ -482,7 +482,7 @@ def reformat_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
+def analyze_df(df: pd.DataFrame, include_early_pokeouts: bool = True) -> pd.DataFrame:
     """
     Analyze the dataframe adding new columns and filling missing data.
     """
@@ -492,7 +492,8 @@ def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
     df = add_trial_misses(df)
     df = add_mouse_first_choice(df)
     df = add_mouse_last_choice(df)
-    df = add_early_pokeouts(df)
+    if include_early_pokeouts:
+        df = add_early_pokeouts(df)
 
     # add a column with the total number of trials
     for subject in pd.unique(df['subject']):
