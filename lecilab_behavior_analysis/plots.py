@@ -769,7 +769,10 @@ def performance_by_decision_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs
     ax.spines["right"].set_visible(False)
 
     # start the x axis at min value
-    ax.set_xlim(left=df["trial_group"].min())
+    try:
+        ax.set_xlim(left=df["trial_group"].min())
+    except Exception as e:
+        print(f"Error setting x-axis limits: {e}")
 
     return ax
 

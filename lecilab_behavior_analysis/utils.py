@@ -390,12 +390,17 @@ def rsync_cluster_data(
     file_path: str,
     credentials: dict,
     local_path: str,
+    exclude: List[str] = None,
 ) -> bool:
     """
     This method syncs the session data from the server to the local machine.
     """
     remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/{file_path}"
-    rsync_command = f"rsync -avz {remote_path} {local_path}"
+    rsync_command = "rsync -avz"
+    if exclude:
+        for pattern in exclude:
+            rsync_command += f" --exclude='{pattern}'"
+    rsync_command += f" {remote_path} {local_path}"
     result = subprocess.run(rsync_command, shell=True)
     if result.returncode != 0:
         print(f"Error syncing data for {file_path}: {result.stderr.decode('utf-8')}")
