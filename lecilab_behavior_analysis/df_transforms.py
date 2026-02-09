@@ -121,7 +121,9 @@ def add_port_where_animal_comes_from(df_in: pd.DataFrame) -> pd.DataFrame:
             # equal to the original dataframe
             df.loc[df_mouse_session.index, 'roa_choice'] = series_to_append
             # add also the port where the animal comes from
-            df.loc[df_mouse_session.index, 'previous_port_before_stimulus'] = last_choice
+            last_choice_series = pd.Series(last_choice, index=df_mouse_session.index)
+            df.loc[df_mouse_session.index, 'previous_port_before_stimulus'] = last_choice_series.astype("string")
+
 
     return df
 
@@ -218,10 +220,10 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     df_copy = df.copy(deep=True) 
-    if df_copy["current_training_stage"].str.contains("visual").any():
+    if df_copy["stimulus_modality"].str.contains("visual").any():
         stim_col = "visual_stimulus"
         diff_col = "visual_stimulus_diff"
-    elif df_copy["current_training_stage"].str.contains("auditory").any():
+    elif df_copy["stimulus_modality"].str.contains("auditory").any():
         stim_col = "auditory_stimulus"
         diff_col = "auditory_stimulus_diff"
     else:

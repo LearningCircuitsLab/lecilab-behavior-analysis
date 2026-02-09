@@ -1109,7 +1109,10 @@ def get_previous_row_index(df: pd.DataFrame, current_index) -> int:
         raise IndexError("No previous row exists for the given index.")
 
 
-def transform_side_choice_to_numeric(side: str) -> Union[int, float]:
+def transform_side_choice_to_numeric(side) -> Union[int, float]:
+    if pd.isna(side):
+        return np.nan
+
     match side:
         case "left":
             return 1
