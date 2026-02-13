@@ -397,10 +397,10 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
                                    point_kwargs = None,
                                    line_kwargs = None,
                                    valueType = 'discrete',
-                                   bins = 6) -> plt.Axes:
+                                   bins = 6, 
+                                   log=True) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
-    
     default_point_kwargs = {
             'color': 'cornflowerblue',
             'markers': 'o',
@@ -429,19 +429,23 @@ def psychometric_plot(df: pd.DataFrame, x, y, ax: plt.Axes = None,
     column_checker(df, required_columns={x, y})
     df_copy = df.copy(deep=True)
     if valueType == 'discrete':
+        df_copy[x + "_fit"] = df_copy[x].copy()
         if 0 in df_copy[x].unique():
             # if there are 0s in the data, we need to add a small value to avoid log(0)
-            df_copy[x + "_fit"] = df_copy[x]
             df_copy[x + "_fit"].replace(0, 0.0001, inplace=True)
-        df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
-        ax.set_xlabel("log_"+x)
+        if log:
+            df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"])).round(4))
+            ax.set_xlabel("log_"+x)
+        else:
+            ax.set_xlabel(x)
+
     else:
         # bin the continuous values when valueType is not discrete
-        bin_groups = pd.cut(df_copy[x], bins = bins)
+        nbins = min(bins, df_copy[x].nunique()) # avoid having more bins than unique values
+        bin_groups = pd.cut(df_copy[x], bins = nbins)
         labels = df_copy[x].groupby(bin_groups, observed=True).mean()
-        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = bins, labels = labels).astype(float)
-        # df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
-        # ax.set_xlabel("log_" + x + "*10")
+        bin_means = df_copy.groupby(bin_groups, observed=True)[x].mean()
+        df_copy[x + "_fit"] = bin_groups.map(bin_means).astype(float)
         ax.set_xlabel(x + " (binned)")
     sns.pointplot(
         x=x + "_fit",
