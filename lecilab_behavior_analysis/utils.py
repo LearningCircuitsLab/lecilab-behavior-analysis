@@ -408,6 +408,12 @@ def rsync_specific_file(
     """
     This method syncs the session data from the server to the local machine.
     """
+    if not os.path.isdir(local_path):
+        try:
+            os.makedirs(local_path)  # Creates the directory (and parents if needed)
+            print(f"Directory '{local_path}' created.")
+        except OSError as e:
+            print(f"Error creating directory '{local_path}': {e}")
     remote_path = f"{credentials['username']}@{credentials['host']}:{file_path}"
     rsync_command = f"rsync -avz {remote_path} {local_path}"
     result = subprocess.run(rsync_command, shell=True)
