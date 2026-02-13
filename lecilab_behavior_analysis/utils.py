@@ -317,7 +317,7 @@ def get_outpath():
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
         "tudou": "/home/kudongdong/data/LeciLab/behavioral_data",
-        "nuo-rostower": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
+        "nuo-rostower": "/home/nuo/Documents/data/LeciLab/behavioral_data",
         "minibaps": "/archive/training_village",
     }
     return paths.get(hostname, "default/path")
@@ -408,6 +408,12 @@ def rsync_specific_file(
     """
     This method syncs the session data from the server to the local machine.
     """
+    if not os.path.isdir(local_path):
+        try:
+            os.makedirs(local_path)  # Creates the directory (and parents if needed)
+            print(f"Directory '{local_path}' created.")
+        except OSError as e:
+            print(f"Error creating directory '{local_path}': {e}")
     remote_path = f"{credentials['username']}@{credentials['host']}:{file_path}"
     rsync_command = f"rsync -avz {remote_path} {local_path}"
     result = subprocess.run(rsync_command, shell=True)
@@ -1109,7 +1115,10 @@ def get_previous_row_index(df: pd.DataFrame, current_index) -> int:
         raise IndexError("No previous row exists for the given index.")
 
 
-def transform_side_choice_to_numeric(side: str) -> Union[int, float]:
+def transform_side_choice_to_numeric(side) -> Union[int, float]:
+    if pd.isna(side):
+        return np.nan
+
     match side:
         case "left":
             return 1
