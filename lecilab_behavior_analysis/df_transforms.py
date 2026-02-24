@@ -839,6 +839,10 @@ def parameters_for_fit(df):
     # Add the correct column as numeric, 1 for correct, 0 for incorrect
     df_copy['correct_numeric'] = df_copy['correct'].astype(int)
 
+    df_copy['correct_side_numeric'] = df_copy['correct_side'].apply(
+                utils.transform_side_choice_to_numeric
+                )
+
     # Add the past trials impact by time kernel
     
 
