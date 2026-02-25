@@ -453,7 +453,10 @@ def is_this_a_miss_trial(series: pd.Series) -> bool:
     checks if STATE_stimulus_state_END is the last state
     """
     try:
-        end_of_stimulus_state = np.max(ast.literal_eval(series["STATE_stimulus_state_END"]))
+        if type(series["STATE_stimulus_state_END"]) == str:
+            end_of_stimulus_state = np.max(ast.literal_eval(series["STATE_stimulus_state_END"]))
+        else:
+            end_of_stimulus_state = np.max(series["STATE_stimulus_state_END"])
         end_of_trial = series["TRIAL_END"]
         if np.round(end_of_stimulus_state, 6) == np.round(end_of_trial, 6):
             return True
@@ -470,9 +473,15 @@ def is_this_an_early_pokeout_trial(series: pd.Series) -> Union[bool, None]:
     """
     # check if this can be computed based on the data
     try:
-        rti_states = ast.literal_eval(series["STATE_ready_to_initiate_START"])
-        port2ins = ast.literal_eval(series["Port2In"])
-        port2outs = ast.literal_eval(series["Port2Out"])
+        rti_states = series["STATE_ready_to_initiate_START"]
+        port2ins = series["Port2In"]
+        port2outs = series["Port2Out"]
+        if type(rti_states) == str:
+            rti_states = ast.literal_eval(rti_states)
+        if type(port2ins) == str:
+            port2ins = ast.literal_eval(port2ins)
+        if type(port2outs) == str:
+            port2outs = ast.literal_eval(port2outs)
     except ValueError:
         # if the value is not a list, return None
         return None
@@ -504,18 +513,25 @@ def trial_reaction_time(series: pd.Series) -> float:
     This method calculates the reaction time of a trial.
     """
     try:
-        out_time = np.max(ast.literal_eval(series["Port2Out"]))
+        port2_outs = series["Port2Out"]
+        if type(port2_outs) == str:
+            port2_outs = ast.literal_eval(port2_outs)
+        out_time = np.max(port2_outs)
     except Exception:
         return np.nan
     try:
-        port1_ins = ast.literal_eval(series["Port1In"])
+        port1_ins = series["Port1In"]
+        if type(port1_ins) == str:
+            port1_ins = ast.literal_eval(port1_ins)
         # get the first Port1In after Port2Out
         port1_ins = np.array(port1_ins)
         port1_in = np.min(port1_ins[port1_ins > out_time])
     except Exception:
         port1_in = np.nan
     try:
-        port3_ins = ast.literal_eval(series["Port3In"])
+        port3_ins = series["Port3In"]
+        if type(port3_ins) == str:
+            port3_ins = ast.literal_eval(port3_ins)
         # get the first Port3In after Port2Out
         port3_ins = np.array(port3_ins)
         port3_in = np.min(port3_ins[port3_ins > out_time])
@@ -531,7 +547,10 @@ def trial_initiation_time(series: pd.Series) -> float:
     This method calculates the initiation time of a trial.
     """
     try:
-        in_time = np.min(ast.literal_eval(series["Port2In"]))
+        port2_ins = series["Port2In"]
+        if type(port2_ins) == str:
+            port2_ins = ast.literal_eval(port2_ins)
+        in_time = np.min(port2_ins)
     except Exception:
         return np.nan
     trial_start = series["TRIAL_START"]
@@ -542,7 +561,10 @@ def first_poke_after_stimulus_state(series: pd.Series) -> Union[str, None]:
     # convert the series to a dictionary
     ser_dict = series.to_dict()
     try:
-        stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+        if type(ser_dict["STATE_stimulus_state_START"]) == str:
+            stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+        else:
+            stim_state_array = ser_dict["STATE_stimulus_state_START"]
     except ValueError:
         # if the value is not a list, return None
         return None
@@ -600,7 +622,10 @@ def get_last_poke_before_stimulus_state(series: pd.Series) -> Union[str, None]:
     # convert the series to a dictionary
     ser_dict = series.to_dict()
     try:
-        stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+        if type(ser_dict["STATE_stimulus_state_START"]) == str:
+            stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+        else:
+            stim_state_array = ser_dict["STATE_stimulus_state_START"]
     except ValueError:
         # if the value is not a list, return None
         return None
@@ -631,6 +656,8 @@ def get_last_poke_before_stimulus_state(series: pd.Series) -> Union[str, None]:
 def get_dictionary_event_as_list(ser_dict: Dict, event: str) -> List:
     # check if the keys are in the dict
     if event in ser_dict.keys():
+        if type(ser_dict[event]) == list:
+            return ser_dict[event]
         try:
             event_list = ast.literal_eval(ser_dict[event])
             if type(event_list) is float:

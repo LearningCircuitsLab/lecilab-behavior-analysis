@@ -511,7 +511,6 @@ def add_mouse_first_choice(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add the first choice made by the mouse in each trial.
     """
-
     utils.column_checker(df, required_columns={"Port1In", "Port3In", "STATE_stimulus_state_START"})
     df = df.copy()
     df['first_choice'] = df.apply(utils.first_poke_after_stimulus_state, axis=1)

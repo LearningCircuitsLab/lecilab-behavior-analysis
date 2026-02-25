@@ -251,13 +251,16 @@ def summary_text_plot(
     return ax
 
 
-def number_of_correct_responses_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+def number_of_correct_responses_plot(df_in: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
-    column_checker(df, required_columns={"correct_side", "correct"})
-    if "stimulus_modality" not in df.columns or df['stimulus_modality'].nunique() == 1:
-        pass
+    column_checker(df_in, required_columns={"correct_side", "correct"})
+    if "stimulus_modality" not in df_in.columns or df_in['stimulus_modality'].nunique() == 1:
+        # create a copy of the df
+        df = df_in.copy()
     else:
+        # create a copy of the df
+        df = df_in.copy()
         # Create a new column combining 'correct_side' and 'stimulus_modality' with a line break for the x-axis
         df["column_name_to_substitute"] = df["stimulus_modality"] + "\n" + df["correct_side"]
         # drop correct_side and rename x
