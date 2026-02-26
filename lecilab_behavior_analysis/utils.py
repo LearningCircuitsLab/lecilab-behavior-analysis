@@ -485,7 +485,10 @@ def is_this_an_early_pokeout_trial(series: pd.Series) -> Union[bool, None]:
     except ValueError:
         # if the value is not a list, return None
         return None
-    # if any of the lists are empty, return None
+    # if any of the lists are empty or nan, return None
+    for item in [rti_states, port2ins, port2outs]:
+        if isinstance(item, float) and np.isnan(item):
+            return None
     if len(rti_states) == 0 or len(port2ins) == 0 or len(port2outs) == 0:
         return None
     # get the first poke in the center port after ready_to_initiate state
