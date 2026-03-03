@@ -397,7 +397,7 @@ def make_temperature_humidity_figure(df):
     fig.update_layout(
         title="Temperature and Humidity in the Past Week",
         xaxis=dict(title="Date"),
-        yaxis=dict(title="Temperature", range=[20, 24]),
+        yaxis=dict(title="Temperature", range=[18, 26]),
         yaxis2=dict(
             title="Humidity",
             overlaying="y",
