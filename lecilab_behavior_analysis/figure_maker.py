@@ -9,6 +9,34 @@ import lecilab_behavior_analysis.df_transforms as dft
 import lecilab_behavior_analysis.plots as plots
 import lecilab_behavior_analysis.utils as utils
 
+
+def _render_plot_error(ax: plt.Axes, plot_name: str, error: Exception) -> plt.Axes:
+    ax.clear()
+    ax.text(
+        0.5,
+        0.5,
+        f"Could not generate {plot_name}\n{type(error).__name__}: {error}",
+        fontsize=10,
+        color="red",
+        ha="center",
+        va="center",
+        wrap=True,
+        transform=ax.transAxes,
+    )
+    ax.set_axis_off()
+    return ax
+
+
+def _safe_make_plot(ax: plt.Axes, plot_name: str, plot_func, *args, **kwargs) -> plt.Axes:
+    try:
+        result = plot_func(*args, **kwargs)
+    except Exception as error:
+        return _render_plot_error(ax, plot_name, error)
+
+    if isinstance(result, plt.Axes):
+        return result
+    return ax
+
 def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
     """
     Information about the trials done in a session and the water consumption
@@ -78,85 +106,108 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
 
     # generate the calendar plot
     dates_df = dft.get_dates_df(df)
-    cal_image = plots.rasterize_plot(plots.training_calendar_plot(dates_df), dpi=600)
-    # paste the calendar plot filling the entire axis
-    ax_cal.imshow(cal_image)
-    ax_cal.axis("off")
+
+    def _plot_calendar() -> plt.Axes:
+        cal_image = plots.rasterize_plot(plots.training_calendar_plot(dates_df), dpi=600)
+        ax_cal.imshow(cal_image)
+        ax_cal.axis("off")
+        return ax_cal
+
+    ax_cal = _safe_make_plot(ax_cal, "calendar plot", _plot_calendar)
 
     # add the training time plot
     # Plot the percentage of time that the task is running per day and the heatmap of the occupancy during the day
-    occupancy_df = dft.get_start_and_end_of_sessions_df(df)
-    occupancy_heatmap = dft.get_occupancy_heatmap(occupancy_df, window_size=30)
     fig.delaxes(ax_training_time)  # Remove the default second subplot
     ax_training_time = fig.add_subplot(gs1[0, 2], projection='polar')  # Add a polar subplot
-    plots.plot_training_times_clock_heatmap(occupancy_heatmap, ax=ax_training_time)
+
+    def _plot_training_time() -> plt.Axes:
+        occupancy_df = dft.get_start_and_end_of_sessions_df(df)
+        occupancy_heatmap = dft.get_occupancy_heatmap(occupancy_df, window_size=30)
+        return plots.plot_training_times_clock_heatmap(occupancy_heatmap, ax=ax_training_time)
+
+    ax_training_time = _safe_make_plot(ax_training_time, "training time plot", _plot_training_time)
 
     # do the barplot
-    bp_df = df.groupby(["year_month_day", "date", "current_training_stage"]).count()
-    # pivot the dataframe so that the individual "date" indexes are stacked
-    bp_df = bp_df.pivot_table(index="year_month_day", columns=["date", "current_training_stage"], values="trial")
-    # Plot the stacked barplot, coloring by current_training_stage
-    ax_bar = plots.trials_by_day_plot(bp_df, ax=ax_bar, cmap="tab10")
+    def _plot_trials_and_water() -> plt.Axes:
+        bp_df = df.groupby(["year_month_day", "date", "current_training_stage"]).count()
+        bp_df = bp_df.pivot_table(index="year_month_day", columns=["date", "current_training_stage"], values="trial")
+        axis = plots.trials_by_day_plot(bp_df, ax=ax_bar, cmap="tab10")
+        legend = axis.get_legend()
+        if legend is not None:
+            legend.get_frame().set_linewidth(0.0)
+        water_df = dft.get_water_df(df, grouping_column="year_month_day")
+        axis = plots.water_by_date_plot(water_df, ax=axis)
+        axis.xaxis.set_major_locator(plt.MaxNLocator(16))
+        return axis
 
-    # remove box
-    ax_bar.get_legend().get_frame().set_linewidth(0.0)
-
-    # Add a vertical histogram
-    # ax_hist = trials_by_session_hist(dates_df, ax=ax_hist, ylim=ax_bar.get_ylim())
-
-    # overlay water consumption in the bar plot
-    water_df = dft.get_water_df(df, grouping_column="year_month_day")
-    ax_bar = plots.water_by_date_plot(water_df, ax=ax_bar)
-    # reduce the number of x ticks to a maximum of 16
-    ax_bar.xaxis.set_major_locator(plt.MaxNLocator(16))
+    ax_bar = _safe_make_plot(ax_bar, "trials and water plot", _plot_trials_and_water)
 
     # Add the performance vs trials plot
     if "perf_window" in kwargs:
         window = kwargs["perf_window"]
     else:
         window = 50
-    df = dft.get_performance_through_trials(df, window=window)
-    ax_perf = plots.performance_vs_trials_plot(df, ax=ax_perf, legend=False)
 
-    df = dft.get_repeat_or_alternate_performance(df)
-    df_pbd = dft.get_performance_by_decision_df(df)
-    ax_pbd = plots.performance_by_decision_plot(df_pbd, ax=ax_pbd)
+    df_perf = df.copy()
+
+    def _plot_performance() -> plt.Axes:
+        nonlocal df_perf
+        df_perf = dft.get_performance_through_trials(df_perf, window=window)
+        return plots.performance_vs_trials_plot(df_perf, ax=ax_perf, legend=False)
+
+    ax_perf = _safe_make_plot(ax_perf, "performance plot", _plot_performance)
+
+    df_decision = df_perf.copy()
+
+    def _plot_performance_by_decision() -> plt.Axes:
+        df_pbd_source = dft.get_repeat_or_alternate_performance(df_decision)
+        df_pbd = dft.get_performance_by_decision_df(df_pbd_source)
+        return plots.performance_by_decision_plot(df_pbd, ax=ax_pbd)
+
+    ax_pbd = _safe_make_plot(ax_pbd, "performance-by-decision plot", _plot_performance_by_decision)
 
     # add the bias plot showing 20 steps
     # get what the animal is doing, if it is alternating or repeating to the left or to the right
-    df = dft.add_mouse_first_choice(df)
-    df = dft.add_mouse_last_choice(df)
-    df = dft.add_port_where_animal_comes_from(df)
-    # get a metric to see the bias in choices (including alternation)
-    df['roa_choice_numeric'] = df.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
-    # evolution of bias by trial group
-    trial_group_size = df.shape[0] // 40
-    df['trial_group'] = df['total_trial'] // trial_group_size * trial_group_size
-    # remove the last group if it is smaller than the others
-    if df['trial_group'].nunique() > 1:
-        df_evol = df[df['trial_group'] < df['trial_group'].max() * 0.7]
-    else:
-        df_evol = df.copy()
-    df_bias_evolution = dft.get_bias_evolution_df(df_evol, groupby='trial_group')
-    df_bias_evolution = dft.points_to_lines_for_bias_evolution(df_bias_evolution, groupby='trial_group')
-    ax_bias = plots.plot_decision_evolution_triangle(df_bias_evolution, ax=ax_bias, hue='trial_group')
+
+    def _plot_bias_evolution() -> plt.Axes:
+        df_bias = df.copy()
+        df_bias = dft.add_mouse_first_choice(df_bias)
+        df_bias = dft.add_mouse_last_choice(df_bias)
+        df_bias = dft.add_port_where_animal_comes_from(df_bias)
+        df_bias['roa_choice_numeric'] = df_bias.apply(utils.get_repeat_or_alternate_to_numeric, axis=1)
+        trial_group_size = max(df_bias.shape[0] // 40, 1)
+        df_bias['trial_group'] = df_bias['total_trial'] // trial_group_size * trial_group_size
+        if df_bias['trial_group'].nunique() > 1:
+            df_evol = df_bias[df_bias['trial_group'] < df_bias['trial_group'].max() * 0.7]
+        else:
+            df_evol = df_bias.copy()
+        df_bias_evolution = dft.get_bias_evolution_df(df_evol, groupby='trial_group')
+        df_bias_evolution = dft.points_to_lines_for_bias_evolution(df_bias_evolution, groupby='trial_group')
+        return plots.plot_decision_evolution_triangle(df_bias_evolution, ax=ax_bias, hue='trial_group')
+
+    ax_bias = _safe_make_plot(ax_bias, "bias evolution plot", _plot_bias_evolution)
 
     # holding time in the center port
-    df_ch = dft.get_center_hold_df(df)
-    ax_htime = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="number_of_pokes", group_trials_by="year_month_day", ax=ax_htime, color='tab:green')
-    ax_htime = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="hold_time", group_trials_by="year_month_day", ax=ax_htime, color='tab:red')
-    # remove x label
-    ax_htime.set_xlabel("")
-    # reduce the number of x ticks to a maximum of 16
-    ax_htime.xaxis.set_major_locator(plt.MaxNLocator(16))
+    def _plot_hold_time() -> plt.Axes:
+        df_ch = dft.get_center_hold_df(df)
+        axis = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="number_of_pokes", group_trials_by="year_month_day", ax=ax_htime, color='tab:green')
+        axis = plots.plot_mean_and_cis_by_date(df_ch, item_to_show="hold_time", group_trials_by="year_month_day", ax=axis, color='tab:red')
+        axis.set_xlabel("")
+        axis.xaxis.set_major_locator(plt.MaxNLocator(16))
+        return axis
+
+    ax_htime = _safe_make_plot(ax_htime, "center hold plot", _plot_hold_time)
 
     # add the reaction time plot
-    rt_df = dft.get_reaction_times_by_date_df(df)
-    ax_rt = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="reaction_time", group_trials_by="year_month_day", ax=ax_rt, color='tab:blue', ylog=True)
-    ax_rt = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="time_between_trials", group_trials_by="year_month_day", ax=ax_rt, color='tab:orange', ylog=True)
-    ax_rt.set_xlabel("")
-    # reduce the number of x ticks to a maximum of 16
-    ax_rt.xaxis.set_major_locator(plt.MaxNLocator(16))
+    def _plot_reaction_time() -> plt.Axes:
+        rt_df = dft.get_reaction_times_by_date_df(df)
+        axis = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="reaction_time", group_trials_by="year_month_day", ax=ax_rt, color='tab:blue', ylog=True)
+        axis = plots.plot_mean_and_cis_by_date(rt_df, item_to_show="time_between_trials", group_trials_by="year_month_day", ax=axis, color='tab:orange', ylog=True)
+        axis.set_xlabel("")
+        axis.xaxis.set_major_locator(plt.MaxNLocator(16))
+        return axis
+
+    ax_rt = _safe_make_plot(ax_rt, "reaction time plot", _plot_reaction_time)
     
     # add the engagement plot. Make sure that events_df is in kwargs
     if "events_df" not in kwargs:
@@ -164,32 +215,42 @@ def subject_progress_figure(df: pd.DataFrame, **kwargs) -> Figure:
         ax_eng.text(0.5, 0.5, "No events_df provided", fontsize=12, color='red', ha='center', va='center')
     else:
         events_df = kwargs["events_df"]
-        df = dft.add_trial_duration_column_to_df(df)
-        df = dft.add_engagement_column(df, engagement_sd_criteria=2)
-        sbu_df = dft.get_box_usage_df(df, events_df, verbose=False)
-        sbu_df = dft.add_day_column_to_df(sbu_df)
-        ax_eng = plots.plot_box_usage_by_date(sbu_df, ax=ax_eng)
-        ax_eng.set_xlabel("")
-        ax_eng.xaxis.set_major_locator(plt.MaxNLocator(16))
+
+        def _plot_engagement() -> plt.Axes:
+            df_eng = dft.add_trial_duration_column_to_df(df.copy())
+            df_eng = dft.add_engagement_column(df_eng, engagement_sd_criteria=2)
+            sbu_df = dft.get_box_usage_df(df_eng, events_df, verbose=False)
+            sbu_df = dft.add_day_column_to_df(sbu_df)
+            axis = plots.plot_box_usage_by_date(sbu_df, ax=ax_eng)
+            axis.set_xlabel("")
+            axis.xaxis.set_major_locator(plt.MaxNLocator(16))
+            return axis
+
+        ax_eng = _safe_make_plot(ax_eng, "engagement plot", _plot_engagement)
     
     # Summary plot
     if summary_matrix_plot_requested:
-        summat_df, summat_info = dft.get_training_summary_matrix(df)
-        ax_summat = plots.summary_matrix_plot(
-            mat_df=summat_df,
-            mat_df_metadata=summat_info,
-            mouse_name="",
-            ax=ax_summat,
-            training_stage_inlegend=False,
-        )
-        # put legend to the right in one column
-        ax_summat.legend(
-            bbox_to_anchor=(1.35, .9),
-            # loc="upper right",
-            borderaxespad=0.0,
-            fontsize=7,
-            ncol=1,
-        )
+
+        def _plot_summary_matrix() -> plt.Axes:
+            summat_df, summat_info = dft.get_training_summary_matrix(df)
+            axis = plots.summary_matrix_plot(
+                mat_df=summat_df,
+                mat_df_metadata=summat_info,
+                mouse_name="",
+                ax=ax_summat,
+                training_stage_inlegend=False,
+            )
+            legend = axis.legend(
+                bbox_to_anchor=(1.35, .9),
+                borderaxespad=0.0,
+                fontsize=7,
+                ncol=1,
+            )
+            if legend is not None:
+                axis.add_artist(legend)
+            return axis
+
+        ax_summat = _safe_make_plot(ax_summat, "summary matrix plot", _plot_summary_matrix)
 
     plt.tight_layout()
 
@@ -248,9 +309,13 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
         return fig
     # Add the performance vs trials plot
     window = kwargs.get("perf_window", 50)
-    df = dft.get_performance_through_trials(df, window=window)
-    # find the index of the session changes and add as vertical lines to the performance plot
-    session_changes = df[df.session != df.session.shift(1)].index
+    df_perf = df.copy()
+    session_changes = pd.Index([])  # default in case transform fails
+    try:
+        df_perf = dft.get_performance_through_trials(df_perf, window=window)
+        session_changes = df_perf[df_perf.session != df_perf.session.shift(1)].index
+    except Exception:
+        pass
     # define the hue based on stimulus_modality or current_training_stage if there are more than one
     perf_hue = kwargs.get("perf_hue", None)
     if perf_hue is None:
@@ -258,15 +323,26 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
             perf_hue = "current_training_stage"
         else:
             perf_hue = "stimulus_modality"
-    perf_ax = plots.performance_vs_trials_plot(df,
-                                               perf_ax,
-                                               legend=True,
-                                               session_changes=session_changes,
-                                               hue=perf_hue)
-    lrc_ax = plots.number_of_correct_responses_plot(df, lrc_ax)
-    df["repeat_or_alternate"] = dft.get_repeat_or_alternate_series(df.correct_side)
-    df = dft.get_repeat_or_alternate_performance(df, window=window)
-    roap_ax = plots.repeat_or_alternate_performance_plot(df, roap_ax, session_changes=session_changes)
+
+    def _plot_perf() -> plt.Axes:
+        return plots.performance_vs_trials_plot(
+            df_perf, perf_ax, legend=True, session_changes=session_changes, hue=perf_hue
+        )
+
+    perf_ax = _safe_make_plot(perf_ax, "performance plot", _plot_perf)
+
+    def _plot_lrc() -> plt.Axes:
+        return plots.number_of_correct_responses_plot(df_perf, lrc_ax)
+
+    lrc_ax = _safe_make_plot(lrc_ax, "correct responses plot", _plot_lrc)
+
+    def _plot_roap() -> plt.Axes:
+        df_roap = df_perf.copy()
+        df_roap["repeat_or_alternate"] = dft.get_repeat_or_alternate_series(df_roap.correct_side)
+        df_roap = dft.get_repeat_or_alternate_performance(df_roap, window=window)
+        return plots.repeat_or_alternate_performance_plot(df_roap, roap_ax, session_changes=session_changes)
+
+    roap_ax = _safe_make_plot(roap_ax, "repeat or alternate plot", _plot_roap)
     # psych_df = dft.get_performance_by_difficulty(df)
     # psych_ax = plots.psychometric_plot(psych_df, psych_ax)
 
@@ -292,33 +368,36 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     df_task = df[df['task'] != 'Habituation']
     for mod in ['visual', 'auditory']:
         ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
-        if len(df_task) > 0:
-            if mod in df_task['stimulus_modality'].unique():
-                df_mod = df_task[df_task["stimulus_modality"] == mod].copy()
-                if df_mod['difficulty'].nunique() == 1 and df_mod['difficulty'].unique()[0] == 'easy':
-                        # if all trials are easy, do the normal plot by difficulty
-                        df_mod["side_difficulty"] = df_mod.apply(lambda row: utils.side_and_difficulty_to_numeric(row), axis=1)
-                        df_mod = dft.add_mouse_first_choice(df_mod)
-                        df_mod['first_choice_numeric'] = df_mod['first_choice'].apply(utils.transform_side_choice_to_numeric)
-                        plots.choice_by_difficulty_plot(df_mod, ax=ax_name)
-                else:
-                    if mod == 'visual':
-                        xvar = 'visual_stimulus_ratio'
-                        value_type = 'discrete'
-                    elif mod == 'auditory':
-                        xvar = 'total_evidence_strength'
-                        value_type = 'continue'
-                    psych_df = dft.get_performance_by_difficulty_ratio(df_mod)
-                    plots.psychometric_plot(psych_df, x = xvar, y = 'first_choice_numeric', ax = ax_name, valueType=value_type)
-                # set the title of the axis
-                ax_name.set_title("choices on " + mod + " trials", fontsize=10)
-                # remove legend if it exists
-                if ax_name.get_legend() is not None:
-                    ax_name.get_legend().remove()
+
+        def _plot_psych_mod(mod=mod, ax=ax_name) -> plt.Axes:
+            if len(df_task) == 0:
+                ax.text(0.1, 0.5, "Habituation phase", fontsize=10, color='k')
+                return ax
+            if mod not in df_task['stimulus_modality'].unique():
+                ax.text(0.1, 0.5, "No trials in " + mod, fontsize=10, color='k')
+                return ax
+            df_mod = df_task[df_task["stimulus_modality"] == mod].copy()
+            if df_mod['difficulty'].nunique() == 1 and df_mod['difficulty'].unique()[0] == 'easy':
+                # if all trials are easy, do the normal plot by difficulty
+                df_mod["side_difficulty"] = df_mod.apply(lambda row: utils.side_and_difficulty_to_numeric(row), axis=1)
+                df_mod = dft.add_mouse_first_choice(df_mod)
+                df_mod['first_choice_numeric'] = df_mod['first_choice'].apply(utils.transform_side_choice_to_numeric)
+                plots.choice_by_difficulty_plot(df_mod, ax=ax)
             else:
-                ax_name.text(0.1, 0.5, "No trials in " + mod, fontsize=10, color='k')
-        else:
-            ax_name.text(0.1, 0.5, "Habituation phase", fontsize=10, color='k')
+                if mod == 'visual':
+                    xvar = 'visual_stimulus_ratio'
+                    value_type = 'discrete'
+                elif mod == 'auditory':
+                    xvar = 'total_evidence_strength'
+                    value_type = 'continue'
+                psych_df = dft.get_performance_by_difficulty_ratio(df_mod)
+                plots.psychometric_plot(psych_df, x=xvar, y='first_choice_numeric', ax=ax, valueType=value_type)
+            ax.set_title("choices on " + mod + " trials", fontsize=10)
+            if ax.get_legend() is not None:
+                ax.get_legend().remove()
+            return ax
+
+        _safe_make_plot(ax_name, f"{mod} psychometric plot", _plot_psych_mod)
 
 
     # for mod in ['visual', 'auditory']:
@@ -338,9 +417,19 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     #     else:
     #         ax_name.text(0.1, 0.5, "No trials in " + mod, fontsize=10, color='k')
 
-    df["port2_holds"] = df.apply(lambda row: utils.get_trial_port_hold(row, 2), axis=1)
-    p2hn_ax = plots.plot_number_of_pokes_histogram(df, port_number=2, ax=p2hn_ax)
-    p2ht_ax = plots.plot_port_holding_time_histogram(df, port_number=2, ax=p2ht_ax)
+    def _plot_p2hn() -> plt.Axes:
+        df_p2h = df.copy()
+        df_p2h["port2_holds"] = df_p2h.apply(lambda row: utils.get_trial_port_hold(row, 2), axis=1)
+        return plots.plot_number_of_pokes_histogram(df_p2h, port_number=2, ax=p2hn_ax)
+
+    p2hn_ax = _safe_make_plot(p2hn_ax, "port 2 pokes histogram", _plot_p2hn)
+
+    def _plot_p2ht() -> plt.Axes:
+        df_p2h = df.copy()
+        df_p2h["port2_holds"] = df_p2h.apply(lambda row: utils.get_trial_port_hold(row, 2), axis=1)
+        return plots.plot_port_holding_time_histogram(df_p2h, port_number=2, ax=p2ht_ax)
+
+    p2ht_ax = _safe_make_plot(p2ht_ax, "port 2 hold time histogram", _plot_p2ht)
 
     # TODO: think about the best way to represent the bias
     # # add the bias plot
@@ -353,15 +442,21 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     # bias_ax = plots.bias_vs_trials_plot(df, bias_ax)
 
     # add the speed of doing trials
-    df = utils.add_time_from_session_start(df)
-    sdf = dft.adjust_trials_and_time_of_start_to_first_session(df)
-    tst_ax = plots.plot_trial_time_of_start(sdf, ax=tst_ax, session_changes=session_changes)
+    def _plot_tst() -> plt.Axes:
+        df_tst = utils.add_time_from_session_start(df.copy())
+        sdf = dft.adjust_trials_and_time_of_start_to_first_session(df_tst)
+        return plots.plot_trial_time_of_start(sdf, ax=tst_ax, session_changes=session_changes)
 
-    df = dft.calculate_time_between_trials_and_reaction_time(df)
-    reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df), dpi=300)
-    ax_rt.imshow(reaction_time_image, aspect='auto')
-    # Turn off the axis for clean presentation
-    ax_rt.axis("off")
+    tst_ax = _safe_make_plot(tst_ax, "trial start time plot", _plot_tst)
+
+    def _plot_rt() -> plt.Axes:
+        df_rt = dft.calculate_time_between_trials_and_reaction_time(df.copy())
+        reaction_time_image = plots.rasterize_plot(plots.plot_time_between_trials_and_reaction_time(df_rt), dpi=300)
+        ax_rt.imshow(reaction_time_image, aspect='auto')
+        ax_rt.axis("off")
+        return ax_rt
+
+    ax_rt = _safe_make_plot(ax_rt, "reaction time plot", _plot_rt)
 
     fig.tight_layout()
 
