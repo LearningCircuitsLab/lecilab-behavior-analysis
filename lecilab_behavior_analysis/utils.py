@@ -319,8 +319,8 @@ def get_outpath():
         "tectum": "/mnt/c/Users/HMARTINEZ/LeCiLab/data/behavioral_data",
         "tudou": "/home/kudongdong/data/LeciLab/behavioral_data",
         "setup2": "/home/kudongdong/Documents/data/LeciLab/behavioral_data",
-        "minibaps": "/archive/training_village",
-        "minibaps2": "/archive/training_village",
+        "minibaps": "/storage/training_village",
+        "minibaps2": "/storage/training_village",
     }
     return paths.get(hostname, "default/path")
 
