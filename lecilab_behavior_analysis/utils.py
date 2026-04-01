@@ -13,7 +13,8 @@ from sklearn.metrics import r2_score
 import os
 import lecilab_behavior_analysis.df_transforms as dft
 
-IDIBAPS_TV_PROJECTS = "/archive/training_village/"
+#IDIBAPS_TV_PROJECTS = "/archive/training_village/"
+IDIBAPS_TV_PROJECTS = "/storage/training_village/"
 
 
 def get_session_performance(df, session: int) -> float:
