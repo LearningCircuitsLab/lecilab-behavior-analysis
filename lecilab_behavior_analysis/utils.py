@@ -15,7 +15,6 @@ from sklearn.metrics import r2_score
 import os
 import lecilab_behavior_analysis.df_transforms as dft
 
-#IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 IDIBAPS_TV_PROJECTS = "/storage/training_village/"
 
 
@@ -1178,6 +1177,26 @@ def transform_side_choice_to_numeric(side) -> Union[int, float]:
         case _:
             return np.nan
 
+
+def detect_incorrect_hold_and_next_event(events):
+    incorrect_hold_sequence_one = ['Port2In', 'Tup', 'Port2Out']
+    incorrect_hold_sequence_two = ['Port2In', 'Port2Out']
+    correct_hold_sequence = ['Port2In', 'Tup', 'Tup', 'Port2Out']
+    next_events = []
+    events = eval(events)
+    # remove all events after a correct hold
+    for i in range(len(events) - 3):
+        if events[i:i+4] == correct_hold_sequence:
+            events = events[:i+4]
+            break
+    for i in range(len(events) - 2):
+        if events[i:i+3] == incorrect_hold_sequence_one:
+            if i + 3 < len(events):
+                next_events.append(events[i + 3])
+        elif events[i:i+2] == incorrect_hold_sequence_two:
+            if i + 2 < len(events):
+                next_events.append(events[i + 2])
+    return next_events
 
 if __name__ == "__main__":
     # Example usage
