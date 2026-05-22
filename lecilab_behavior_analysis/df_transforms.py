@@ -202,7 +202,13 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
     if df_copy["stimulus_modality"].unique() == 'visual':
         stim_col = "visual_stimulus"
         ratio_col = "visual_stimulus_ratio"
-        df_copy["visual_stimulus_ratio"] = df_copy["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
+        df_copy["visual_stimulus_ratio"] = df_copy["visual_stimulus"].apply(
+            lambda x: np.nan if pd.isna(x)
+            else abs(
+                (ast.literal_eval(x) if isinstance(x, str) else x)[0] /
+                (ast.literal_eval(x) if isinstance(x, str) else x)[1]
+            )
+        )
         # df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
         df_copy["visual_stimulus_ratio"] = df_copy.apply(
             lambda row: row["visual_stimulus_ratio"] if row['correct_side'] == 'left' else -row["visual_stimulus_ratio"],
@@ -229,7 +235,13 @@ def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     else:
         raise ValueError("modality must be one of 'visual' or 'auditory'")
 
-    df_copy[diff_col] = df_copy[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
+    df_copy[diff_col] = df_copy[stim_col].apply(
+            lambda x: np.nan if pd.isna(x)
+            else abs(
+                (ast.literal_eval(x) if isinstance(x, str) else x)[0] -
+                (ast.literal_eval(x) if isinstance(x, str) else x)[1]
+            )
+        )
     df_copy[diff_col] = df_copy.apply(
         lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
         axis=1
@@ -803,18 +815,23 @@ def parameters_for_fit(df):
         df_copy['abs_visual_stimulus_ratio'] = df_copy['visual_stimulus_ratio'].abs()
         df_copy['visual_ratio_diff_interact'] = df_copy['visual_stimulus_ratio'] * (df_copy['visual_stimulus_diff'].abs())
         df_copy['left_bright'] = df_copy.apply(
-            lambda row: ast.literal_eval(row['visual_stimulus'])[0] if row['correct_side'] == 'left' else ast.literal_eval(row['visual_stimulus'])[1],
-            axis=1
-        )
+                lambda row: np.nan if pd.isna(row['visual_stimulus'])
+                else (
+                    ast.literal_eval(row['visual_stimulus'])[0]
+                    if row['correct_side'] == 'left'
+                    else ast.literal_eval(row['visual_stimulus'])[1]
+                ),
+                axis=1
+            )
         df_copy['visual_ratio_bright_interact'] = df_copy['abs_visual_stimulus_ratio'] * df_copy['left_bright']
-        df_copy['wrong_bright'] = df_copy['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
+        df_copy['wrong_bright'] = df_copy['visual_stimulus'].apply(lambda x: np.nan if pd.isna(x) else abs(ast.literal_eval(x)[1]))
     elif df['stimulus_modality'].unique() == 'auditory':
         df_copy = add_auditory_real_statistics(df_copy)
         df_copy = get_left_auditory_stim(df_copy, 'total_percentage_of_tones')
         df_copy = get_left_auditory_stim(df_copy, 'number_of_tones')
         df_copy = get_left_auditory_stim(df_copy, 'percentage_of_timebins_with_evidence')
         df_copy['abs_total_evidence_strength'] = df_copy['total_evidence_strength'].abs()
-        df_copy['high_tones'] = df_copy['auditory_stimulus'].apply(lambda row: eval(row)['high_tones'])
+        df_copy['high_tones'] = df_copy['auditory_stimulus'].apply(lambda row: ast.literal_eval(row)['high_tones'])
         df_copy['high_tones_amplitude_sum'] = df_copy['high_tones'].apply(lambda row: np.sum(pd.DataFrame(row).values))
         df_copy['low_tones'] = df_copy['auditory_stimulus'].apply(lambda row: eval(row)['low_tones'])
         df_copy['low_tones_amplitude_sum'] = df_copy['low_tones'].apply(lambda row: np.sum(pd.DataFrame(row).values))
@@ -839,7 +856,10 @@ def parameters_for_fit(df):
     # Add the correct column as numeric, 1 for correct, 0 for incorrect
     df_copy['correct_numeric'] = df_copy['correct'].astype(int)
 
-    # Add the past trials impact by time kernel
+    # Add the correct side column as numeric, 1 for left, 0 for right
+    df_copy['correct_side_numeric'] = df_copy['correct_side'].apply(
+        lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
+    )
     
 
     df_copy = get_choice_before(df_copy)
