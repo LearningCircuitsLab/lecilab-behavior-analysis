@@ -856,10 +856,11 @@ def parameters_for_fit(df):
     # Add the correct column as numeric, 1 for correct, 0 for incorrect
     df_copy['correct_numeric'] = df_copy['correct'].astype(int)
 
-    # Add the correct side column as numeric, 1 for left, 0 for right
     df_copy['correct_side_numeric'] = df_copy['correct_side'].apply(
-        lambda x: 1 if x == 'left' else 0 if x == 'right' else np.nan
-    )
+                utils.transform_side_choice_to_numeric
+                )
+
+    # Add the past trials impact by time kernel
     
 
     df_copy = get_choice_before(df_copy)
