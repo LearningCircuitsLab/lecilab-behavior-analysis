@@ -251,13 +251,16 @@ def summary_text_plot(
     return ax
 
 
-def number_of_correct_responses_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
+def number_of_correct_responses_plot(df_in: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
-    column_checker(df, required_columns={"correct_side", "correct"})
-    if "stimulus_modality" not in df.columns or df['stimulus_modality'].nunique() == 1:
-        pass
+    column_checker(df_in, required_columns={"correct_side", "correct"})
+    if "stimulus_modality" not in df_in.columns or df_in['stimulus_modality'].nunique() == 1:
+        # create a copy of the df
+        df = df_in.copy()
     else:
+        # create a copy of the df
+        df = df_in.copy()
         # Create a new column combining 'correct_side' and 'stimulus_modality' with a line break for the x-axis
         df["column_name_to_substitute"] = df["stimulus_modality"] + "\n" + df["correct_side"]
         # drop correct_side and rename x
@@ -773,7 +776,10 @@ def performance_by_decision_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs
     ax.spines["right"].set_visible(False)
 
     # start the x axis at min value
-    ax.set_xlim(left=df["trial_group"].min())
+    try:
+        ax.set_xlim(left=df["trial_group"].min())
+    except Exception as e:
+        print(f"Error setting x-axis limits: {e}")
 
     return ax
 
@@ -891,7 +897,7 @@ def plot_training_times_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes = None)
     return ax
 
 
-def plot_training_times_clock_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes = None) -> plt.Axes:
+def plot_training_times_clock_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes = None, **kwargs) -> plt.Axes:
     if ax is None:
         _, ax = plt.subplots(figsize=(3, 3), subplot_kw={'projection': 'polar'})
     # Create a polar plot
@@ -899,6 +905,10 @@ def plot_training_times_clock_heatmap(heatmap_vector: np.ndarray, ax: plt.Axes =
 
     # Plot the heatmap as a polar bar plot
     ax.bar(theta, heatmap_vector, width=2 * np.pi / 1440, color=plt.cm.YlGnBu(heatmap_vector / np.max(heatmap_vector)), edgecolor='none')
+
+    # change the limit of the radius if specified
+    if "ylim" in kwargs:
+        ax.set_ylim(kwargs["ylim"])
 
     # shade in light gray from 20:00 to 8:00 and put it behind the bars
     # get the maximum value of the plot radius
@@ -1019,7 +1029,10 @@ def plot_number_of_pokes_histogram(df: pd.DataFrame, port_number: int, ax: plt.A
     return ax
 
 
-def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt.Axes = None) -> plt.Axes:
+def plot_port_holding_time_histogram(df: pd.DataFrame,
+                                     port_number: int,
+                                     ax: plt.Axes = None,
+                                     **kwargs) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     port_hold_column = f"port{port_number}_holds"
@@ -1027,10 +1040,14 @@ def plot_port_holding_time_histogram(df: pd.DataFrame, port_number: int, ax: plt
     # plot the histogram of the holding times
     port_holds = df[port_hold_column].tolist()
     port_holds = [item for sublist in port_holds for item in sublist]
+    if "bins" in kwargs:
+        bins = kwargs["bins"]
+    else:
+        bins = 100
 
     sns.histplot(port_holds,
                  ax=ax,
-                 bins=100,
+                 bins=bins,
                  color="gray",
                  stat="probability",
                  kde=True)
@@ -1097,6 +1114,10 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
     ax_to_use.tick_params(axis='y', labelsize=ticksize)
     # increase the size of the y axis labels
     ax_to_use.yaxis.label.set_size(axislabelsize)
+
+    if "ylog" in kwargs and kwargs["ylog"]:
+        ax_to_use.set_yscale("log")
+    
     ax_to_use.set_ylim(bottom=ylim_bottom, top=ylim_top)
 
     if not add_stuff:
@@ -1109,8 +1130,6 @@ def plot_mean_and_cis_by_date(df: pd.DataFrame, item_to_show: str, group_trials_
         label.set_rotation(45)
         label.set_horizontalalignment("right")
     
-    if "ylog" in kwargs and kwargs["ylog"]:
-        ax_to_use.set_yscale("log")
     return ax
 
 
@@ -1260,3 +1279,4 @@ def pointplot_stimulus_dual_dependence(
     ax.spines['right'].set_visible(False)
     # plt.tight_layout()
     return ax
+

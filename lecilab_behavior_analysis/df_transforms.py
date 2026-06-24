@@ -496,7 +496,7 @@ def reformat_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
+def analyze_df(df: pd.DataFrame, include_early_pokeouts: bool = True) -> pd.DataFrame:
     """
     Analyze the dataframe adding new columns and filling missing data.
     """
@@ -506,7 +506,8 @@ def analyze_df(df: pd.DataFrame) -> pd.DataFrame:
     df = add_trial_misses(df)
     df = add_mouse_first_choice(df)
     df = add_mouse_last_choice(df)
-    df = add_early_pokeouts(df)
+    if include_early_pokeouts:
+        df = add_early_pokeouts(df)
 
     # add a column with the total number of trials
     for subject in pd.unique(df['subject']):
@@ -524,7 +525,6 @@ def add_mouse_first_choice(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add the first choice made by the mouse in each trial.
     """
-
     utils.column_checker(df, required_columns={"Port1In", "Port3In", "STATE_stimulus_state_START"})
     df = df.copy()
     df['first_choice'] = df.apply(utils.first_poke_after_stimulus_state, axis=1)
@@ -968,7 +968,7 @@ def add_early_pokeouts(df_in: pd.DataFrame) -> pd.DataFrame:
     Adds a boolean column 'early_pokeout' to the dataframe indicating whether there was an early pokeout
     in the center port before holding the required time. This is irrespective of whether the trial was correct or incorrect.
     """
-    utils.column_checker(df_in, required_columns={"STATE_ready_to_initiate_START", "Port2In", "Port2Out"})
+    utils.column_checker(df_in, required_columns={"STATE_ready_to_initiate_START", "Port2In", "Port2Out", "holding_time"})
     df = df_in.copy()  # Make a copy to avoid modifying the original DataFrame
     df['early_pokeout'] = df.apply(utils.is_this_an_early_pokeout_trial, axis=1)
     return df

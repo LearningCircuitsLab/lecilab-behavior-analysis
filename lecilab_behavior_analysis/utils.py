@@ -389,12 +389,17 @@ def rsync_cluster_data(
     file_path: str,
     credentials: dict,
     local_path: str,
+    exclude: List[str] = None,
 ) -> bool:
     """
     This method syncs the session data from the server to the local machine.
     """
     remote_path = f"{credentials['username']}@{credentials['host']}:{IDIBAPS_TV_PROJECTS}{project_name}/{file_path}"
-    rsync_command = f"rsync -avz {remote_path} {local_path}"
+    rsync_command = "rsync -avz"
+    if exclude:
+        for pattern in exclude:
+            rsync_command += f" --exclude='{pattern}'"
+    rsync_command += f" {remote_path} {local_path}"
     result = subprocess.run(rsync_command, shell=True)
     if result.returncode != 0:
         print(f"Error syncing data for {file_path}: {result.stderr.decode('utf-8')}")
@@ -453,7 +458,10 @@ def is_this_a_miss_trial(series: pd.Series) -> bool:
     checks if STATE_stimulus_state_END is the last state
     """
     try:
-        end_of_stimulus_state = np.max(ast.literal_eval(series["STATE_stimulus_state_END"]))
+        if type(series["STATE_stimulus_state_END"]) == str:
+            end_of_stimulus_state = np.max(ast.literal_eval(series["STATE_stimulus_state_END"]))
+        else:
+            end_of_stimulus_state = np.max(series["STATE_stimulus_state_END"])
         end_of_trial = series["TRIAL_END"]
         if np.round(end_of_stimulus_state, 6) == np.round(end_of_trial, 6):
             return True
@@ -470,13 +478,22 @@ def is_this_an_early_pokeout_trial(series: pd.Series) -> Union[bool, None]:
     """
     # check if this can be computed based on the data
     try:
-        rti_states = ast.literal_eval(series["STATE_ready_to_initiate_START"])
-        port2ins = ast.literal_eval(series["Port2In"])
-        port2outs = ast.literal_eval(series["Port2Out"])
+        rti_states = series["STATE_ready_to_initiate_START"]
+        port2ins = series["Port2In"]
+        port2outs = series["Port2Out"]
+        if type(rti_states) == str:
+            rti_states = ast.literal_eval(rti_states)
+        if type(port2ins) == str:
+            port2ins = ast.literal_eval(port2ins)
+        if type(port2outs) == str:
+            port2outs = ast.literal_eval(port2outs)
     except ValueError:
         # if the value is not a list, return None
         return None
-    # if any of the lists are empty, return None
+    # if any of the lists are empty or nan, return None
+    for item in [rti_states, port2ins, port2outs]:
+        if isinstance(item, float) and np.isnan(item):
+            return None
     if len(rti_states) == 0 or len(port2ins) == 0 or len(port2outs) == 0:
         return None
     # get the first poke in the center port after ready_to_initiate state
@@ -504,18 +521,25 @@ def trial_reaction_time(series: pd.Series) -> float:
     This method calculates the reaction time of a trial.
     """
     try:
-        out_time = np.max(ast.literal_eval(series["Port2Out"]))
+        port2_outs = series["Port2Out"]
+        if type(port2_outs) == str:
+            port2_outs = ast.literal_eval(port2_outs)
+        out_time = np.max(port2_outs)
     except Exception:
         return np.nan
     try:
-        port1_ins = ast.literal_eval(series["Port1In"])
+        port1_ins = series["Port1In"]
+        if type(port1_ins) == str:
+            port1_ins = ast.literal_eval(port1_ins)
         # get the first Port1In after Port2Out
         port1_ins = np.array(port1_ins)
         port1_in = np.min(port1_ins[port1_ins > out_time])
     except Exception:
         port1_in = np.nan
     try:
-        port3_ins = ast.literal_eval(series["Port3In"])
+        port3_ins = series["Port3In"]
+        if type(port3_ins) == str:
+            port3_ins = ast.literal_eval(port3_ins)
         # get the first Port3In after Port2Out
         port3_ins = np.array(port3_ins)
         port3_in = np.min(port3_ins[port3_ins > out_time])
@@ -531,7 +555,10 @@ def trial_initiation_time(series: pd.Series) -> float:
     This method calculates the initiation time of a trial.
     """
     try:
-        in_time = np.min(ast.literal_eval(series["Port2In"]))
+        port2_ins = series["Port2In"]
+        if type(port2_ins) == str:
+            port2_ins = ast.literal_eval(port2_ins)
+        in_time = np.min(port2_ins)
     except Exception:
         return np.nan
     trial_start = series["TRIAL_START"]
@@ -542,7 +569,10 @@ def first_poke_after_stimulus_state(series: pd.Series) -> Union[str, None]:
     # convert the series to a dictionary
     ser_dict = series.to_dict()
     try:
-        stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+        if type(ser_dict["STATE_stimulus_state_START"]) == str:
+            stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+        else:
+            stim_state_array = ser_dict["STATE_stimulus_state_START"]
     except ValueError:
         # if the value is not a list, return None
         return None
@@ -600,7 +630,10 @@ def get_last_poke_before_stimulus_state(series: pd.Series) -> Union[str, None]:
     # convert the series to a dictionary
     ser_dict = series.to_dict()
     try:
-        stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+        if type(ser_dict["STATE_stimulus_state_START"]) == str:
+            stim_state_array = ast.literal_eval(ser_dict["STATE_stimulus_state_START"])
+        else:
+            stim_state_array = ser_dict["STATE_stimulus_state_START"]
     except ValueError:
         # if the value is not a list, return None
         return None
@@ -631,6 +664,8 @@ def get_last_poke_before_stimulus_state(series: pd.Series) -> Union[str, None]:
 def get_dictionary_event_as_list(ser_dict: Dict, event: str) -> List:
     # check if the keys are in the dict
     if event in ser_dict.keys():
+        if type(ser_dict[event]) == list:
+            return ser_dict[event]
         try:
             event_list = ast.literal_eval(ser_dict[event])
             if type(event_list) is float:
@@ -885,9 +920,14 @@ def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hou
     time_hours_ago = pd.Timestamp(max_date) - pd.Timedelta(hours=hours)
 
     detections = events[
-        (events["description"] == "Subject detected")
-        & (events["date"] >= time_hours_ago)
-    ]
+            (
+                events["description"].str.startswith(
+                    ("Subject not", "Detection in", "Large", "Multiple")
+                )
+                | (events["type"] == "START")
+            )
+            & (events["date"] >= time_hours_ago)
+        ]
     sessions = events[
         (events["type"] == "START") & (events["date"] >= time_hours_ago)
     ]
@@ -922,20 +962,20 @@ def generate_tv_report(events: pd.DataFrame, sessions_summary: pd.DataFrame, hou
     return report_df, max_date
 
 
-def load_all_events(project_name: str) -> pd.DataFrame:
+def load_all_events(events_subfolder_location: str) -> pd.DataFrame:
     """
     Load all events from the local machine for a given project.
     """
     outpath = get_outpath()
-    events_path = f"{outpath}/{project_name}/events.csv"
+    events_path = f"{outpath}/{events_subfolder_location}/events.csv"
     if not os.path.exists(events_path):
-        raise FileNotFoundError(f"Events file for project {project_name} does not exist.")
+        raise FileNotFoundError(f"Events file for project {outpath}/{events_subfolder_location} does not exist.")
     
     events_df = pd.read_csv(events_path, sep=";")
 
     # read events in old_events if they exist
     events_dfs_list = []
-    old_events_path = f"{outpath}/{project_name}/old_events"
+    old_events_path = f"{outpath}/{events_subfolder_location}/old_events"
     # list files in the old_events folder
     if os.path.exists(old_events_path):
         old_events_files = [f for f in os.listdir(old_events_path) if f.endswith('.csv')]
