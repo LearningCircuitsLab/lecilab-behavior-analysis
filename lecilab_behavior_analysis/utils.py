@@ -1,3 +1,5 @@
+from email import header
+
 import numpy as np
 import pandas as pd
 import socket
@@ -967,7 +969,7 @@ def load_all_events(events_subfolder_location: str) -> pd.DataFrame:
     if not os.path.exists(events_path):
         raise FileNotFoundError(f"Events file for project {outpath}/{events_subfolder_location} does not exist.")
     
-    events_df = pd.read_csv(events_path, sep=";")
+    events_df = read_csv_with_specific_number_of_columns(events_path, expected_columns=4, sep=";")
 
     # read events in old_events if they exist
     events_dfs_list = []
@@ -980,10 +982,18 @@ def load_all_events(events_subfolder_location: str) -> pd.DataFrame:
         # read each file and concatenate to events_df
         for old_file in old_events_files:
             old_file_path = os.path.join(old_events_path, old_file)
-            old_events_df = pd.read_csv(old_file_path, sep=";")
+            old_events_df = read_csv_with_specific_number_of_columns(old_file_path, expected_columns=4, sep=";")
             events_dfs_list.append(old_events_df)
     events_df = pd.concat(events_dfs_list + [events_df], ignore_index=True)
     return events_df
+
+
+def read_csv_with_specific_number_of_columns(file_path: str, expected_columns: int, sep: str = ";") -> pd.DataFrame:
+    with open(file_path, encoding="utf-8") as f:
+        header = f.readline().rstrip("\n").split(sep)
+        rows = [line.rstrip("\n").split(sep, expected_columns-1) for line in f]
+
+    return pd.DataFrame(rows, columns=header)
     
 
 def side_and_difficulty_to_numeric(row: pd.Series) -> float:
