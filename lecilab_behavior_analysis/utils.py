@@ -388,6 +388,16 @@ def get_animals_in_project(project_name: str) -> List[str]:
     return folders
 
 
+def get_files_for_animal(project_name: str, animal_name: str) -> List[str]:
+    credentials = get_idibaps_cluster_credentials()
+    files = get_folders_from_server(
+        credentials,
+        f"{IDIBAPS_TV_PROJECTS}{project_name}/sessions/{animal_name}/",
+    )
+
+    return files
+
+
 def rsync_cluster_data(
     project_name: str,
     file_path: str,
