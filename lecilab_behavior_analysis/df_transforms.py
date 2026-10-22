@@ -734,6 +734,36 @@ def get_left_auditory_stim(df: pd.DataFrame, param: str) -> pd.DataFrame:
     )
     return pbd_df
 
+
+def add_number_of_pokes(df_raw: pd.DataFrame, port_number: int):
+    df = df_raw.copy()
+    port_hold_column = f"port{port_number}_holds"
+    df[port_hold_column] = df.apply(lambda row: utils.get_trial_port_hold(row, port_number), axis=1)
+    df[f"port{port_number}_pokes_num"] = df[port_hold_column].apply(lambda x: len(x))
+    return df
+
+def add_number_of_centralpokes_after_choice(df_raw: pd.DataFrame):
+    df = df_raw.copy()
+    df["eager_pokes"] = (
+        pd.to_numeric(df["port2_pokes_num"], errors="coerce")
+        - pd.to_numeric(df["fixation_breaks"], errors="coerce")
+    )
+    return df
+
+def add_fixation_break_columns(
+    df,
+    event_col="ordered_list_of_events",
+    next_event_col="next_event_after_fixation_break",
+    count_col="fixation_breaks",
+):
+    df = df.copy()
+    df[next_event_col] = df[event_col].apply(utils.detect_incorrect_hold_and_next_event)
+    df[count_col] = df[next_event_col].apply(
+        lambda x: len(x) if isinstance(x, list) else 0
+    )
+    return df
+
+
 def get_choice_before(df):
     df_copy = df.copy(deep=True)
     utils.column_checker(df_copy, required_columns={"first_choice", "last_choice", "previous_port_before_stimulus", "correct"})
@@ -876,6 +906,15 @@ def parameters_for_fit(df):
                 )
     df_copy['previous_correct_numeric'] = df_copy['previous_correct'].astype('Int64')
 
+
+    df_copy = add_day_column_to_df(df_copy)
+    df_copy = add_trial_of_day_column_to_df(df_copy)
+    df_copy = add_number_of_pokes(df_copy, port_number=2)
+    df_copy = add_inter_trial_interval_column_to_df(
+        add_trial_duration_column_to_df(
+            add_number_of_centralpokes_after_choice(
+                add_fixation_break_columns(df_copy)
+            )))
     return df_copy
 
 def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
