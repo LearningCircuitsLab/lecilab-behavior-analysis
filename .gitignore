@@ -81,3 +81,6 @@ venv/
 
 # written by setuptools_scm
 **/_version.py
+
+# Large local data used for manual tests (a small excerpt is in tests/data)
+example_data/

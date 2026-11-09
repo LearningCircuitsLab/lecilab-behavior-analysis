@@ -126,9 +126,6 @@ def test_normalize_stage(old, new):
     assert dfc.normalize_stage(old) == new
 
 
-# fill_missing_data uses infer_objects(copy=False), deprecated in pandas 3
-# (not related to these changes)
-@pytest.mark.filterwarnings("ignore:The copy keyword is deprecated")
 def test_fill_missing_data_normalizes_names():
     df = pd.DataFrame(
         {

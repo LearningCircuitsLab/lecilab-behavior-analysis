@@ -21,15 +21,15 @@ analysis function separately.
 
 Rule for the rest of the package
 --------------------------------
-- Public entry points convert the data once, at the start:
-  df_transforms.fill_missing_data (also used by analyze_df and
-  subject_progress_figure) and figure_maker.session_summary_figure call
-  normalize_task_names. A new public figure or analysis function must do the
-  same before using stimulus_modality or current_training_stage.
+- The data is converted once, at the start: preprocessing.prepare (also
+  called analyze_df) calls fill_missing_data, which calls
+  normalize_task_names. Every figure (figure_maker, the figures package)
+  prepares its data first. A new public figure or analysis function must do
+  the same before using stimulus_modality or current_training_stage.
 - Internal code then compares only with the current names
   ("auditory-cot", "TwoAFC_auditory-cot_easy"...), never with the old ones.
 - Functions that may be called directly on raw data and need one specific
-  modality normalize it themselves (e.g. df_transforms._get_single_modality).
+  modality normalize it themselves (e.g. common._get_single_modality).
 - Columns whose meaning changed (visual_stimulus) are always read through the
   functions in this file, which use the date of each trial.
 
@@ -164,7 +164,7 @@ def add_left_right_brightness(df_in: pd.DataFrame) -> pd.DataFrame:
 # TwoAFC_<modality>_<difficulty>. "visual" and "multisensory" did not change.
 #
 # How to read both: normalize the names with the functions below (done in
-# df_transforms.fill_missing_data), and compare only with the new names.
+# preprocessing.fill_missing_data), and compare only with the new names.
 LEGACY_MODALITY_NAMES = {
     "auditory": "auditory-cot",
     "auditory_cot": "auditory-cot",
