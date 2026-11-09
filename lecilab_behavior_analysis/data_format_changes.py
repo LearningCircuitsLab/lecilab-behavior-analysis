@@ -19,6 +19,20 @@ names. When a task changes the format of a column again, add a new section
 here (and use it where that column is read), rather than patching each
 analysis function separately.
 
+Rule for the rest of the package
+--------------------------------
+- Public entry points convert the data once, at the start:
+  df_transforms.fill_missing_data (also used by analyze_df and
+  subject_progress_figure) and figure_maker.session_summary_figure call
+  normalize_task_names. A new public figure or analysis function must do the
+  same before using stimulus_modality or current_training_stage.
+- Internal code then compares only with the current names
+  ("auditory-cot", "TwoAFC_auditory-cot_easy"...), never with the old ones.
+- Functions that may be called directly on raw data and need one specific
+  modality normalize it themselves (e.g. df_transforms._get_single_modality).
+- Columns whose meaning changed (visual_stimulus) are always read through the
+  functions in this file, which use the date of each trial.
+
 Current changes
 ---------------
 1. visual_stimulus: (correct, incorrect) -> (left, right), from 2026-11-09.

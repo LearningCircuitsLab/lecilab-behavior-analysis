@@ -263,6 +263,9 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     """
     Summary of a particular session.
     """
+    # use the current modality and stage names in every panel
+    # (see data_format_changes.py)
+    df = dfc.normalize_task_names(df)
     # if more than one session is there, raise an error
     # if df.date.nunique() > 1:
     #     raise ValueError("The dataframe contains more than one session")
@@ -367,8 +370,7 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     
     """
 
-    # use the current modality names (see data_format_changes.py)
-    df_task = dfc.normalize_task_names(df[df['task'] != 'Habituation'])
+    df_task = df[df['task'] != 'Habituation']
     psych_axes = {
         'visual': visual_psych_by_difficulty_ratio_ax,
         'auditory-cot': auditory_psych_by_difficulty_ratio_ax,
