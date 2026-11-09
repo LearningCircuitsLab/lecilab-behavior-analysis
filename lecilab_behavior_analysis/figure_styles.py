@@ -6,7 +6,7 @@ def figure_style_guido(font_size=7):
     """
     Set style for plotting figures
     """
-    sns.set(style="ticks", context="paper",
+    sns.set_theme(style="ticks", context="paper",
             font="sans-serif",
             rc={"font.size": font_size,
                 "figure.titlesize": font_size,
