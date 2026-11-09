@@ -16,8 +16,8 @@ def generate_fake_dataset(outfile: str) -> None:
         ["Habituation"] * 3
         + ["TwoAFC_visual_easy"] * 5
         + ["TwoAFC_visual_hard"] * 3
-        + ["TwoAFC_auditory_easy"] * 7
-        + ["TwoAFC_auditory_hard"] * 4
+        + ["TwoAFC_auditory-cot_easy"] * 7
+        + ["TwoAFC_auditory-cot_hard"] * 4
         + ["TwoAFC_multisensory_easy"] * 8
     )
 
@@ -58,7 +58,7 @@ def generate_fake_dataset(outfile: str) -> None:
         if "visual" in current_training_stage_list[i]:
             stimulus_modality = "visual"
         elif "auditory" in current_training_stage_list[i]:
-            stimulus_modality = "auditory"
+            stimulus_modality = "auditory-cot"
         else:
             stimulus_modality = "multisensory"
         # difficulty

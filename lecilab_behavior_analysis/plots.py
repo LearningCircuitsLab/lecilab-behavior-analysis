@@ -14,6 +14,8 @@ from matplotlib.lines import Line2D
 from scipy.stats import mannwhitneyu, ttest_ind, ttest_rel
 
 import lecilab_behavior_analysis.utils as utils
+# changes in the format of the saved data (see that file for the reasons)
+import lecilab_behavior_analysis.data_format_changes as dfc
 from lecilab_behavior_analysis.utils import (column_checker, get_text_from_subset_df, list_to_colors, get_text_from_subject_df)
 
 
@@ -251,10 +253,21 @@ def summary_text_plot(
     return ax
 
 
+def _correct_as_bool(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Copy of the dataframe with "correct" as True / False. Timeouts (correct = None)
+    are shown as errors (see data_format_changes.py).
+    """
+    df = df.copy()
+    df["correct"] = df["correct"].apply(dfc.correct_as_number) == 1
+    return df
+
+
 def number_of_correct_responses_plot(df_in: pd.DataFrame, ax: plt.Axes = None) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     column_checker(df_in, required_columns={"correct_side", "correct"})
+    df_in = _correct_as_bool(df_in)
     if "stimulus_modality" not in df_in.columns or df_in['stimulus_modality'].nunique() == 1:
         # create a copy of the df
         df = df_in.copy()
@@ -281,6 +294,7 @@ def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Ax
     if ax is None:
         ax = plt.gca()
     column_checker(df, required_columns={"correct_side", "correct"})
+    df = _correct_as_bool(df)
     # Define colors
     colors = {
         True: "forestgreen",
@@ -594,7 +608,7 @@ def side_correct_performance_plot(df: pd.DataFrame, ax: plt.Axes, trials_to_show
     column_checker(df, required_columns={"trial", "correct_side", "correct"})
     ax.clear()
     # select only the last X trials
-    df = df.tail(trials_to_show)
+    df = _correct_as_bool(df.tail(trials_to_show))
     sns.scatterplot(data=df, x="trial", y="correct_side", hue="correct", ax=ax)
     # make sure the y axis ticks are ascending, inverting the y axis
     ax.invert_yaxis()

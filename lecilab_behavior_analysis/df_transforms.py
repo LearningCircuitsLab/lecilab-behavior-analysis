@@ -3,6 +3,8 @@ import numpy as np
 import ast
 from typing import Tuple, Union
 import lecilab_behavior_analysis.utils as utils
+# changes in the format of the saved data (see that file for the reasons)
+import lecilab_behavior_analysis.data_format_changes as dfc
 import ast
 
 def fill_missing_data(df_in: pd.DataFrame) -> pd.DataFrame:
@@ -21,8 +23,23 @@ def fill_missing_data(df_in: pd.DataFrame) -> pd.DataFrame:
         df["correct"] = df["correct"].infer_objects(copy=False)
     except KeyError:
         df["correct"] = True
+    # use the current modality and stage names (see data_format_changes.py)
+    df = dfc.normalize_task_names(df)
 
     return df
+
+
+def _get_single_modality(df: pd.DataFrame) -> str:
+    """
+    Returns the stimulus modality of the dataframe, with its current name
+    (see data_format_changes.py). Raises if there is more than one.
+    """
+    modalities = df["stimulus_modality"].apply(dfc.normalize_modality).unique()
+    if len(modalities) != 1:
+        raise ValueError(
+            f"The dataframe must contain one stimulus modality, got {list(modalities)}"
+        )
+    return modalities[0]
 
 
 def get_dates_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -137,7 +154,8 @@ def get_performance_through_trials(df: pd.DataFrame, window: int = 25) -> pd.Dat
     if "total_trial" not in df.columns:
         df["total_trial"] = np.arange(1, df.shape[0] + 1)
     # calculate the performance as a mean of the last X trials
-    df["performance_w"] = df.correct.rolling(window=window).mean() * 100
+    # timeouts (correct = None) count as errors (see data_format_changes.py)
+    df["performance_w"] = df.correct.apply(dfc.correct_as_number).rolling(window=window).mean() * 100
 
     return df
 
@@ -197,19 +215,22 @@ def add_auditory_real_statistics(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
     df_copy = df.copy(deep=True) 
-    if df_copy["stimulus_modality"].unique() == 'visual':
-        stim_col = "visual_stimulus"
-        ratio_col = "visual_stimulus_ratio"
-        df_copy["visual_stimulus_ratio"] = df_copy["visual_stimulus"].apply(lambda x: abs(eval(x)[0] / eval(x)[1]))
-        # df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
-        df_copy["visual_stimulus_ratio"] = df_copy.apply(
-            lambda row: row["visual_stimulus_ratio"] if row['correct_side'] == 'left' else -row["visual_stimulus_ratio"],
-            axis=1
+    modality = _get_single_modality(df_copy)
+    if modality == 'visual':
+        # brighter / dimmer ratio, positive if the left port is the brighter one
+        # (visual_stimulus is read in either format, see data_format_changes.py)
+        df_copy = dfc.add_left_right_brightness(df_copy)
+        brighter = df_copy[["left_brightness", "right_brightness"]].max(axis=1)
+        dimmer = df_copy[["left_brightness", "right_brightness"]].min(axis=1)
+        df_copy["visual_stimulus_ratio"] = (brighter / dimmer).where(
+            df_copy["left_brightness"] > df_copy["right_brightness"],
+            -(brighter / dimmer),
         )
-    elif df_copy["stimulus_modality"].unique() == "auditory":
+        # df["visual_stimulus_ratio"] = df["visual_stimulus_ratio"].apply(np.log).round(4)
+    elif modality == "auditory-cot":
         df_copy = add_auditory_real_statistics(df_copy)
     else:
-        raise ValueError("modality must be either 'visual' or 'auditory'")
+        raise ValueError("modality must be either 'visual' or 'auditory-cot'")
     df_copy = add_mouse_first_choice(df_copy)
     df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(utils.transform_side_choice_to_numeric)
 
@@ -219,19 +240,23 @@ def get_performance_by_difficulty_ratio(df: pd.DataFrame) -> pd.DataFrame:
 def get_performance_by_difficulty_diff(df: pd.DataFrame) -> pd.DataFrame:
     df_copy = df.copy(deep=True) 
     if df_copy["current_training_stage"].str.contains("visual").any():
-        stim_col = "visual_stimulus"
-        diff_col = "visual_stimulus_diff"
+        # left minus right brightness
+        # (visual_stimulus is read in either format, see data_format_changes.py)
+        df_copy = dfc.add_left_right_brightness(df_copy)
+        df_copy["visual_stimulus_diff"] = (
+            df_copy["left_brightness"] - df_copy["right_brightness"]
+        )
     elif df_copy["current_training_stage"].str.contains("auditory").any():
         stim_col = "auditory_stimulus"
         diff_col = "auditory_stimulus_diff"
+        df_copy[diff_col] = df_copy[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
+        df_copy[diff_col] = df_copy.apply(
+            lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
+            axis=1
+        )
     else:
         raise ValueError("modality must be one of 'visual' or 'auditory'")
 
-    df_copy[diff_col] = df_copy[stim_col].apply(lambda x: abs(eval(x)[0] - eval(x)[1]))
-    df_copy[diff_col] = df_copy.apply(
-        lambda row: row[diff_col] if row['correct_side'] == 'left' else -row[diff_col],
-        axis=1
-    )
     df_copy['first_choice_numeric'] = df_copy['first_choice'].apply(utils.transform_side_choice_to_numeric)
     return df_copy
 
@@ -639,11 +664,25 @@ def create_transition_matrix(events: list) -> pd.DataFrame:
     return pd.DataFrame(transition_matrix, index=items, columns=items)
 
 
+def _difference_correct_minus_incorrect(pair) -> float:
+    if pair is None:
+        return np.nan
+    return pair[0] - pair[1]
+
+
 def add_visual_stimulus_difference(df_in: pd.DataFrame) -> pd.DataFrame:
     df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
-    utils.column_checker(df_in, required_columns={"visual_stimulus"})
-    df['visual_stimulus'] = df['visual_stimulus'].apply(ast.literal_eval)
-    df["visual_stim_difference"] = df["visual_stimulus"].apply(lambda x: x[0] - x[1])
+    utils.column_checker(df_in, required_columns={"visual_stimulus", "correct_side", "date"})
+    # correct minus incorrect port brightness
+    # (visual_stimulus is read in either format, see data_format_changes.py)
+    df["visual_stim_difference"] = df.apply(
+        lambda row: _difference_correct_minus_incorrect(
+            dfc.get_correct_incorrect_brightness(
+                row["visual_stimulus"], row["correct_side"], row["date"]
+            )
+        ),
+        axis=1,
+    )
     # bin the data every 0.1
     df["vis_stim_dif_bin"] = np.round((df["visual_stim_difference"] // 0.1) * 0.1, 1)
     return df
@@ -795,18 +834,20 @@ def parameters_for_fit(df):
     df_copy = add_mouse_first_choice(df_copy)
     df_copy = add_mouse_last_choice(df_copy)
     df_copy = add_port_where_animal_comes_from(df_copy)
-    if df['stimulus_modality'].unique() == 'visual':
+    modality = _get_single_modality(df)
+    if modality == 'visual':
         df_copy = get_performance_by_difficulty_ratio(df_copy)
         df_copy = get_performance_by_difficulty_diff(df_copy)
         df_copy['abs_visual_stimulus_ratio'] = df_copy['visual_stimulus_ratio'].abs()
         df_copy['visual_ratio_diff_interact'] = df_copy['visual_stimulus_ratio'] * (df_copy['visual_stimulus_diff'].abs())
-        df_copy['left_bright'] = df_copy.apply(
-            lambda row: ast.literal_eval(row['visual_stimulus'])[0] if row['correct_side'] == 'left' else ast.literal_eval(row['visual_stimulus'])[1],
-            axis=1
-        )
+        # brightness of the left port, and of the incorrect port
+        # (visual_stimulus is read in either format, see data_format_changes.py)
+        df_copy['left_bright'] = df_copy['left_brightness']
         df_copy['visual_ratio_bright_interact'] = df_copy['abs_visual_stimulus_ratio'] * df_copy['left_bright']
-        df_copy['wrong_bright'] = df_copy['visual_stimulus'].apply(lambda x: abs(eval(x)[1]))
-    elif df['stimulus_modality'].unique() == 'auditory':
+        df_copy['wrong_bright'] = df_copy['left_brightness'].where(
+            df_copy['correct_side'] == 'right', df_copy['right_brightness']
+        )
+    elif modality == 'auditory-cot':
         df_copy = add_auditory_real_statistics(df_copy)
         df_copy = get_left_auditory_stim(df_copy, 'total_percentage_of_tones')
         df_copy = get_left_auditory_stim(df_copy, 'number_of_tones')

@@ -8,6 +8,8 @@ import plotly.graph_objects as go
 import lecilab_behavior_analysis.df_transforms as dft
 import lecilab_behavior_analysis.plots as plots
 import lecilab_behavior_analysis.utils as utils
+# changes in the format of the saved data (see that file for the reasons)
+import lecilab_behavior_analysis.data_format_changes as dfc
 
 
 def _render_plot_error(ax: plt.Axes, plot_name: str, error: Exception) -> plt.Axes:
@@ -365,9 +367,13 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
     
     """
 
-    df_task = df[df['task'] != 'Habituation']
-    for mod in ['visual', 'auditory']:
-        ax_name = eval(mod + '_psych_by_difficulty_ratio_ax')
+    # use the current modality names (see data_format_changes.py)
+    df_task = dfc.normalize_task_names(df[df['task'] != 'Habituation'])
+    psych_axes = {
+        'visual': visual_psych_by_difficulty_ratio_ax,
+        'auditory-cot': auditory_psych_by_difficulty_ratio_ax,
+    }
+    for mod, ax_name in psych_axes.items():
 
         def _plot_psych_mod(mod=mod, ax=ax_name) -> plt.Axes:
             if len(df_task) == 0:
@@ -387,7 +393,7 @@ def session_summary_figure(df: pd.DataFrame, **kwargs) -> plt.Figure:
                 if mod == 'visual':
                     xvar = 'visual_stimulus_ratio'
                     value_type = 'discrete'
-                elif mod == 'auditory':
+                elif mod == 'auditory-cot':
                     xvar = 'total_evidence_strength'
                     value_type = 'continue'
                 psych_df = dft.get_performance_by_difficulty_ratio(df_mod)
