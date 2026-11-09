@@ -910,11 +910,11 @@ def parameters_for_fit(df):
     df_copy = add_day_column_to_df(df_copy)
     df_copy = add_trial_of_day_column_to_df(df_copy)
     df_copy = add_number_of_pokes(df_copy, port_number=2)
-    df_copy = add_inter_trial_interval_column_to_df(
-        add_trial_duration_column_to_df(
-            add_number_of_centralpokes_after_choice(
-                add_fixation_break_columns(df_copy)
-            )))
+    df_copy = add_fixation_break_columns(df_copy)
+    df_copy = add_number_of_centralpokes_after_choice(df_copy)
+    df_copy = calculate_time_between_trials_and_reaction_time(df_copy)
+    df_copy = add_trial_duration_column_to_df(df_copy)
+    df_copy = add_inter_trial_interval_column_to_df(df_copy)
     return df_copy
 
 def get_time_kernel_impact(df:pd.DataFrame, y: str, max_lag, tau):
