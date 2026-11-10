@@ -110,20 +110,63 @@ def add_engagement_column(df_in: pd.DataFrame, engagement_sd_criteria: float = 2
     return df
 
 
+BOX_USAGE_COLUMNS = ["date", "subject", "time_type", "absolute_time", "percentage_of_time", "accuracy"]
+
+
+MAX_SESSION_HOURS = 6
+
+
+def get_session_ends(df: pd.DataFrame, events_df: pd.DataFrame, max_hours: float = MAX_SESSION_HOURS) -> pd.DataFrame:
+    """
+    End of each session (subject, date) of df: the first time the same subject
+    returned home ("Subject back home: ..." or "The subject has returned
+    home.") after the session started, before its next session started and
+    at most max_hours later. Columns: subject, date, end_date,
+    session_duration (seconds). Sessions without such an event (e.g. events
+    missing) are left out.
+
+    Matching the subject (instead of taking the next event of any subject)
+    lets events of several boxes be used together.
+    """
+    home = events_df[np.logical_or(
+        events_df["description"] == "The subject has returned home.",
+        events_df["description"].str.startswith("Subject back home:"),
+    )]
+    home = pd.DataFrame({"subject": home["subject"], "end_date": pd.to_datetime(home["date"])})
+    home = home.dropna().sort_values("end_date")
+    if home.empty:
+        return pd.DataFrame(columns=["subject", "date", "end_date", "session_duration"])
+    sessions = df[["subject", "date"]].drop_duplicates().copy()
+    sessions["start"] = pd.to_datetime(sessions["date"])
+    sessions = sessions.sort_values("start")
+    sessions["next_start"] = sessions.groupby("subject")["start"].shift(-1)
+    ends = pd.merge_asof(sessions, home, left_on="start", right_on="end_date", by="subject",
+                         direction="forward", allow_exact_matches=False)
+    ends = ends[ends["end_date"].notna()
+                & ~(ends["end_date"] >= ends["next_start"])
+                & (ends["end_date"] - ends["start"] <= pd.Timedelta(hours=max_hours))]
+    ends["session_duration"] = (ends["end_date"] - ends["start"]).dt.total_seconds()
+    return ends[["subject", "date", "end_date", "session_duration"]].reset_index(drop=True)
+
+
 def get_box_usage_df(df: pd.DataFrame, events_df: pd.DataFrame, verbose: bool = True) -> pd.DataFrame:
+    """
+    Time of each session spent completing the first trial, engaged,
+    disengaged, unaccounted and exiting the box (see get_session_box_usage),
+    with the session end taken from events_df (see get_session_ends). Sessions
+    without an end in the events are skipped. Empty (with the columns) if
+    there are none.
+    """
+    ends = get_session_ends(df, events_df)
+    durations = {(row.subject, row.date): row.session_duration for row in ends.itertuples()}
     gsbu_dfs = []
-    # keep only the "back home" events, with dates read once (instead of once per session)
-    events_df = events_df[np.logical_or(
-        events_df['description'] == "The subject has returned home.",
-        events_df['description'].str.startswith("Subject back home:")
-    )].copy()
-    events_df['date'] = pd.to_datetime(events_df['date'])
-    for date, df_session in df.groupby('date', sort=False):
-        subject = df_session['subject'].unique()[0]
-        _, session_duration = find_next_end_task_time_in_events(events_df, date, subject)
+    for (subject, date), df_session in df.groupby(["subject", "date"], sort=False):
+        session_duration = durations.get((subject, date))
         if session_duration is None:
             if verbose:
                 print(f"Session duration not found for {subject} on {date}. Skipping this session.")
             continue
         gsbu_dfs.append(get_session_box_usage(df_session, session_duration=session_duration))
+    if not gsbu_dfs:
+        return pd.DataFrame(columns=BOX_USAGE_COLUMNS)
     return pd.concat(gsbu_dfs, ignore_index=True)

@@ -285,6 +285,9 @@ def format_date_axis(ax: plt.Axes) -> plt.Axes:
     import matplotlib.dates as mdates
 
     locator = mdates.AutoDateLocator(minticks=3, maxticks=10)
+    left, right = ax.get_xlim()
+    if right - left < 10:  # a few days: one tick per day, never hours
+        locator = mdates.DayLocator()
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(mdates.ConciseDateFormatter(locator))
     ax.set_xlabel("")

@@ -116,9 +116,10 @@ def prepare(df_in: pd.DataFrame, include_early_pokeouts: bool = True) -> pd.Data
     whole history (such as total_trial).
 
     It:
+
     - fills missing task information and converts old names to the current ones
       (fill_missing_data, see data_format_changes.py),
-    - reads the event columns (Port1In, STATE_..._START...) once,
+    - reads the event columns (Port1In, STATE_*_START...) once,
     - adds: year_month_day, total_trial (per subject), trial_of_day,
       miss_trial, first_choice, last_choice, last_choice_before_stimulus,
       previous_port_before_stimulus, roa_choice, roa_choice_numeric,

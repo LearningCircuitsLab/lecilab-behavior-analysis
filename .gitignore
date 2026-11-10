@@ -84,3 +84,8 @@ venv/
 
 # Large local data used for manual tests (a small excerpt is in tests/data)
 example_data/
+
+# documentation build
+docs/build/
+docs/source/api_generated/
+docs/source/_static/examples/

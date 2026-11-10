@@ -186,10 +186,13 @@ def engagement(data: FigureData, ax) -> None:
         raise NotApplicable("No events_df provided")
     df = add_engagement_column(with_numeric_correct(data), engagement_sd_criteria=2)
     usage = get_box_usage_df(df, events_df, verbose=False)
+    if usage.empty:
+        raise NotApplicable("No session ends found in the events")
     usage["day"] = pd.to_datetime(pd.to_datetime(usage["date"]).dt.strftime("%Y-%m-%d"))
     hue_order = ["engaged_time", "disengaged_time", "time_to_complete_first_trial", "time_to_exit_box"]
     for time_type in hue_order:
         rows = usage[usage["time_type"] == time_type].groupby("day")["percentage_of_time"].mean()
+        rows = rows.asfreq("D") if len(rows) else rows  # break the line over days without data
         ax.plot(rows.index, rows.values, label=time_type.replace("_", " "))
     ax.set_ylabel("Percentage of time (%)")
     ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=2)

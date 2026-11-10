@@ -33,10 +33,22 @@ from lecilab_behavior_analysis.plots.occupancy import (
     plot_percentage_of_occupancy_per_day,
     plot_training_times_clock_heatmap,
 )
-from lecilab_behavior_analysis.plots.training import plot_table_from_df
+from lecilab_behavior_analysis.plots.training import format_date_axis, plot_table_from_df
 from lecilab_behavior_analysis.reports.tables import generate_tv_report
 
 logger = logging.getLogger(__name__)
+
+# cells that failed since the last reset_failed_cells(), for problems_table
+_FAILED_CELLS: List[PanelProblem] = []
+
+
+def failed_cells() -> List[PanelProblem]:
+    """The report cells that failed (and showed a message instead) so far."""
+    return list(_FAILED_CELLS)
+
+
+def reset_failed_cells() -> None:
+    _FAILED_CELLS.clear()
 
 
 # ---------------------------------------------------------------------------
@@ -71,6 +83,7 @@ def never_raises(title: str, kind: str) -> Callable:
                 return function(*args, **kwargs)
             except Exception as error:
                 logger.warning("Report cell '%s' failed: %s: %s", title, type(error).__name__, error)
+                _FAILED_CELLS.append(PanelProblem(title, type(error).__name__, str(error)))
                 text = f"Could not generate {title}<br>{type(error).__name__}: {error}"
                 if kind == "plotly":
                     return _plotly_message(title, text)
@@ -91,6 +104,8 @@ def _correct_numeric(df: pd.DataFrame) -> pd.Series:
 @never_raises("TV report", "plotly")
 def tv_report_table(events_df: pd.DataFrame, sessions_summary_df: pd.DataFrame, hours: int = 24) -> go.Figure:
     """Detections, sessions, water and weight of each subject in the last hours."""
+    if events_df is None or sessions_summary_df is None:
+        return _plotly_message("TV report", "No events or sessions summary for this setup")
     report_df, last_date = generate_tv_report(events_df.copy(), sessions_summary_df.copy(), hours)
     return plot_table_from_df(report_df, title=f"TV Report - Last {hours} Hours from {last_date}")
 
@@ -133,7 +148,8 @@ def last_days_table(df: pd.DataFrame, n_days: int = 3) -> go.Figure:
 def problems_table(problems: Dict[str, List[PanelProblem]]) -> go.Figure:
     """
     The figure panels that failed, e.g. {"NUO003": fig.panel_problems, ...}.
-    Shows "All panels were generated" if there are none.
+    Shows "All panels were generated" if there are none. To include the
+    report cells that failed, add {"Overview": failed_cells()}.
     """
     rows = [
         {"figure": name, "panel": p.panel, "error": p.error, "message": p.message[:200]}
@@ -189,22 +205,26 @@ def daily_trials_and_performance(df: pd.DataFrame) -> pd.DataFrame:
 def cohort_trials_and_performance_figure(df: pd.DataFrame) -> Figure:
     """Number of trials and performance per day of the whole cohort, by training stage."""
     table = daily_trials_and_performance(df)
-    fig, axs = plt.subplots(1, 2, figsize=(10, 3), layout="constrained")
+    fig, axs = plt.subplots(1, 2, figsize=(12, 3), layout="constrained")
     sns.lineplot(data=table, x="day", y="trials", hue="current_training_stage", ax=axs[0])
     axs[0].set_title("Number of trials per day")
     sns.lineplot(data=table, x="day", y="correct", hue="current_training_stage", ax=axs[1], legend=False)
     axs[1].set_title("Correct percentage per day")
     for ax in axs:
-        ax.set_xlabel("Date")
-        ax.tick_params(axis="x", rotation=45)
+        format_date_axis(ax)
         ax.spines[["top", "right"]].set_visible(False)
     if axs[0].get_legend() is not None:
-        axs[0].get_legend().set_title("")
+        # one legend for both plots, outside, so that it does not hide the lines
+        handles, labels = axs[0].get_legend_handles_labels()
+        axs[0].get_legend().remove()
+        fig.legend(handles, labels, loc="outside right upper", frameon=False)
     return fig
 
 
 __all__ = [
     "never_raises",
+    "failed_cells",
+    "reset_failed_cells",
     "tv_report_table",
     "trials_by_stage",
     "trials_by_stage_table",

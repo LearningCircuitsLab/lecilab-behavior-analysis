@@ -1,5 +1,5 @@
 """Reading the events of one trial (a row): first and last choice, reaction time,
-center port holds, misses. Event columns (Port1In, STATE_..._START...) can be
+center port holds, misses. Event columns (Port1In, STATE_*_START...) can be
 lists or text such as "[1.2, 3.4]".
 """
 import re

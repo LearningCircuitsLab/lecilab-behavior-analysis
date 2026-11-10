@@ -1,8 +1,6 @@
 linkify-it-py
 myst-parser
-nbsphinx
-pydata-sphinx-theme
 setuptools-scm
+shibuya
 sphinx
-sphinx-autodoc-typehints
 sphinx-sitemap

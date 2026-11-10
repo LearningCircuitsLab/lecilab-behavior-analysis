@@ -12,7 +12,7 @@ list the panels that failed. A panel that has nothing to show for this data
 (e.g. no visual trials) raises NotApplicable, and shows a grey message
 instead (not a problem).
 
-Example:
+Example::
 
     @panel("reaction times", needs={"reaction_time", "year_month_day"})
     def reaction_times(data, ax):

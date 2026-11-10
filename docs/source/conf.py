@@ -1,132 +1,60 @@
 # Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-
-# -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-
+# Build locally with:  sphinx-build docs/source docs/build
 import os
 import sys
 
 import setuptools_scm
 
-
-# Mock external dependencies to avoid import errors during documentation build
-autodoc_mock_imports = [
-    "pandas", "matplotlib", "seaborn", "scikit-learn", "statsmodels", "plotly", "networkx"
-]
-
-# Add the module path to sys.path here.
-# If the directory is relative to the documentation root,
-# use os.path.abspath to make it absolute, like shown here.
+# the package is installed in the docs build (pip install -e .), and also
+# importable from the repository when building locally
 sys.path.insert(0, os.path.abspath("../../"))
+sys.path.insert(0, os.path.abspath("."))
 
 project = "lecilab-behavior-analysis"
-copyright = "2022, Hernando M Vergara"
+copyright = "2022, Learning Circuits Lab"
 author = "Hernando M Vergara"
 try:
     release = setuptools_scm.get_version(root="../..", relative_to=__file__)
 except LookupError:
-    # if git is not initialised, still allow local build
-    # with a dummy version
     release = "0.0.0"
 
-# -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+# draw the example figures with the current code (from tests/data)
+import make_examples  # noqa: E402
+
+make_examples.main()
 
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
     "sphinx.ext.githubpages",
-    "sphinx_autodoc_typehints",
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
-    "sphinx.ext.intersphinx",
     "sphinx_sitemap",
     "myst_parser",
-    "nbsphinx",
 ]
-
-# Configure the myst parser to enable cool markdown features
-# See https://sphinx-design.readthedocs.io
-myst_enable_extensions = [
-    "amsmath",
-    "colon_fence",
-    "deflist",
-    "dollarmath",
-    "fieldlist",
-    "html_admonition",
-    "html_image",
-    "linkify",
-    "replacements",
-    "smartquotes",
-    "strikethrough",
-    "substitution",
-    "tasklist",
-]
-# Automatically add anchors to markdown headings
+myst_enable_extensions = ["colon_fence", "deflist", "linkify", "html_image"]
 myst_heading_anchors = 3
-
-# Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
-
-# Automatically generate stub pages for API
 autosummary_generate = True
-autodoc_default_flags = ["members", "inherited-members"]
-
-# Remove module names from class documentation
+autodoc_member_order = "bysource"
 add_module_names = False
+exclude_patterns = ["**.ipynb_checkpoints", "**/*.ipynb", "make_examples.py"]
+source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [
-    "**.ipynb_checkpoints",
-    # to ensure that include files (partial pages) aren't built, exclude them
-    # https://github.com/sphinx-doc/sphinx/issues/1965#issuecomment-124732907
-    "**/includes/**",
-]
-
-# Add notebook files to the exclude_patterns list to prevent Sphinx from processing them
-exclude_patterns.extend([
-    "**/*.ipynb",  # Exclude all Jupyter notebooks
-])
-
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-html_theme = "pydata_sphinx_theme"
+# same look as the Training Village documentation
+html_theme = "shibuya"
 html_title = "lecilab-behavior-analysis"
-
-# Customize the theme
+html_static_path = ["_static"]
 html_theme_options = {
-    "icon_links": [
-        {
-            # Label for this link
-            "name": "GitHub",
-            # URL where the link will redirect
-            "url": "https://github.com/LearningCircuitsLab/lecilab-behavior-analysis",  # required
-            # Icon class (if "type": "fontawesome"),
-            # or path to local image (if "type": "local")
-            "icon": "fa-brands fa-github",
-            # The type of image to be used (see below for details)
-            "type": "fontawesome",
-        }
+    "color_mode": "light",
+    "github_url": "https://github.com/LearningCircuitsLab/lecilab-behavior-analysis",
+    "nav_links": [
+        {"title": "Getting started", "url": "getting_started"},
+        {"title": "Figures", "url": "figures"},
+        {"title": "API", "url": "api_index"},
+        {"title": "Daily reports", "url": "https://learningcircuitslab.github.io/village-report-generator/documentation/"},
     ],
-    "logo": {
-        "text": f"{project} v{release}",
-    },
 }
-
-# Redirect the webpage to another URL
-# Sphinx will create the appropriate CNAME file in the build directory
-# The default is the URL of the GitHub pages
-# https://www.sphinx-doc.org/en/master/usage/extensions/githubpages.html
 github_user = "LearningCircuitsLab"
-html_baseurl = f"https://{github_user}.github.io/{project}"
+html_baseurl = f"https://{github_user}.github.io/{project}/"
 sitemap_url_scheme = "{link}"
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']

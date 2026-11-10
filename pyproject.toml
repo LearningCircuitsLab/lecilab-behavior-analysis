@@ -7,12 +7,16 @@ requires-python = ">=3.9.0"
 dynamic = ["version"]
 
 dependencies = [
-  "calplot",
+  "numpy",
+  "pandas",
+  "scipy",
+  "matplotlib",
   "seaborn",
+  "plotly",
+  "calplot",
   "networkx",
   "scikit-learn",
   "statsmodels",
-  "plotly-calplot",
 ]
 
 license = {text = "BSD-3-Clause"}

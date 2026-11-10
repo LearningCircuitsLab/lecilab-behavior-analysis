@@ -9,6 +9,7 @@ columns have changed. Old rows cannot be rewritten, so the analysis code has to
 read old and new rows correctly at the same time.
 
 Each change is documented here, in one place, with:
+
 - what changed, and from when,
 - why it changed,
 - the constant or function the rest of the analysis code must use to read

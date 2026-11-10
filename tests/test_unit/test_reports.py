@@ -42,3 +42,19 @@ def test_cells_never_raise():
     assert "Could not generate" in fig.axes[0].texts[0].get_text()
     fig = overview.trials_by_stage_table(broken)
     assert "Could not generate" in fig.layout.annotations[0].text
+
+
+def test_failed_cells_are_recorded():
+    overview.reset_failed_cells()
+    overview.cohort_trials_and_performance_figure(pd.DataFrame({"nothing": [1]}))
+    failed = overview.failed_cells()
+    assert [p.panel for p in failed] == ["Trials and performance of the cohort"]
+    overview.reset_failed_cells()
+    assert overview.failed_cells() == []
+
+
+def test_tv_report_without_logs():
+    overview.reset_failed_cells()
+    fig = overview.tv_report_table(None, None)
+    assert "No events" in fig.layout.annotations[0].text
+    assert overview.failed_cells() == []

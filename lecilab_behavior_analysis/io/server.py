@@ -1,5 +1,6 @@
 """Paths of the data on each computer and on the cluster, and copying it with ssh / rsync."""
 from typing import List
+import os
 import socket
 import subprocess
 
@@ -10,7 +11,19 @@ import subprocess
 IDIBAPS_TV_PROJECTS = "/storage/training_village/"
 
 
+# set this environment variable to read the data from another folder (e.g. a
+# sample dataset) instead of the folder of this computer
+DATA_PATH_VARIABLE = "LECILAB_DATA_PATH"
+
+
 def get_outpath():
+    """
+    Folder with the data of every project (<folder>/<project>/sessions/...).
+    It is the LECILAB_DATA_PATH environment variable if it is set, or the
+    folder of this computer (by hostname).
+    """
+    if os.environ.get(DATA_PATH_VARIABLE):
+        return os.environ[DATA_PATH_VARIABLE]
     hostname = socket.gethostname()
     paths = {
         "lorena-ThinkPad-E550": "/home/emma/Desktop/EloiJacomet/data",
