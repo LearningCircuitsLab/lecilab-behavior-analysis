@@ -395,87 +395,101 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="5"><span class="sd">panel, and return (figure, problems): problems lists the panels that could</span>
 </span><span data-line="6"><span class="sd">not be drawn, so that a report can show them instead of failing.</span>
 </span><span data-line="7"><span class="sd">"""</span>
-</span><span data-line="8"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
-</span><span data-line="9">
-</span><span data-line="10"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-</span><span data-line="11"><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.figure</span><span class="w"> </span><span class="kn">import</span> <span class="n">Figure</span>
-</span><span data-line="12">
-</span><span data-line="13"><span class="kn">import</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.figures.panels</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">p</span>
-</span><span data-line="14"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.figures.render</span><span class="w"> </span><span class="kn">import</span> <span class="n">FigureData</span><span class="p">,</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">PanelProblem</span><span class="p">,</span> <span class="n">Row</span><span class="p">,</span> <span class="n">render</span>
-</span><span data-line="15"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare</span>
-</span><span data-line="16">
-</span><span data-line="17"><span class="n">SUBJECT_PROGRESS</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
-</span><span data-line="18">    <span class="n">rows</span><span class="o">=</span><span class="p">[</span>
-</span><span data-line="19">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">subject_summary</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">training_calendar</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">training_times</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
-</span><span data-line="20">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">subject_performance</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">trials_and_water</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]),</span>
-</span><span data-line="21">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">performance_by_decision</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">bias_evolution</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">center_holds</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)]),</span>
-</span><span data-line="22">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">reaction_times_by_day</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">engagement</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
-</span><span data-line="23">    <span class="p">],</span>
-</span><span data-line="24">    <span class="n">width</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-</span><span data-line="25">    <span class="n">height</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-</span><span data-line="26"><span class="p">)</span>
-</span><span data-line="27">
-</span><span data-line="28"><span class="n">SUMMARY_MATRIX_ROW</span> <span class="o">=</span> <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">summary_matrix</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
-</span><span data-line="29">
-</span><span data-line="30"><span class="n">SESSION_SUMMARY</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
-</span><span data-line="31">    <span class="n">rows</span><span class="o">=</span><span class="p">[</span>
-</span><span data-line="32">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">session_summary_text</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">session_performance</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">correct_responses</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
-</span><span data-line="33">        <span class="n">Row</span><span class="p">([</span>
-</span><span data-line="34">            <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">repeat_or_alternate</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-</span><span data-line="35">            <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">psychometric</span><span class="p">(</span><span class="s2">"visual"</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span>
-</span><span data-line="36">            <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">psychometric</span><span class="p">(</span><span class="s2">"auditory-cot"</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span>
-</span><span data-line="37">            <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">center_pokes_histogram</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-</span><span data-line="38">            <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">center_hold_histogram</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-</span><span data-line="39">        <span class="p">]),</span>
-</span><span data-line="40">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">trial_start_times</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">reaction_times_in_session</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
-</span><span data-line="41">    <span class="p">],</span>
-</span><span data-line="42">    <span class="n">width</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-</span><span data-line="43">    <span class="n">height</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-</span><span data-line="44"><span class="p">)</span>
-</span><span data-line="45">
-</span><span data-line="46">
+</span><span data-line="8">
+</span><span data-line="9"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+</span><span data-line="10">
+</span><span data-line="11"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span data-line="12"><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.figure</span><span class="w"> </span><span class="kn">import</span> <span class="n">Figure</span>
+</span><span data-line="13">
+</span><span data-line="14"><span class="kn">import</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.figures.panels</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">p</span>
+</span><span data-line="15"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.figures.render</span><span class="w"> </span><span class="kn">import</span> <span class="n">FigureData</span><span class="p">,</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">PanelProblem</span><span class="p">,</span> <span class="n">Row</span><span class="p">,</span> <span class="n">render</span>
+</span><span data-line="16"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare</span>
+</span><span data-line="17">
+</span><span data-line="18"><span class="n">SUBJECT_PROGRESS</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+</span><span data-line="19">    <span class="n">rows</span><span class="o">=</span><span class="p">[</span>
+</span><span data-line="20">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">subject_summary</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">training_calendar</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">training_times</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">),</span>
+</span><span data-line="21">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">subject_performance</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">trials_and_water</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]),</span>
+</span><span data-line="22">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">performance_by_decision</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">bias_evolution</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">center_holds</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">)]),</span>
+</span><span data-line="23">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">reaction_times_by_day</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">engagement</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+</span><span data-line="24">    <span class="p">],</span>
+</span><span data-line="25">    <span class="n">width</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+</span><span data-line="26">    <span class="n">height</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span data-line="27"><span class="p">)</span>
+</span><span data-line="28">
+</span><span data-line="29"><span class="n">SUMMARY_MATRIX_ROW</span> <span class="o">=</span> <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">summary_matrix</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span>
+</span><span data-line="30">
+</span><span data-line="31"><span class="n">SESSION_SUMMARY</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+</span><span data-line="32">    <span class="n">rows</span><span class="o">=</span><span class="p">[</span>
+</span><span data-line="33">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">session_summary_text</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">session_performance</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">correct_responses</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+</span><span data-line="34">        <span class="n">Row</span><span class="p">(</span>
+</span><span data-line="35">            <span class="p">[</span>
+</span><span data-line="36">                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">repeat_or_alternate</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+</span><span data-line="37">                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">psychometric</span><span class="p">(</span><span class="s2">"visual"</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span>
+</span><span data-line="38">                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">psychometric</span><span class="p">(</span><span class="s2">"auditory-cot"</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span>
+</span><span data-line="39">                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">center_pokes_histogram</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+</span><span data-line="40">                <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">center_hold_histogram</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+</span><span data-line="41">            <span class="p">]</span>
+</span><span data-line="42">        <span class="p">),</span>
+</span><span data-line="43">        <span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">trial_start_times</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">reaction_times_in_session</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]),</span>
+</span><span data-line="44">    <span class="p">],</span>
+</span><span data-line="45">    <span class="n">width</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+</span><span data-line="46">    <span class="n">height</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+</span><span data-line="47"><span class="p">)</span>
+</span><span data-line="48">
+</span><span data-line="49">
 <div class="viewcode-block" id="subject_progress">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.subject_progress.html#lecilab_behavior_analysis.figures.layouts.subject_progress">[docs]</a>
-</span><span data-line="47"><span class="k">def</span><span class="w"> </span><span class="nf">subject_progress</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">perf_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">events_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="48">                     <span class="n">summary_matrix_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="49">                     <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PanelProblem</span><span class="p">]]:</span>
-</span><span data-line="50"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="51"><span class="sd">    Training history of one subject. Returns (figure, panels that failed).</span>
-</span><span data-line="52">
-</span><span data-line="53"><span class="sd">    Args:</span>
-</span><span data-line="54"><span class="sd">        df: trials of one subject (raw or already prepared).</span>
-</span><span data-line="55"><span class="sd">        perf_window: number of trials of the performance window.</span>
-</span><span data-line="56"><span class="sd">        events_df: events of the setup, for the engagement panel (optional).</span>
-</span><span data-line="57"><span class="sd">        summary_matrix_plot: add a row with the choices by difficulty per session.</span>
-</span><span data-line="58"><span class="sd">    """</span>
-</span><span data-line="59">    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">subject</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="60">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The dataframe contains more than one subject: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">subject</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
-</span><span data-line="61">    <span class="n">layout</span> <span class="o">=</span> <span class="n">SUBJECT_PROGRESS</span>
-</span><span data-line="62">    <span class="k">if</span> <span class="n">summary_matrix_plot</span><span class="p">:</span>
-</span><span data-line="63">        <span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span><span class="n">rows</span><span class="o">=</span><span class="n">SUBJECT_PROGRESS</span><span class="o">.</span><span class="n">rows</span> <span class="o">+</span> <span class="p">[</span><span class="n">SUMMARY_MATRIX_ROW</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">layout</span><span class="o">.</span><span class="n">width</span><span class="p">,</span>
-</span><span data-line="64">                        <span class="n">height</span><span class="o">=</span><span class="n">layout</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="mf">1.25</span><span class="p">)</span>
-</span><span data-line="65">    <span class="n">data</span> <span class="o">=</span> <span class="n">FigureData</span><span class="p">(</span><span class="n">prepare</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">perf_window</span><span class="o">=</span><span class="n">perf_window</span><span class="p">,</span> <span class="n">events_df</span><span class="o">=</span><span class="n">events_df</span><span class="p">)</span>
-</span><span data-line="66">    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span></div>
+</span><span data-line="50"><span class="k">def</span><span class="w"> </span><span class="nf">subject_progress</span><span class="p">(</span>
+</span><span data-line="51">    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+</span><span data-line="52">    <span class="n">perf_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+</span><span data-line="53">    <span class="n">events_df</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="54">    <span class="n">summary_matrix_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="55">    <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="56">    <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="57"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PanelProblem</span><span class="p">]]:</span>
+</span><span data-line="58"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="59"><span class="sd">    Training history of one subject. Returns (figure, panels that failed).</span>
+</span><span data-line="60">
+</span><span data-line="61"><span class="sd">    Args:</span>
+</span><span data-line="62"><span class="sd">        df: trials of one subject (raw or already prepared).</span>
+</span><span data-line="63"><span class="sd">        perf_window: number of trials of the performance window.</span>
+</span><span data-line="64"><span class="sd">        events_df: events of the setup, for the engagement panel (optional).</span>
+</span><span data-line="65"><span class="sd">        summary_matrix_plot: add a row with the choices by difficulty per session.</span>
+</span><span data-line="66"><span class="sd">    """</span>
+</span><span data-line="67">    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">subject</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="68">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The dataframe contains more than one subject: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">subject</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+</span><span data-line="69">    <span class="n">layout</span> <span class="o">=</span> <span class="n">SUBJECT_PROGRESS</span>
+</span><span data-line="70">    <span class="k">if</span> <span class="n">summary_matrix_plot</span><span class="p">:</span>
+</span><span data-line="71">        <span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+</span><span data-line="72">            <span class="n">rows</span><span class="o">=</span><span class="n">SUBJECT_PROGRESS</span><span class="o">.</span><span class="n">rows</span> <span class="o">+</span> <span class="p">[</span><span class="n">SUMMARY_MATRIX_ROW</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">layout</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">layout</span><span class="o">.</span><span class="n">height</span> <span class="o">*</span> <span class="mf">1.25</span>
+</span><span data-line="73">        <span class="p">)</span>
+</span><span data-line="74">    <span class="n">data</span> <span class="o">=</span> <span class="n">FigureData</span><span class="p">(</span><span class="n">prepare</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">perf_window</span><span class="o">=</span><span class="n">perf_window</span><span class="p">,</span> <span class="n">events_df</span><span class="o">=</span><span class="n">events_df</span><span class="p">)</span>
+</span><span data-line="75">    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span></div>
 
-</span><span data-line="67">
-</span><span data-line="68">
+</span><span data-line="76">
+</span><span data-line="77">
 <div class="viewcode-block" id="session_summary">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.session_summary.html#lecilab_behavior_analysis.figures.layouts.session_summary">[docs]</a>
-</span><span data-line="69"><span class="k">def</span><span class="w"> </span><span class="nf">session_summary</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">perf_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">perf_hue</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="70">                    <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PanelProblem</span><span class="p">]]:</span>
-</span><span data-line="71"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="72"><span class="sd">    Summary of some trials of one subject, usually one day. Returns</span>
-</span><span data-line="73"><span class="sd">    (figure, panels that failed).</span>
-</span><span data-line="74">
-</span><span data-line="75"><span class="sd">    Args:</span>
-</span><span data-line="76"><span class="sd">        df: trials (raw or already prepared; a day of prepared data keeps the</span>
-</span><span data-line="77"><span class="sd">            trial numbers of the whole history).</span>
-</span><span data-line="78"><span class="sd">        perf_window: number of trials of the performance window.</span>
-</span><span data-line="79"><span class="sd">        perf_hue: column that colors the performance (default: training stage</span>
-</span><span data-line="80"><span class="sd">            if there are several, otherwise stimulus modality).</span>
-</span><span data-line="81"><span class="sd">    """</span>
-</span><span data-line="82">    <span class="n">data</span> <span class="o">=</span> <span class="n">FigureData</span><span class="p">(</span><span class="n">prepare</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">perf_window</span><span class="o">=</span><span class="n">perf_window</span><span class="p">,</span> <span class="n">perf_hue</span><span class="o">=</span><span class="n">perf_hue</span><span class="p">)</span>
-</span><span data-line="83">    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">SESSION_SUMMARY</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span></div>
+</span><span data-line="78"><span class="k">def</span><span class="w"> </span><span class="nf">session_summary</span><span class="p">(</span>
+</span><span data-line="79">    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+</span><span data-line="80">    <span class="n">perf_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+</span><span data-line="81">    <span class="n">perf_hue</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="82">    <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="83">    <span class="n">height</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="84"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Figure</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PanelProblem</span><span class="p">]]:</span>
+</span><span data-line="85"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="86"><span class="sd">    Summary of some trials of one subject, usually one day. Returns</span>
+</span><span data-line="87"><span class="sd">    (figure, panels that failed).</span>
+</span><span data-line="88">
+</span><span data-line="89"><span class="sd">    Args:</span>
+</span><span data-line="90"><span class="sd">        df: trials (raw or already prepared; a day of prepared data keeps the</span>
+</span><span data-line="91"><span class="sd">            trial numbers of the whole history).</span>
+</span><span data-line="92"><span class="sd">        perf_window: number of trials of the performance window.</span>
+</span><span data-line="93"><span class="sd">        perf_hue: column that colors the performance (default: training stage</span>
+</span><span data-line="94"><span class="sd">            if there are several, otherwise stimulus modality).</span>
+</span><span data-line="95"><span class="sd">    """</span>
+</span><span data-line="96">    <span class="n">data</span> <span class="o">=</span> <span class="n">FigureData</span><span class="p">(</span><span class="n">prepare</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">perf_window</span><span class="o">=</span><span class="n">perf_window</span><span class="p">,</span> <span class="n">perf_hue</span><span class="o">=</span><span class="n">perf_hue</span><span class="p">)</span>
+</span><span data-line="97">    <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">SESSION_SUMMARY</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">height</span><span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -507,7 +521,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../../_static/documentation_options.js?v=8768056e"></script>
+      <script src="../../../_static/documentation_options.js?v=8a1d7382"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../_static/shibuya.js?v=50760d75"></script></body>

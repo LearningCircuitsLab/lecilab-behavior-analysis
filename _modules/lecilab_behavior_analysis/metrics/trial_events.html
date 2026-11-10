@@ -392,413 +392,417 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="2"><span class="sd">center port holds, misses. Event columns (Port1In, STATE_*_START...) can be</span>
 </span><span data-line="3"><span class="sd">lists or text such as "[1.2, 3.4]".</span>
 </span><span data-line="4"><span class="sd">"""</span>
-</span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
-</span><span data-line="7">
-</span><span data-line="8"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span data-line="9"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-</span><span data-line="10">
+</span><span data-line="5">
+</span><span data-line="6"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span data-line="7"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span data-line="10"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 </span><span data-line="11">
 </span><span data-line="12">
-</span><span data-line="13">
 <div class="viewcode-block" id="get_start_and_end_times">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_start_and_end_times.html#lecilab_behavior_analysis.metrics.trial_events.get_start_and_end_times">[docs]</a>
-</span><span data-line="14"><span class="k">def</span><span class="w"> </span><span class="nf">get_start_and_end_times</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
-</span><span data-line="15"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="16"><span class="sd">    Get the start and end times of the session.</span>
-</span><span data-line="17"><span class="sd">    """</span>
-</span><span data-line="18">    <span class="c1"># ensure that there is only one session in the dataframe</span>
-</span><span data-line="19">    <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="s1">'session'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="20">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The dataframe contains more than one session."</span><span class="p">)</span>
-</span><span data-line="21">    <span class="c1"># get the start time of the session as the start of the first trial</span>
-</span><span data-line="22">    <span class="n">start_time</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'trial'</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">trial</span><span class="p">),</span> <span class="s1">'TRIAL_START'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="23">    <span class="c1"># get the end time of the session as the end of the last trial</span>
-</span><span data-line="24">    <span class="n">end_time</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'trial'</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">trial</span><span class="p">),</span> <span class="s1">'TRIAL_END'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="25">    <span class="c1"># convert the start and end times to datetime</span>
-</span><span data-line="26">    <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'s'</span><span class="p">)</span>
-</span><span data-line="27">    <span class="n">end_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'s'</span><span class="p">)</span>
-</span><span data-line="28">    <span class="k">return</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span></div>
+</span><span data-line="13"><span class="k">def</span><span class="w"> </span><span class="nf">get_start_and_end_times</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+</span><span data-line="14"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="15"><span class="sd">    Get the start and end times of the session.</span>
+</span><span data-line="16"><span class="sd">    """</span>
+</span><span data-line="17">    <span class="c1"># ensure that there is only one session in the dataframe</span>
+</span><span data-line="18">    <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="s2">"session"</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="19">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The dataframe contains more than one session."</span><span class="p">)</span>
+</span><span data-line="20">    <span class="c1"># get the start time of the session as the start of the first trial</span>
+</span><span data-line="21">    <span class="n">start_time</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">"trial"</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">trial</span><span class="p">),</span> <span class="s2">"TRIAL_START"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="22">    <span class="c1"># get the end time of the session as the end of the last trial</span>
+</span><span data-line="23">    <span class="n">end_time</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">"trial"</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">trial</span><span class="p">),</span> <span class="s2">"TRIAL_END"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="24">    <span class="c1"># convert the start and end times to datetime</span>
+</span><span data-line="25">    <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"s"</span><span class="p">)</span>
+</span><span data-line="26">    <span class="n">end_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"s"</span><span class="p">)</span>
+</span><span data-line="27">    <span class="k">return</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span></div>
 
+</span><span data-line="28">
 </span><span data-line="29">
-</span><span data-line="30">
-</span><span data-line="31"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="32"><span class="c1"># Reading event times</span>
-</span><span data-line="33"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="34"><span class="c1"># Event and state columns (Port1In, STATE_stimulus_state_START...) hold the</span>
-</span><span data-line="35"><span class="c1"># times of that event in the trial. In the .csv they are text such as</span>
-</span><span data-line="36"><span class="c1"># "[1.2, 3.4]" ("[nan]" for a state that was not visited, empty if the event</span>
-</span><span data-line="37"><span class="c1"># did not happen). parse_events reads any of these forms once, much faster</span>
-</span><span data-line="38"><span class="c1"># than ast.literal_eval. NaN times are left out, so a state that was not</span>
-</span><span data-line="39"><span class="c1"># visited gives an empty list.</span>
-</span><span data-line="40"><span class="n">_NUMPY_SCALAR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?:np|numpy)\.\w+\(([^)]*)\)"</span><span class="p">)</span>
-</span><span data-line="41"><span class="n">_NUMBER</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?|nan|inf"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+</span><span data-line="30"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="31"><span class="c1"># Reading event times</span>
+</span><span data-line="32"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="33"><span class="c1"># Event and state columns (Port1In, STATE_stimulus_state_START...) hold the</span>
+</span><span data-line="34"><span class="c1"># times of that event in the trial. In the .csv they are text such as</span>
+</span><span data-line="35"><span class="c1"># "[1.2, 3.4]" ("[nan]" for a state that was not visited, empty if the event</span>
+</span><span data-line="36"><span class="c1"># did not happen). parse_events reads any of these forms once, much faster</span>
+</span><span data-line="37"><span class="c1"># than ast.literal_eval. NaN times are left out, so a state that was not</span>
+</span><span data-line="38"><span class="c1"># visited gives an empty list.</span>
+</span><span data-line="39"><span class="n">_NUMPY_SCALAR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?:np|numpy)\.\w+\(([^)]*)\)"</span><span class="p">)</span>
+</span><span data-line="40"><span class="n">_NUMBER</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?|nan|inf"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+</span><span data-line="41">
 </span><span data-line="42">
-</span><span data-line="43">
 <div class="viewcode-block" id="parse_events">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.parse_events.html#lecilab_behavior_analysis.metrics.trial_events.parse_events">[docs]</a>
-</span><span data-line="44"><span class="k">def</span><span class="w"> </span><span class="nf">parse_events</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-</span><span data-line="45"><span class="w">    </span><span class="sd">"""Times of one event in one trial, as a list of floats ([] if none)."""</span>
-</span><span data-line="46">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="47">        <span class="n">text</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="48">        <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"["</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"]"</span><span class="p">):</span>
-</span><span data-line="49">            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span data-line="50">        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-</span><span data-line="51">            <span class="k">return</span> <span class="p">[]</span>
-</span><span data-line="52">        <span class="k">try</span><span class="p">:</span>
-</span><span data-line="53">            <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)]</span>
-</span><span data-line="54">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-</span><span data-line="55">            <span class="c1"># e.g. "[np.float64(1.2)]"</span>
-</span><span data-line="56">            <span class="n">text</span> <span class="o">=</span> <span class="n">_NUMPY_SCALAR</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\1"</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-</span><span data-line="57">            <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_NUMBER</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
-</span><span data-line="58">        <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">times</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
-</span><span data-line="59">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
-</span><span data-line="60">        <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
-</span><span data-line="61">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-</span><span data-line="62">        <span class="k">return</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">value</span> <span class="k">else</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
-</span><span data-line="63">    <span class="k">return</span> <span class="p">[]</span></div>
+</span><span data-line="43"><span class="k">def</span><span class="w"> </span><span class="nf">parse_events</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+</span><span data-line="44"><span class="w">    </span><span class="sd">"""Times of one event in one trial, as a list of floats ([] if none)."""</span>
+</span><span data-line="45">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="46">        <span class="n">text</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="47">        <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"["</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"]"</span><span class="p">):</span>
+</span><span data-line="48">            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="49">        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+</span><span data-line="50">            <span class="k">return</span> <span class="p">[]</span>
+</span><span data-line="51">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="52">            <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)]</span>
+</span><span data-line="53">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="54">            <span class="c1"># e.g. "[np.float64(1.2)]"</span>
+</span><span data-line="55">            <span class="n">text</span> <span class="o">=</span> <span class="n">_NUMPY_SCALAR</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\1"</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span data-line="56">            <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_NUMBER</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
+</span><span data-line="57">        <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">times</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
+</span><span data-line="58">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+</span><span data-line="59">        <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
+</span><span data-line="60">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+</span><span data-line="61">        <span class="k">return</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">value</span> <span class="k">else</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
+</span><span data-line="62">    <span class="k">return</span> <span class="p">[]</span></div>
 
+</span><span data-line="63">
 </span><span data-line="64">
-</span><span data-line="65">
 <div class="viewcode-block" id="parse_event_column">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.parse_event_column.html#lecilab_behavior_analysis.metrics.trial_events.parse_event_column">[docs]</a>
-</span><span data-line="66"><span class="k">def</span><span class="w"> </span><span class="nf">parse_event_column</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-</span><span data-line="67"><span class="w">    </span><span class="sd">"""parse_events for every trial of a column ([] for every trial if the column is missing)."""</span>
-</span><span data-line="68">    <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-</span><span data-line="69">        <span class="k">return</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))]</span>
-</span><span data-line="70">    <span class="k">return</span> <span class="p">[</span><span class="n">parse_events</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)]</span></div>
+</span><span data-line="65"><span class="k">def</span><span class="w"> </span><span class="nf">parse_event_column</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+</span><span data-line="66"><span class="w">    </span><span class="sd">"""parse_events for every trial of a column ([] for every trial if the column is missing)."""</span>
+</span><span data-line="67">    <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+</span><span data-line="68">        <span class="k">return</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))]</span>
+</span><span data-line="69">    <span class="k">return</span> <span class="p">[</span><span class="n">parse_events</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)]</span></div>
 
+</span><span data-line="70">
 </span><span data-line="71">
-</span><span data-line="72">
-</span><span data-line="73"><span class="k">def</span><span class="w"> </span><span class="nf">_side_of_first_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">after</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="74">    <span class="n">left</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">]</span>
-</span><span data-line="75">    <span class="n">right</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">]</span>
-</span><span data-line="76">    <span class="k">if</span> <span class="ow">not</span> <span class="n">left</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
-</span><span data-line="77">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="78">    <span class="k">if</span> <span class="ow">not</span> <span class="n">left</span><span class="p">:</span>
-</span><span data-line="79">        <span class="k">return</span> <span class="s2">"right"</span>
-</span><span data-line="80">    <span class="k">if</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
-</span><span data-line="81">        <span class="k">return</span> <span class="s2">"left"</span>
-</span><span data-line="82">    <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">right</span><span class="p">):</span>
-</span><span data-line="83">        <span class="k">return</span> <span class="s2">"left"</span>
-</span><span data-line="84">    <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">right</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="p">):</span>
-</span><span data-line="85">        <span class="k">return</span> <span class="s2">"right"</span>
-</span><span data-line="86">    <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="72"><span class="k">def</span><span class="w"> </span><span class="nf">_side_of_first_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">after</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="73">    <span class="n">left</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">]</span>
+</span><span data-line="74">    <span class="n">right</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">]</span>
+</span><span data-line="75">    <span class="k">if</span> <span class="ow">not</span> <span class="n">left</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
+</span><span data-line="76">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="77">    <span class="k">if</span> <span class="ow">not</span> <span class="n">left</span><span class="p">:</span>
+</span><span data-line="78">        <span class="k">return</span> <span class="s2">"right"</span>
+</span><span data-line="79">    <span class="k">if</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
+</span><span data-line="80">        <span class="k">return</span> <span class="s2">"left"</span>
+</span><span data-line="81">    <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">right</span><span class="p">):</span>
+</span><span data-line="82">        <span class="k">return</span> <span class="s2">"left"</span>
+</span><span data-line="83">    <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">right</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="p">):</span>
+</span><span data-line="84">        <span class="k">return</span> <span class="s2">"right"</span>
+</span><span data-line="85">    <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="86">
 </span><span data-line="87">
-</span><span data-line="88">
-</span><span data-line="89"><span class="k">def</span><span class="w"> </span><span class="nf">_side_of_last_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="90">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">port3</span><span class="p">:</span>
-</span><span data-line="91">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="92">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port1</span><span class="p">:</span>
-</span><span data-line="93">        <span class="k">return</span> <span class="s2">"right"</span>
-</span><span data-line="94">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port3</span><span class="p">:</span>
-</span><span data-line="95">        <span class="k">return</span> <span class="s2">"left"</span>
-</span><span data-line="96">    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">port1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">port3</span><span class="p">):</span>
-</span><span data-line="97">        <span class="k">return</span> <span class="s2">"left"</span>
-</span><span data-line="98">    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">port3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">port1</span><span class="p">):</span>
-</span><span data-line="99">        <span class="k">return</span> <span class="s2">"right"</span>
-</span><span data-line="100">    <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="88"><span class="k">def</span><span class="w"> </span><span class="nf">_side_of_last_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="89">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">port3</span><span class="p">:</span>
+</span><span data-line="90">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="91">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port1</span><span class="p">:</span>
+</span><span data-line="92">        <span class="k">return</span> <span class="s2">"right"</span>
+</span><span data-line="93">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port3</span><span class="p">:</span>
+</span><span data-line="94">        <span class="k">return</span> <span class="s2">"left"</span>
+</span><span data-line="95">    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">port1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">port3</span><span class="p">):</span>
+</span><span data-line="96">        <span class="k">return</span> <span class="s2">"left"</span>
+</span><span data-line="97">    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">port3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">port1</span><span class="p">):</span>
+</span><span data-line="98">        <span class="k">return</span> <span class="s2">"right"</span>
+</span><span data-line="99">    <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="100">
 </span><span data-line="101">
-</span><span data-line="102">
 <div class="viewcode-block" id="first_choice_from_events">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.first_choice_from_events.html#lecilab_behavior_analysis.metrics.trial_events.first_choice_from_events">[docs]</a>
-</span><span data-line="103"><span class="k">def</span><span class="w"> </span><span class="nf">first_choice_from_events</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="104"><span class="w">    </span><span class="sd">"""Side of the first side poke after the stimulus started (None if no poke)."""</span>
-</span><span data-line="105">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_start</span><span class="p">:</span>
-</span><span data-line="106">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="107">    <span class="k">return</span> <span class="n">_side_of_first_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">,</span> <span class="n">port3</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">))</span></div>
+</span><span data-line="102"><span class="k">def</span><span class="w"> </span><span class="nf">first_choice_from_events</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="103"><span class="w">    </span><span class="sd">"""Side of the first side poke after the stimulus started (None if no poke)."""</span>
+</span><span data-line="104">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_start</span><span class="p">:</span>
+</span><span data-line="105">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="106">    <span class="k">return</span> <span class="n">_side_of_first_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">,</span> <span class="n">port3</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">))</span></div>
 
+</span><span data-line="107">
 </span><span data-line="108">
-</span><span data-line="109">
 <div class="viewcode-block" id="last_choice_before_stimulus_from_events">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.last_choice_before_stimulus_from_events.html#lecilab_behavior_analysis.metrics.trial_events.last_choice_before_stimulus_from_events">[docs]</a>
-</span><span data-line="110"><span class="k">def</span><span class="w"> </span><span class="nf">last_choice_before_stimulus_from_events</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="111"><span class="w">    </span><span class="sd">"""Side of the last side poke before the stimulus started (None if no poke)."""</span>
-</span><span data-line="112">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_start</span><span class="p">:</span>
-</span><span data-line="113">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="114">    <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">)</span>
-</span><span data-line="115">    <span class="k">return</span> <span class="n">_side_of_last_poke</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">])</span></div>
+</span><span data-line="109"><span class="k">def</span><span class="w"> </span><span class="nf">last_choice_before_stimulus_from_events</span><span class="p">(</span>
+</span><span data-line="110">    <span class="n">stimulus_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+</span><span data-line="111"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="112"><span class="w">    </span><span class="sd">"""Side of the last side poke before the stimulus started (None if no poke)."""</span>
+</span><span data-line="113">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_start</span><span class="p">:</span>
+</span><span data-line="114">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="115">    <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">)</span>
+</span><span data-line="116">    <span class="k">return</span> <span class="n">_side_of_last_poke</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">])</span></div>
 
-</span><span data-line="116">
 </span><span data-line="117">
+</span><span data-line="118">
 <div class="viewcode-block" id="miss_from_events">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.miss_from_events.html#lecilab_behavior_analysis.metrics.trial_events.miss_from_events">[docs]</a>
-</span><span data-line="118"><span class="k">def</span><span class="w"> </span><span class="nf">miss_from_events</span><span class="p">(</span><span class="n">stimulus_end</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">trial_end</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="119"><span class="w">    </span><span class="sd">"""True if the trial ended when the stimulus state ended (no choice)."""</span>
-</span><span data-line="120">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_end</span><span class="p">:</span>
-</span><span data-line="121">        <span class="k">return</span> <span class="kc">False</span>
-</span><span data-line="122">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">stimulus_end</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">trial_end</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span></div>
+</span><span data-line="119"><span class="k">def</span><span class="w"> </span><span class="nf">miss_from_events</span><span class="p">(</span><span class="n">stimulus_end</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">trial_end</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="120"><span class="w">    </span><span class="sd">"""True if the trial ended when the stimulus state ended (no choice)."""</span>
+</span><span data-line="121">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_end</span><span class="p">:</span>
+</span><span data-line="122">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="123">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">stimulus_end</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">trial_end</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span></div>
 
-</span><span data-line="123">
 </span><span data-line="124">
+</span><span data-line="125">
 <div class="viewcode-block" id="early_pokeout_from_events">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.early_pokeout_from_events.html#lecilab_behavior_analysis.metrics.trial_events.early_pokeout_from_events">[docs]</a>
-</span><span data-line="125"><span class="k">def</span><span class="w"> </span><span class="nf">early_pokeout_from_events</span><span class="p">(</span><span class="n">ready_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port2_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port2_out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">holding_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
-</span><span data-line="126"><span class="w">    </span><span class="sd">"""True if the first center poke was shorter than holding_time (None if unknown)."""</span>
-</span><span data-line="127">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ready_start</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">port2_in</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">port2_out</span><span class="p">:</span>
-</span><span data-line="128">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="129">    <span class="n">first_ready</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ready_start</span><span class="p">)</span>
-</span><span data-line="130">    <span class="n">ins</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port2_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">first_ready</span><span class="p">]</span>
-</span><span data-line="131">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ins</span><span class="p">:</span>
-</span><span data-line="132">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="133">    <span class="n">first_in</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span>
-</span><span data-line="134">    <span class="n">outs</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port2_out</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">first_in</span><span class="p">]</span>
-</span><span data-line="135">    <span class="k">if</span> <span class="ow">not</span> <span class="n">outs</span><span class="p">:</span>
-</span><span data-line="136">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="137">    <span class="k">return</span> <span class="nb">bool</span><span class="p">((</span><span class="nb">min</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="n">first_in</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">holding_time</span><span class="p">)</span></div>
+</span><span data-line="126"><span class="k">def</span><span class="w"> </span><span class="nf">early_pokeout_from_events</span><span class="p">(</span>
+</span><span data-line="127">    <span class="n">ready_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port2_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port2_out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">holding_time</span><span class="p">:</span> <span class="nb">float</span>
+</span><span data-line="128"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+</span><span data-line="129"><span class="w">    </span><span class="sd">"""True if the first center poke was shorter than holding_time (None if unknown)."""</span>
+</span><span data-line="130">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ready_start</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">port2_in</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">port2_out</span><span class="p">:</span>
+</span><span data-line="131">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="132">    <span class="n">first_ready</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ready_start</span><span class="p">)</span>
+</span><span data-line="133">    <span class="n">ins</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port2_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">first_ready</span><span class="p">]</span>
+</span><span data-line="134">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ins</span><span class="p">:</span>
+</span><span data-line="135">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="136">    <span class="n">first_in</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span>
+</span><span data-line="137">    <span class="n">outs</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port2_out</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">first_in</span><span class="p">]</span>
+</span><span data-line="138">    <span class="k">if</span> <span class="ow">not</span> <span class="n">outs</span><span class="p">:</span>
+</span><span data-line="139">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="140">    <span class="k">return</span> <span class="nb">bool</span><span class="p">((</span><span class="nb">min</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="n">first_in</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">holding_time</span><span class="p">)</span></div>
 
-</span><span data-line="138">
-</span><span data-line="139">
+</span><span data-line="141">
+</span><span data-line="142">
 <div class="viewcode-block" id="reaction_time_from_events">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.reaction_time_from_events.html#lecilab_behavior_analysis.metrics.trial_events.reaction_time_from_events">[docs]</a>
-</span><span data-line="140"><span class="k">def</span><span class="w"> </span><span class="nf">reaction_time_from_events</span><span class="p">(</span><span class="n">port2_out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="141"><span class="w">    </span><span class="sd">"""Time from the last center poke out to the next side poke (NaN if none)."""</span>
-</span><span data-line="142">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port2_out</span><span class="p">:</span>
-</span><span data-line="143">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-</span><span data-line="144">    <span class="n">out_time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">port2_out</span><span class="p">)</span>
-</span><span data-line="145">    <span class="n">side_ins</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">out_time</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">out_time</span><span class="p">]</span>
-</span><span data-line="146">    <span class="k">if</span> <span class="ow">not</span> <span class="n">side_ins</span><span class="p">:</span>
-</span><span data-line="147">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-</span><span data-line="148">    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">side_ins</span><span class="p">)</span> <span class="o">-</span> <span class="n">out_time</span></div>
+</span><span data-line="143"><span class="k">def</span><span class="w"> </span><span class="nf">reaction_time_from_events</span><span class="p">(</span><span class="n">port2_out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="144"><span class="w">    </span><span class="sd">"""Time from the last center poke out to the next side poke (NaN if none)."""</span>
+</span><span data-line="145">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port2_out</span><span class="p">:</span>
+</span><span data-line="146">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+</span><span data-line="147">    <span class="n">out_time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">port2_out</span><span class="p">)</span>
+</span><span data-line="148">    <span class="n">side_ins</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">out_time</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">out_time</span><span class="p">]</span>
+</span><span data-line="149">    <span class="k">if</span> <span class="ow">not</span> <span class="n">side_ins</span><span class="p">:</span>
+</span><span data-line="150">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+</span><span data-line="151">    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">side_ins</span><span class="p">)</span> <span class="o">-</span> <span class="n">out_time</span></div>
 
-</span><span data-line="149">
-</span><span data-line="150">
+</span><span data-line="152">
+</span><span data-line="153">
 <div class="viewcode-block" id="initiation_time_from_events">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.initiation_time_from_events.html#lecilab_behavior_analysis.metrics.trial_events.initiation_time_from_events">[docs]</a>
-</span><span data-line="151"><span class="k">def</span><span class="w"> </span><span class="nf">initiation_time_from_events</span><span class="p">(</span><span class="n">port2_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">trial_start</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="152"><span class="w">    </span><span class="sd">"""Time from the start of the trial to the first center poke (NaN if none)."""</span>
-</span><span data-line="153">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port2_in</span><span class="p">:</span>
-</span><span data-line="154">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-</span><span data-line="155">    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">port2_in</span><span class="p">)</span> <span class="o">-</span> <span class="n">trial_start</span></div>
+</span><span data-line="154"><span class="k">def</span><span class="w"> </span><span class="nf">initiation_time_from_events</span><span class="p">(</span><span class="n">port2_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">trial_start</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="155"><span class="w">    </span><span class="sd">"""Time from the start of the trial to the first center poke (NaN if none)."""</span>
+</span><span data-line="156">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port2_in</span><span class="p">:</span>
+</span><span data-line="157">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+</span><span data-line="158">    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">port2_in</span><span class="p">)</span> <span class="o">-</span> <span class="n">trial_start</span></div>
 
-</span><span data-line="156">
-</span><span data-line="157">
+</span><span data-line="159">
+</span><span data-line="160">
 <div class="viewcode-block" id="port_holds_from_events">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.port_holds_from_events.html#lecilab_behavior_analysis.metrics.trial_events.port_holds_from_events">[docs]</a>
-</span><span data-line="158"><span class="k">def</span><span class="w"> </span><span class="nf">port_holds_from_events</span><span class="p">(</span><span class="n">ins</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-</span><span data-line="159"><span class="w">    </span><span class="sd">"""Duration of every poke in a port during the trial (including the ITI)."""</span>
-</span><span data-line="160">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ins</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">outs</span><span class="p">:</span>
-</span><span data-line="161">        <span class="k">return</span> <span class="p">[]</span>
-</span><span data-line="162">    <span class="c1"># if the first out is earlier than the first in, remove it</span>
-</span><span data-line="163">    <span class="k">if</span> <span class="n">outs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ins</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-</span><span data-line="164">        <span class="n">outs</span> <span class="o">=</span> <span class="n">outs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-</span><span data-line="165">    <span class="c1"># if they are different lengths, pad the shorter one with NaNs</span>
-</span><span data-line="166">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">):</span>
-</span><span data-line="167">        <span class="n">outs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">))</span>
-</span><span data-line="168">    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">):</span>
-</span><span data-line="169">        <span class="n">ins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">))</span>
-</span><span data-line="170">    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span></div>
+</span><span data-line="161"><span class="k">def</span><span class="w"> </span><span class="nf">port_holds_from_events</span><span class="p">(</span><span class="n">ins</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+</span><span data-line="162"><span class="w">    </span><span class="sd">"""Duration of every poke in a port during the trial (including the ITI)."""</span>
+</span><span data-line="163">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ins</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">outs</span><span class="p">:</span>
+</span><span data-line="164">        <span class="k">return</span> <span class="p">[]</span>
+</span><span data-line="165">    <span class="c1"># if the first out is earlier than the first in, remove it</span>
+</span><span data-line="166">    <span class="k">if</span> <span class="n">outs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ins</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+</span><span data-line="167">        <span class="n">outs</span> <span class="o">=</span> <span class="n">outs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+</span><span data-line="168">    <span class="c1"># if they are different lengths, pad the shorter one with NaNs</span>
+</span><span data-line="169">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">):</span>
+</span><span data-line="170">        <span class="n">outs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">))</span>
+</span><span data-line="171">    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">):</span>
+</span><span data-line="172">        <span class="n">ins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">))</span>
+</span><span data-line="173">    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span></div>
 
-</span><span data-line="171">
-</span><span data-line="172">
-</span><span data-line="173"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="174"><span class="c1"># The same, for one trial given as a row (kept for old code; prefer the</span>
-</span><span data-line="175"><span class="c1"># columns that preprocessing.prepare adds)</span>
+</span><span data-line="174">
+</span><span data-line="175">
 </span><span data-line="176"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="177"><span class="c1"># The same, for one trial given as a row (kept for old code; prefer the</span>
+</span><span data-line="178"><span class="c1"># columns that preprocessing.prepare adds)</span>
+</span><span data-line="179"><span class="c1"># ---------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="is_this_a_miss_trial">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.is_this_a_miss_trial.html#lecilab_behavior_analysis.metrics.trial_events.is_this_a_miss_trial">[docs]</a>
-</span><span data-line="177"><span class="k">def</span><span class="w"> </span><span class="nf">is_this_a_miss_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="178"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="179"><span class="sd">    checks if STATE_stimulus_state_END is the last state</span>
-</span><span data-line="180"><span class="sd">    """</span>
-</span><span data-line="181">    <span class="k">return</span> <span class="n">miss_from_events</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_END"</span><span class="p">)),</span> <span class="n">series</span><span class="p">[</span><span class="s2">"TRIAL_END"</span><span class="p">])</span></div>
+</span><span data-line="180"><span class="k">def</span><span class="w"> </span><span class="nf">is_this_a_miss_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="181"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="182"><span class="sd">    checks if STATE_stimulus_state_END is the last state</span>
+</span><span data-line="183"><span class="sd">    """</span>
+</span><span data-line="184">    <span class="k">return</span> <span class="n">miss_from_events</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_END"</span><span class="p">)),</span> <span class="n">series</span><span class="p">[</span><span class="s2">"TRIAL_END"</span><span class="p">])</span></div>
 
-</span><span data-line="182">
-</span><span data-line="183">
+</span><span data-line="185">
+</span><span data-line="186">
 <div class="viewcode-block" id="is_this_an_early_pokeout_trial">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.is_this_an_early_pokeout_trial.html#lecilab_behavior_analysis.metrics.trial_events.is_this_an_early_pokeout_trial">[docs]</a>
-</span><span data-line="184"><span class="k">def</span><span class="w"> </span><span class="nf">is_this_an_early_pokeout_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-</span><span data-line="185"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="186"><span class="sd">    checks if there was an early pokeout in the center port before holding the required time</span>
-</span><span data-line="187"><span class="sd">    """</span>
-</span><span data-line="188">    <span class="k">return</span> <span class="n">early_pokeout_from_events</span><span class="p">(</span>
-</span><span data-line="189">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_ready_to_initiate_START"</span><span class="p">)),</span>
-</span><span data-line="190">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2In"</span><span class="p">)),</span>
-</span><span data-line="191">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2Out"</span><span class="p">)),</span>
-</span><span data-line="192">        <span class="n">series</span><span class="p">[</span><span class="s2">"holding_time"</span><span class="p">],</span>
-</span><span data-line="193">    <span class="p">)</span></div>
+</span><span data-line="187"><span class="k">def</span><span class="w"> </span><span class="nf">is_this_an_early_pokeout_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="188"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="189"><span class="sd">    checks if there was an early pokeout in the center port before holding the required time</span>
+</span><span data-line="190"><span class="sd">    """</span>
+</span><span data-line="191">    <span class="k">return</span> <span class="n">early_pokeout_from_events</span><span class="p">(</span>
+</span><span data-line="192">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_ready_to_initiate_START"</span><span class="p">)),</span>
+</span><span data-line="193">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2In"</span><span class="p">)),</span>
+</span><span data-line="194">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2Out"</span><span class="p">)),</span>
+</span><span data-line="195">        <span class="n">series</span><span class="p">[</span><span class="s2">"holding_time"</span><span class="p">],</span>
+</span><span data-line="196">    <span class="p">)</span></div>
 
-</span><span data-line="194">
-</span><span data-line="195">
+</span><span data-line="197">
+</span><span data-line="198">
 <div class="viewcode-block" id="trial_reaction_time">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.trial_reaction_time.html#lecilab_behavior_analysis.metrics.trial_events.trial_reaction_time">[docs]</a>
-</span><span data-line="196"><span class="k">def</span><span class="w"> </span><span class="nf">trial_reaction_time</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="197"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="198"><span class="sd">    This method calculates the reaction time of a trial.</span>
-</span><span data-line="199"><span class="sd">    """</span>
-</span><span data-line="200">    <span class="k">return</span> <span class="n">reaction_time_from_events</span><span class="p">(</span>
-</span><span data-line="201">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2Out"</span><span class="p">)),</span>
-</span><span data-line="202">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
-</span><span data-line="203">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
-</span><span data-line="204">    <span class="p">)</span></div>
+</span><span data-line="199"><span class="k">def</span><span class="w"> </span><span class="nf">trial_reaction_time</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="200"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="201"><span class="sd">    This method calculates the reaction time of a trial.</span>
+</span><span data-line="202"><span class="sd">    """</span>
+</span><span data-line="203">    <span class="k">return</span> <span class="n">reaction_time_from_events</span><span class="p">(</span>
+</span><span data-line="204">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2Out"</span><span class="p">)),</span>
+</span><span data-line="205">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
+</span><span data-line="206">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
+</span><span data-line="207">    <span class="p">)</span></div>
 
-</span><span data-line="205">
-</span><span data-line="206">
+</span><span data-line="208">
+</span><span data-line="209">
 <div class="viewcode-block" id="trial_initiation_time">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.trial_initiation_time.html#lecilab_behavior_analysis.metrics.trial_events.trial_initiation_time">[docs]</a>
-</span><span data-line="207"><span class="k">def</span><span class="w"> </span><span class="nf">trial_initiation_time</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="208"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="209"><span class="sd">    This method calculates the initiation time of a trial.</span>
-</span><span data-line="210"><span class="sd">    """</span>
-</span><span data-line="211">    <span class="k">return</span> <span class="n">initiation_time_from_events</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2In"</span><span class="p">)),</span> <span class="n">series</span><span class="p">[</span><span class="s2">"TRIAL_START"</span><span class="p">])</span></div>
+</span><span data-line="210"><span class="k">def</span><span class="w"> </span><span class="nf">trial_initiation_time</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="211"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="212"><span class="sd">    This method calculates the initiation time of a trial.</span>
+</span><span data-line="213"><span class="sd">    """</span>
+</span><span data-line="214">    <span class="k">return</span> <span class="n">initiation_time_from_events</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2In"</span><span class="p">)),</span> <span class="n">series</span><span class="p">[</span><span class="s2">"TRIAL_START"</span><span class="p">])</span></div>
 
-</span><span data-line="212">
-</span><span data-line="213">
+</span><span data-line="215">
+</span><span data-line="216">
 <div class="viewcode-block" id="first_poke_after_stimulus_state">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.first_poke_after_stimulus_state.html#lecilab_behavior_analysis.metrics.trial_events.first_poke_after_stimulus_state">[docs]</a>
-</span><span data-line="214"><span class="k">def</span><span class="w"> </span><span class="nf">first_poke_after_stimulus_state</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-</span><span data-line="215">    <span class="k">return</span> <span class="n">first_choice_from_events</span><span class="p">(</span>
-</span><span data-line="216">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_START"</span><span class="p">)),</span>
-</span><span data-line="217">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
-</span><span data-line="218">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
-</span><span data-line="219">    <span class="p">)</span></div>
+</span><span data-line="217"><span class="k">def</span><span class="w"> </span><span class="nf">first_poke_after_stimulus_state</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="218">    <span class="k">return</span> <span class="n">first_choice_from_events</span><span class="p">(</span>
+</span><span data-line="219">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_START"</span><span class="p">)),</span>
+</span><span data-line="220">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
+</span><span data-line="221">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
+</span><span data-line="222">    <span class="p">)</span></div>
 
-</span><span data-line="220">
-</span><span data-line="221">
+</span><span data-line="223">
+</span><span data-line="224">
 <div class="viewcode-block" id="get_last_poke_of_trial">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_last_poke_of_trial.html#lecilab_behavior_analysis.metrics.trial_events.get_last_poke_of_trial">[docs]</a>
-</span><span data-line="222"><span class="k">def</span><span class="w"> </span><span class="nf">get_last_poke_of_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-</span><span data-line="223">    <span class="k">return</span> <span class="n">_side_of_last_poke</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span> <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)))</span></div>
+</span><span data-line="225"><span class="k">def</span><span class="w"> </span><span class="nf">get_last_poke_of_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="226">    <span class="k">return</span> <span class="n">_side_of_last_poke</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span> <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)))</span></div>
 
-</span><span data-line="224">
-</span><span data-line="225">
+</span><span data-line="227">
+</span><span data-line="228">
 <div class="viewcode-block" id="get_last_poke_before_stimulus_state">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_last_poke_before_stimulus_state.html#lecilab_behavior_analysis.metrics.trial_events.get_last_poke_before_stimulus_state">[docs]</a>
-</span><span data-line="226"><span class="k">def</span><span class="w"> </span><span class="nf">get_last_poke_before_stimulus_state</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-</span><span data-line="227"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="228"><span class="sd">    Sometimes the animal can poke in the center port and not wait long enough</span>
-</span><span data-line="229"><span class="sd">    to get the stimulus state. If trial is not aborted due to selected settings,</span>
-</span><span data-line="230"><span class="sd">    the animal can keep poking.</span>
-</span><span data-line="231"><span class="sd">    """</span>
-</span><span data-line="232">    <span class="k">return</span> <span class="n">last_choice_before_stimulus_from_events</span><span class="p">(</span>
-</span><span data-line="233">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_START"</span><span class="p">)),</span>
-</span><span data-line="234">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
-</span><span data-line="235">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
-</span><span data-line="236">    <span class="p">)</span></div>
+</span><span data-line="229"><span class="k">def</span><span class="w"> </span><span class="nf">get_last_poke_before_stimulus_state</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="230"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="231"><span class="sd">    Sometimes the animal can poke in the center port and not wait long enough</span>
+</span><span data-line="232"><span class="sd">    to get the stimulus state. If trial is not aborted due to selected settings,</span>
+</span><span data-line="233"><span class="sd">    the animal can keep poking.</span>
+</span><span data-line="234"><span class="sd">    """</span>
+</span><span data-line="235">    <span class="k">return</span> <span class="n">last_choice_before_stimulus_from_events</span><span class="p">(</span>
+</span><span data-line="236">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_START"</span><span class="p">)),</span>
+</span><span data-line="237">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
+</span><span data-line="238">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
+</span><span data-line="239">    <span class="p">)</span></div>
 
-</span><span data-line="237">
-</span><span data-line="238">
+</span><span data-line="240">
+</span><span data-line="241">
 <div class="viewcode-block" id="get_dictionary_event_as_list">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_dictionary_event_as_list.html#lecilab_behavior_analysis.metrics.trial_events.get_dictionary_event_as_list">[docs]</a>
-</span><span data-line="239"><span class="k">def</span><span class="w"> </span><span class="nf">get_dictionary_event_as_list</span><span class="p">(</span><span class="n">ser_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-</span><span data-line="240">    <span class="k">return</span> <span class="n">parse_events</span><span class="p">(</span><span class="n">ser_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">event</span><span class="p">))</span></div>
+</span><span data-line="242"><span class="k">def</span><span class="w"> </span><span class="nf">get_dictionary_event_as_list</span><span class="p">(</span><span class="n">ser_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+</span><span data-line="243">    <span class="k">return</span> <span class="n">parse_events</span><span class="p">(</span><span class="n">ser_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">event</span><span class="p">))</span></div>
 
-</span><span data-line="241">
-</span><span data-line="242">
+</span><span data-line="244">
+</span><span data-line="245">
 <div class="viewcode-block" id="get_repeat_or_alternate_to_numeric">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_repeat_or_alternate_to_numeric.html#lecilab_behavior_analysis.metrics.trial_events.get_repeat_or_alternate_to_numeric">[docs]</a>
-</span><span data-line="243"><span class="k">def</span><span class="w"> </span><span class="nf">get_repeat_or_alternate_to_numeric</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="244">    <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">'roa_choice'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'alternate'</span><span class="p">:</span>
-</span><span data-line="245">        <span class="k">return</span> <span class="mi">0</span>
-</span><span data-line="246">    <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="s1">'roa_choice'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'repeat'</span><span class="p">:</span>
-</span><span data-line="247">        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">'first_choice'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'left'</span><span class="p">:</span>
-</span><span data-line="248">            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
-</span><span data-line="249">        <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="s1">'first_choice'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'right'</span><span class="p">:</span>
-</span><span data-line="250">            <span class="k">return</span> <span class="mi">1</span>
-</span><span data-line="251">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="252">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
+</span><span data-line="246"><span class="k">def</span><span class="w"> </span><span class="nf">get_repeat_or_alternate_to_numeric</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="247">    <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s2">"roa_choice"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"alternate"</span><span class="p">:</span>
+</span><span data-line="248">        <span class="k">return</span> <span class="mi">0</span>
+</span><span data-line="249">    <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="s2">"roa_choice"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"repeat"</span><span class="p">:</span>
+</span><span data-line="250">        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s2">"first_choice"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"left"</span><span class="p">:</span>
+</span><span data-line="251">            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</span><span data-line="252">        <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="s2">"first_choice"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"right"</span><span class="p">:</span>
+</span><span data-line="253">            <span class="k">return</span> <span class="mi">1</span>
+</span><span data-line="254">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+</span><span data-line="255">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="256">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
-</span><span data-line="253">
-</span><span data-line="254">
+</span><span data-line="257">
+</span><span data-line="258">
 <div class="viewcode-block" id="get_trial_port_hold">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_trial_port_hold.html#lecilab_behavior_analysis.metrics.trial_events.get_trial_port_hold">[docs]</a>
-</span><span data-line="255"><span class="k">def</span><span class="w"> </span><span class="nf">get_trial_port_hold</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">port_number</span><span class="p">):</span>
-</span><span data-line="256"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="257"><span class="sd">    This calculates everything, including those occurring in the ITIs for example.</span>
-</span><span data-line="258"><span class="sd">    """</span>
-</span><span data-line="259">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-</span><span data-line="260">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"row must be a pandas Series"</span><span class="p">)</span>
-</span><span data-line="261">    <span class="k">return</span> <span class="n">port_holds_from_events</span><span class="p">(</span>
-</span><span data-line="262">        <span class="n">parse_events</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"Port"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">port_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"In"</span><span class="p">]),</span>
-</span><span data-line="263">        <span class="n">parse_events</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"Port"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">port_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"Out"</span><span class="p">]),</span>
-</span><span data-line="264">    <span class="p">)</span></div>
+</span><span data-line="259"><span class="k">def</span><span class="w"> </span><span class="nf">get_trial_port_hold</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">port_number</span><span class="p">):</span>
+</span><span data-line="260"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="261"><span class="sd">    This calculates everything, including those occurring in the ITIs for example.</span>
+</span><span data-line="262"><span class="sd">    """</span>
+</span><span data-line="263">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+</span><span data-line="264">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"row must be a pandas Series"</span><span class="p">)</span>
+</span><span data-line="265">    <span class="k">return</span> <span class="n">port_holds_from_events</span><span class="p">(</span>
+</span><span data-line="266">        <span class="n">parse_events</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"Port"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">port_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"In"</span><span class="p">]),</span>
+</span><span data-line="267">        <span class="n">parse_events</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"Port"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">port_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"Out"</span><span class="p">]),</span>
+</span><span data-line="268">    <span class="p">)</span></div>
 
-</span><span data-line="265">
-</span><span data-line="266">
+</span><span data-line="269">
+</span><span data-line="270">
 <div class="viewcode-block" id="side_and_difficulty_to_numeric">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.side_and_difficulty_to_numeric.html#lecilab_behavior_analysis.metrics.trial_events.side_and_difficulty_to_numeric">[docs]</a>
-</span><span data-line="267"><span class="k">def</span><span class="w"> </span><span class="nf">side_and_difficulty_to_numeric</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="268">    <span class="k">match</span> <span class="n">row</span><span class="o">.</span><span class="n">difficulty</span><span class="p">:</span>
-</span><span data-line="269">        <span class="k">case</span> <span class="s2">"easy"</span><span class="p">:</span>
-</span><span data-line="270">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">3</span>
-</span><span data-line="271">        <span class="k">case</span> <span class="s2">"medium"</span><span class="p">:</span>
-</span><span data-line="272">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">2</span>
-</span><span data-line="273">        <span class="k">case</span> <span class="s2">"hard"</span><span class="p">:</span>
-</span><span data-line="274">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">1</span>
-</span><span data-line="275">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-</span><span data-line="276">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span data-line="277">    <span class="k">match</span> <span class="n">row</span><span class="o">.</span><span class="n">correct_side</span><span class="p">:</span>
-</span><span data-line="278">        <span class="k">case</span> <span class="s2">"left"</span><span class="p">:</span>
-</span><span data-line="279">            <span class="k">pass</span>
-</span><span data-line="280">        <span class="k">case</span> <span class="s2">"right"</span><span class="p">:</span>
-</span><span data-line="281">            <span class="n">numval</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
-</span><span data-line="282">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-</span><span data-line="283">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span data-line="284">    
-</span><span data-line="285">    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">numval</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
+</span><span data-line="271"><span class="k">def</span><span class="w"> </span><span class="nf">side_and_difficulty_to_numeric</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="272">    <span class="k">match</span> <span class="n">row</span><span class="o">.</span><span class="n">difficulty</span><span class="p">:</span>
+</span><span data-line="273">        <span class="k">case</span> <span class="s2">"easy"</span><span class="p">:</span>
+</span><span data-line="274">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">3</span>
+</span><span data-line="275">        <span class="k">case</span> <span class="s2">"medium"</span><span class="p">:</span>
+</span><span data-line="276">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">2</span>
+</span><span data-line="277">        <span class="k">case</span> <span class="s2">"hard"</span><span class="p">:</span>
+</span><span data-line="278">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span data-line="279">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+</span><span data-line="280">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span data-line="281">    <span class="k">match</span> <span class="n">row</span><span class="o">.</span><span class="n">correct_side</span><span class="p">:</span>
+</span><span data-line="282">        <span class="k">case</span> <span class="s2">"left"</span><span class="p">:</span>
+</span><span data-line="283">            <span class="k">pass</span>
+</span><span data-line="284">        <span class="k">case</span> <span class="s2">"right"</span><span class="p">:</span>
+</span><span data-line="285">            <span class="n">numval</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+</span><span data-line="286">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+</span><span data-line="287">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span data-line="288">
+</span><span data-line="289">    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">numval</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
 
-</span><span data-line="286">
-</span><span data-line="287">
+</span><span data-line="290">
+</span><span data-line="291">
 <div class="viewcode-block" id="add_time_from_session_start">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.add_time_from_session_start.html#lecilab_behavior_analysis.metrics.trial_events.add_time_from_session_start">[docs]</a>
-</span><span data-line="288"><span class="k">def</span><span class="w"> </span><span class="nf">add_time_from_session_start</span><span class="p">(</span><span class="n">df_in</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-</span><span data-line="289">    <span class="c1"># Group by both 'subject' and 'session' to calculate time from session start</span>
-</span><span data-line="290">    <span class="n">df_in</span><span class="p">[</span><span class="s1">'time_from_start'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_in</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">'subject'</span><span class="p">,</span> <span class="s1">'session'</span><span class="p">])[</span><span class="s1">'TRIAL_START'</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span data-line="291">    <span class="k">return</span> <span class="n">df_in</span></div>
+</span><span data-line="292"><span class="k">def</span><span class="w"> </span><span class="nf">add_time_from_session_start</span><span class="p">(</span><span class="n">df_in</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+</span><span data-line="293">    <span class="c1"># Group by both 'subject' and 'session' to calculate time from session start</span>
+</span><span data-line="294">    <span class="n">df_in</span><span class="p">[</span><span class="s2">"time_from_start"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_in</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">"subject"</span><span class="p">,</span> <span class="s2">"session"</span><span class="p">])[</span><span class="s2">"TRIAL_START"</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span data-line="295">    <span class="k">return</span> <span class="n">df_in</span></div>
 
-</span><span data-line="292">
-</span><span data-line="293">
+</span><span data-line="296">
+</span><span data-line="297">
 <div class="viewcode-block" id="get_previous_row_index">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_previous_row_index.html#lecilab_behavior_analysis.metrics.trial_events.get_previous_row_index">[docs]</a>
-</span><span data-line="294"><span class="k">def</span><span class="w"> </span><span class="nf">get_previous_row_index</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">current_index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span data-line="295">    <span class="c1"># Get the position of the current index</span>
-</span><span data-line="296">    <span class="n">current_pos</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">current_index</span><span class="p">)</span>
-</span><span data-line="297">    <span class="c1"># Ensure it's not the first row</span>
-</span><span data-line="298">    <span class="k">if</span> <span class="n">current_pos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span data-line="299">        <span class="c1"># Return the previous index</span>
-</span><span data-line="300">        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">current_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-</span><span data-line="301">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="302">        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">"No previous row exists for the given index."</span><span class="p">)</span></div>
+</span><span data-line="298"><span class="k">def</span><span class="w"> </span><span class="nf">get_previous_row_index</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">current_index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span data-line="299">    <span class="c1"># Get the position of the current index</span>
+</span><span data-line="300">    <span class="n">current_pos</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">current_index</span><span class="p">)</span>
+</span><span data-line="301">    <span class="c1"># Ensure it's not the first row</span>
+</span><span data-line="302">    <span class="k">if</span> <span class="n">current_pos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span data-line="303">        <span class="c1"># Return the previous index</span>
+</span><span data-line="304">        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">current_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+</span><span data-line="305">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="306">        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">"No previous row exists for the given index."</span><span class="p">)</span></div>
 
-</span><span data-line="303">
-</span><span data-line="304">
+</span><span data-line="307">
+</span><span data-line="308">
 <div class="viewcode-block" id="transform_side_choice_to_numeric">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.transform_side_choice_to_numeric.html#lecilab_behavior_analysis.metrics.trial_events.transform_side_choice_to_numeric">[docs]</a>
-</span><span data-line="305"><span class="k">def</span><span class="w"> </span><span class="nf">transform_side_choice_to_numeric</span><span class="p">(</span><span class="n">side</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-</span><span data-line="306">    <span class="k">match</span> <span class="n">side</span><span class="p">:</span>
-</span><span data-line="307">        <span class="k">case</span> <span class="s2">"left"</span><span class="p">:</span>
-</span><span data-line="308">            <span class="k">return</span> <span class="mi">1</span>
-</span><span data-line="309">        <span class="k">case</span> <span class="s2">"right"</span><span class="p">:</span>
-</span><span data-line="310">            <span class="k">return</span> <span class="mi">0</span>
-</span><span data-line="311">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
-</span><span data-line="312">            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
+</span><span data-line="309"><span class="k">def</span><span class="w"> </span><span class="nf">transform_side_choice_to_numeric</span><span class="p">(</span><span class="n">side</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+</span><span data-line="310">    <span class="k">match</span> <span class="n">side</span><span class="p">:</span>
+</span><span data-line="311">        <span class="k">case</span> <span class="s2">"left"</span><span class="p">:</span>
+</span><span data-line="312">            <span class="k">return</span> <span class="mi">1</span>
+</span><span data-line="313">        <span class="k">case</span> <span class="s2">"right"</span><span class="p">:</span>
+</span><span data-line="314">            <span class="k">return</span> <span class="mi">0</span>
+</span><span data-line="315">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+</span><span data-line="316">            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
-</span><span data-line="313">
-</span><span data-line="314">
+</span><span data-line="317">
+</span><span data-line="318">
 <div class="viewcode-block" id="EventColumns">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.EventColumns.html#lecilab_behavior_analysis.metrics.trial_events.EventColumns">[docs]</a>
-</span><span data-line="315"><span class="k">class</span><span class="w"> </span><span class="nc">EventColumns</span><span class="p">:</span>
-</span><span data-line="316"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="317"><span class="sd">    Event columns of a dataframe, read with parse_events. Each column is read</span>
-</span><span data-line="318"><span class="sd">    the first time it is used and kept, so that several functions can share it:</span>
-</span><span data-line="319">
-</span><span data-line="320"><span class="sd">        events = EventColumns(df)</span>
-</span><span data-line="321"><span class="sd">        df = add_mouse_first_choice(df, events)</span>
-</span><span data-line="322"><span class="sd">        df = add_trial_misses(df, events)</span>
+</span><span data-line="319"><span class="k">class</span><span class="w"> </span><span class="nc">EventColumns</span><span class="p">:</span>
+</span><span data-line="320"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="321"><span class="sd">    Event columns of a dataframe, read with parse_events. Each column is read</span>
+</span><span data-line="322"><span class="sd">    the first time it is used and kept, so that several functions can share it:</span>
 </span><span data-line="323">
-</span><span data-line="324"><span class="sd">    The lists follow the order of the rows of df.</span>
-</span><span data-line="325"><span class="sd">    """</span>
-</span><span data-line="326">
+</span><span data-line="324"><span class="sd">        events = EventColumns(df)</span>
+</span><span data-line="325"><span class="sd">        df = add_mouse_first_choice(df, events)</span>
+</span><span data-line="326"><span class="sd">        df = add_trial_misses(df, events)</span>
+</span><span data-line="327">
+</span><span data-line="328"><span class="sd">    The lists follow the order of the rows of df.</span>
+</span><span data-line="329"><span class="sd">    """</span>
+</span><span data-line="330">
 <div class="viewcode-block" id="EventColumns.__init__">
 <a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.EventColumns.html#lecilab_behavior_analysis.metrics.trial_events.EventColumns.__init__">[docs]</a>
-</span><span data-line="327">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-</span><span data-line="328">        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
-</span><span data-line="329">        <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span></div>
+</span><span data-line="331">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+</span><span data-line="332">        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+</span><span data-line="333">        <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span></div>
 
-</span><span data-line="330">
-</span><span data-line="331">    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-</span><span data-line="332">        <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">:</span>
-</span><span data-line="333">            <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">parse_event_column</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
-</span><span data-line="334">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="n">column</span><span class="p">]</span></div>
+</span><span data-line="334">
+</span><span data-line="335">    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+</span><span data-line="336">        <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">:</span>
+</span><span data-line="337">            <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">parse_event_column</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+</span><span data-line="338">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="n">column</span><span class="p">]</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -830,7 +834,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../../_static/documentation_options.js?v=8768056e"></script>
+      <script src="../../../_static/documentation_options.js?v=8a1d7382"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../_static/shibuya.js?v=50760d75"></script></body>
