@@ -63,3 +63,16 @@ def test_tv_report_without_logs():
     fig = overview.tv_report_table(None, None)
     assert "No events" in fig.layout.annotations[0].text
     assert overview.failed_cells() == []
+
+
+def test_performance_over_trials_has_at_most_1000_points_per_subject(prepared_trials):
+    many = pd.concat([prepared_trials.assign(subject="A"), prepared_trials.head(300).assign(subject="B")])
+    assert len(prepared_trials) > 1100
+    points = overview.group_trials(many, "performance_w", max_points=1000)
+    counts = points.groupby("subject").size()
+    with_value = many.dropna(subset=["performance_w"]).groupby("subject").size()
+    assert with_value["A"] > 1000 and counts["A"] <= 1000  # A is grouped
+    assert counts["B"] == with_value["B"]  # B has fewer trials: not grouped
+    assert points.groupby("subject")["total_trial"].max()["A"] == many[many.subject == "A"]["total_trial"].max()
+    fig = overview.performance_over_trials_figure(many)
+    assert sum(len(trace.x) for trace in fig.data) == len(points)

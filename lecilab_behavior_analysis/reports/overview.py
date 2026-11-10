@@ -15,6 +15,7 @@ import functools
 import logging
 from typing import Callable, Dict, List
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -168,15 +169,46 @@ def problems_table(problems: Dict[str, List[PanelProblem]]) -> go.Figure:
 # ---------------------------------------------------------------------------
 # Figures
 # ---------------------------------------------------------------------------
+def group_trials(df: pd.DataFrame, column: str = "performance_w", max_points: int = 1000) -> pd.DataFrame:
+    """
+    At most max_points points per subject: consecutive trials are grouped
+    (as few per group as needed) and each group is one point, at the last
+    trial of the group (total_trial) with the mean of column.
+    Columns: subject, total_trial, column.
+    """
+    groups = []
+    for subject, trials in df.sort_values("total_trial").groupby("subject", sort=True):
+        trials = trials[["total_trial", column]].dropna()
+        if trials.empty:
+            continue
+        size = int(np.ceil(len(trials) / max_points))
+        group = np.arange(len(trials)) // size
+        points = trials.groupby(group).agg(total_trial=("total_trial", "last"), value=(column, "mean"))
+        points = points.rename(columns={"value": column})
+        points.insert(0, "subject", subject)
+        groups.append(points)
+    if not groups:
+        return pd.DataFrame(columns=["subject", "total_trial", column])
+    return pd.concat(groups, ignore_index=True)
+
+
 @never_raises("Performance over trials", "plotly")
-def performance_over_trials_figure(df: pd.DataFrame, window: int = 50) -> go.Figure:
-    """Performance through the trials of every subject (interactive)."""
+def performance_over_trials_figure(df: pd.DataFrame, window: int = 50, max_points: int = 1000) -> go.Figure:
+    """
+    Performance through the trials of every subject (interactive), with at
+    most max_points points per subject (see group_trials), so that the size
+    of the report does not grow with the number of trials.
+    """
     if "performance_w" not in df.columns:
         df = pd.concat(
             [get_performance_through_trials(d, window=window) for _, d in df.groupby("subject")],
             ignore_index=True,
         )
-    return px.line(df, x="total_trial", y="performance_w", color="subject")
+    points = group_trials(df, "performance_w", max_points)
+    points["performance_w"] = points["performance_w"].round(1)
+    fig = px.line(points, x="total_trial", y="performance_w", color="subject")
+    fig.update_layout(xaxis_title="Trial", yaxis_title=f"Performance (%, window of {window} trials)")
+    return fig
 
 
 @never_raises("Box occupancy and training times", "matplotlib")
@@ -239,6 +271,7 @@ __all__ = [
     "last_days",
     "last_days_table",
     "problems_table",
+    "group_trials",
     "performance_over_trials_figure",
     "box_occupancy_figure",
     "daily_trials_and_performance",

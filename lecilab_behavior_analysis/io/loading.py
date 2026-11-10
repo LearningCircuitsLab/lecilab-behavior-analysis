@@ -204,3 +204,48 @@ def load_project_logs(
         )
 
     return combine([e for e, _ in logs]), combine([s for _, s in logs]), setups
+
+
+def load_session_dates(project: str, subjects: List[str], root: Optional[Union[str, Path]] = None) -> pd.DataFrame:
+    """
+    Start of every session of some subjects of a project: columns subject and
+    date (datetime), sorted by date. It tells when new data was collected
+    (the boxes send each session to the data folder).
+
+    Read from the sessions summaries of every setup of the project (only the
+    given subjects: a box can hold subjects of other projects). Subjects that
+    are in no sessions summary are read from the date column of their trials
+    file instead. Subjects without data are left out.
+    """
+    root = Path(root) if root is not None else Path(get_outpath())
+    frames = []
+    for setup in find_setups(project, root):
+        path = root / project / setup / "sessions_summary.csv"
+        if not path.exists():
+            continue
+        try:
+            summary = pd.read_csv(path, sep=";", usecols=["date", "subject"])
+        except Exception as error:
+            logger.warning("Could not read %s: %s: %s", path, type(error).__name__, error)
+            continue
+        frames.append(summary[summary["subject"].isin(subjects)])
+    found = set(pd.concat(frames)["subject"]) if frames else set()
+    for subject in subjects:
+        if subject in found:
+            continue
+        path = root / project / "sessions" / subject / f"{subject}.csv"
+        if not path.exists() and path.with_suffix(".csv.gz").exists():
+            path = path.with_suffix(".csv.gz")
+        if not path.exists():
+            continue
+        try:
+            dates = pd.read_csv(path, sep=";", usecols=["date"])
+        except Exception as error:
+            logger.warning("Could not read %s: %s: %s", path, type(error).__name__, error)
+            continue
+        frames.append(dates.drop_duplicates().assign(subject=subject))
+    if not frames:
+        return pd.DataFrame({"subject": pd.Series(dtype=str), "date": pd.Series(dtype="datetime64[ns]")})
+    dates = pd.concat(frames, ignore_index=True)[["subject", "date"]]
+    dates["date"] = pd.to_datetime(dates["date"], errors="coerce")
+    return dates.dropna().drop_duplicates().sort_values("date", kind="stable").reset_index(drop=True)

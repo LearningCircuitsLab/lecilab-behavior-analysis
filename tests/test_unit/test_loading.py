@@ -98,3 +98,20 @@ def test_load_project_trials_compressed(tmp_path, raw_trials):
     folder.mkdir(parents=True)
     raw_trials.head(50).to_csv(folder / "NUO003.csv.gz", sep=";", index=False)
     assert len(load_project_trials("proj", ["NUO003"], root=tmp_path)) == 50
+
+
+def test_load_session_dates(tmp_path, raw_trials):
+    from lecilab_behavior_analysis.io.loading import load_session_dates
+
+    write_project(tmp_path, raw_trials)
+    # another project's mouse in the same box, and a mouse without a sessions summary
+    (tmp_path / "proj" / "village01" / "sessions_summary.csv").write_text(
+        "date;subject;trials\n2025-09-05 10:00:00;NUO003;100\n2025-09-06 10:00:00;OTHER;50\n"
+    )
+    other = tmp_path / "proj" / "sessions" / "NUO004"
+    other.mkdir(parents=True)
+    raw_trials.head(5).assign(subject="NUO004").to_csv(other / "NUO004.csv", sep=";", index=False)
+    dates = load_session_dates("proj", ["NUO003", "NUO004", "MISSING"], root=tmp_path)
+    assert set(dates["subject"]) == {"NUO003", "NUO004"}
+    assert list(dates[dates.subject == "NUO003"]["date"].astype(str)) == ["2025-09-05 10:00:00"]
+    assert dates["date"].is_monotonic_increasing
