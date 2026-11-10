@@ -1,13 +1,14 @@
 """Plots of the training history: calendar, trials and water per day, text summaries."""
-from matplotlib import pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg
-from typing import List
+
+from typing import List, Optional
 
 import calplot
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import seaborn as sns
+from matplotlib import pyplot as plt
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 from lecilab_behavior_analysis.common import column_checker, list_to_colors
 from lecilab_behavior_analysis.metrics.performance import get_text_from_subject_df, get_text_from_subset_df
@@ -16,9 +17,7 @@ from lecilab_behavior_analysis.metrics.performance import get_text_from_subject_
 def training_calendar_plot(dates_df: pd.DataFrame) -> plt.Figure:
     # make the calendar plot and convert it to an image
     column_checker(dates_df, required_columns={"trial"})
-    cpfig, _ = calplot.calplot(
-        data=dates_df.trial, yearlabel_kws={"fontname": "sans-serif"}
-    )
+    cpfig, _ = calplot.calplot(data=dates_df.trial, yearlabel_kws={"fontname": "sans-serif"})
 
     return cpfig
 
@@ -30,7 +29,9 @@ def rasterize_plot(plot: plt.Figure, dpi: int = 300) -> np.ndarray:
     width, height = plot.get_size_inches() * dpi
     # Get ARGB buffer and reshape
     argb = np.frombuffer(canvas.tostring_argb(), dtype="uint8").reshape(
-        int(height), int(width), 4  # 4 channels (A, R, G, B)
+        int(height),
+        int(width),
+        4,  # 4 channels (A, R, G, B)
     )
     # Remove alpha channel by keeping only R, G, B
     rgb = argb[:, :, 1:]  # Drop the first (alpha) channel
@@ -61,9 +62,7 @@ def trials_by_session_plot(dates_df: pd.DataFrame, ax: plt.Axes = None) -> plt.A
     return ax
 
 
-def trials_by_day_plot(
-    dates_df: pd.DataFrame, ax: plt.Axes = None, cmap: str = "tab10"
-) -> plt.Axes:
+def trials_by_day_plot(dates_df: pd.DataFrame, ax: plt.Axes = None, cmap: str = "tab10") -> plt.Axes:
     array_of_training_stages = np.array([x[1] for x in dates_df.columns])
     color_list, color_dict = list_to_colors(ids=array_of_training_stages, cmap=cmap)
     ax = dates_df.plot(kind="bar", stacked=True, edgecolor="black", color=color_list, ax=ax)
@@ -80,13 +79,11 @@ def trials_by_day_plot(
     ax.tick_params(axis="x", rotation=45, labelsize=7)
     for label in ax.get_xticklabels():
         label.set_horizontalalignment("right")
-    
+
     return ax
 
 
-def trials_by_session_hist(
-    dates_df: pd.DataFrame, ax: plt.Axes = None, **kwargs
-) -> plt.Axes:
+def trials_by_session_hist(dates_df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
     column_checker(dates_df, required_columns={"trial"})
     dates_df["trial"].hist(ax=ax, orientation="horizontal", bins=15, color="gray")
     if "ylim" in kwargs:
@@ -101,10 +98,8 @@ def trials_by_session_hist(
 def water_by_date_plot(water_df: pd.Series, ax: plt.Axes = None) -> plt.Axes:
     # if water_df.index.name != "date":
     #     raise ValueError("The dataframe must have [date] as index")
-    # check if there is someting plotted in the axis already
-    items_in_axis = (
-        len(ax.patches) + len(ax.lines) + len(ax.collections) + len(ax.texts)
-    )
+    # check if there is something plotted in the axis already
+    items_in_axis = len(ax.patches) + len(ax.lines) + len(ax.collections) + len(ax.texts)
     if items_in_axis > 0:
         # create a new y axis on the right
         ax2 = ax.twinx()
@@ -127,9 +122,7 @@ def water_by_date_plot(water_df: pd.Series, ax: plt.Axes = None) -> plt.Axes:
     return ax_to_use
 
 
-def summary_text_plot(
-    df: pd.DataFrame, kind: str = "session", ax: plt.Axes = None, **kwargs
-) -> plt.Axes:
+def summary_text_plot(df: pd.DataFrame, kind: str = "session", ax: plt.Axes = None, **kwargs) -> plt.Axes:
     """
     summary of a particular session or subject
     """
@@ -182,13 +175,8 @@ def summary_matrix_plot(
 
     # The protocols is the default that gets plotted,
     # with the size of the dots proportional to the number of trials
-    training_stages = [
-        mat_df_metadata[session]["current_training_stage"]
-        for session in mat_df.columns
-    ]
-    trials_list = [
-        mat_df_metadata[session]["n_trials"] for session in mat_df.columns
-    ]
+    training_stages = [mat_df_metadata[session]["current_training_stage"] for session in mat_df.columns]
+    trials_list = [mat_df_metadata[session]["n_trials"] for session in mat_df.columns]
     evidence_levels = mat_df.index
     shift_up = 0.5
     training_stages_done = []
@@ -197,9 +185,9 @@ def summary_matrix_plot(
             continue
         tr_stg_idx = [i for i, x in enumerate(training_stages) if x == tr_stg]
         if training_stage_inlegend:
-            label=tr_stg
+            label = tr_stg
         else:
-            label=None
+            label = None
         ax.scatter(
             [x + 0.5 for x in tr_stg_idx],
             np.repeat(len(evidence_levels) + shift_up, len(tr_stg_idx)),
@@ -213,9 +201,7 @@ def summary_matrix_plot(
     # label the rest of the sessions as given in the input
     marker_list = ["*", "P", "h", "D", "X"]
     for n_lab, t_label in enumerate(top_labels):
-        t_label_uniques = [
-            mat_df_metadata[session][t_label] for session in mat_df.columns
-        ]
+        t_label_uniques = [mat_df_metadata[session][t_label] for session in mat_df.columns]
         for tlu in np.unique(t_label_uniques):
             tlu_idx = [i for i, x in enumerate(t_label_uniques) if x == tlu]
             ax.scatter(
@@ -232,37 +218,37 @@ def summary_matrix_plot(
     ax.set_ylabel("Evidence level")
     ax.set_xlabel("Session")
     sp.set_yticklabels(sp.get_yticklabels(), rotation=0)
-    sp.set_xticklabels(
-        sp.get_xticklabels(), rotation=45, horizontalalignment="right"
-    )
-    sp.set_title(
-        mouse_name + "\n\n", fontsize=20, fontweight=0
-    )
+    sp.set_xticklabels(sp.get_xticklabels(), rotation=45, horizontalalignment="right")
+    sp.set_title(mouse_name + "\n\n", fontsize=20, fontweight=0)
 
     return ax
 
 
 def plot_table_from_df(df: pd.DataFrame, **kwargs) -> go.Figure:
     # Create table
-    fig = go.Figure(data=[go.Table(
-        columnwidth=[80] + [60]*len(df.columns),  # Adjust column widths
-        header=dict(
-            values=[f"<b>{col.replace('_', '<br>')}</b>" for col in df.columns],
-            align='center',
-            font=dict(size=14),
-            height=40,
-            line_color='darkslategray',
-            fill_color='lightgray'
-        ),
-        cells=dict(
-            values=[df[col].tolist() for col in df.columns],
-            align='center',
-            font=dict(size=12),
-            height=35,
-            line_color='darkslategray',
-            fill_color='white'
-        )
-    )])
+    fig = go.Figure(
+        data=[
+            go.Table(
+                columnwidth=[80] + [60] * len(df.columns),  # Adjust column widths
+                header=dict(
+                    values=[f"<b>{col.replace('_', '<br>')}</b>" for col in df.columns],
+                    align="center",
+                    font=dict(size=14),
+                    height=40,
+                    line_color="darkslategray",
+                    fill_color="lightgray",
+                ),
+                cells=dict(
+                    values=[df[col].tolist() for col in df.columns],
+                    align="center",
+                    font=dict(size=12),
+                    height=35,
+                    line_color="darkslategray",
+                    fill_color="white",
+                ),
+            )
+        ]
+    )
 
     # Update layout
     if "title" in kwargs:
@@ -307,8 +293,9 @@ def calendar_plot(daily_trials: pd.Series, axes: List[plt.Axes], cmap: str = "vi
         raise ValueError(f"calendar_plot needs one axis per year ({len(years)})")
     vmax = daily_trials.max()
     for ax, year in zip(axes, years):
-        calplot.yearplot(daily_trials, year=year, ax=ax, vmin=0, vmax=vmax, cmap=cmap,
-                         linewidth=0.5, dayticks=[0, 2, 4, 6])
+        calplot.yearplot(
+            daily_trials, year=year, ax=ax, vmin=0, vmax=vmax, cmap=cmap, linewidth=0.5, dayticks=[0, 2, 4, 6]
+        )
         ax.set_ylabel(str(year))
         ax.tick_params(labelsize=6)
     from matplotlib.cm import ScalarMappable
@@ -319,8 +306,9 @@ def calendar_plot(daily_trials: pd.Series, axes: List[plt.Axes], cmap: str = "vi
     return axes
 
 
-def trials_by_day_stacked_plot(sessions: pd.DataFrame, ax: plt.Axes = None, cmap: str = "tab10",
-                               stage_order: List[str] = None) -> plt.Axes:
+def trials_by_day_stacked_plot(
+    sessions: pd.DataFrame, ax: plt.Axes = None, cmap: str = "tab10", stage_order: Optional[List[str]] = None
+) -> plt.Axes:
     """
     Number of trials per day, one stacked bar segment per session, colored by
     training stage.
@@ -337,9 +325,15 @@ def trials_by_day_stacked_plot(sessions: pd.DataFrame, ax: plt.Axes = None, cmap
     colormap = plt.get_cmap(cmap)
     colors = {stage: colormap(i % colormap.N) for i, stage in enumerate(stages)}
     bottoms = sessions.groupby("day")["trials"].cumsum() - sessions["trials"]
-    ax.bar(sessions["day"], sessions["trials"], bottom=bottoms, width=0.8,
-           color=[colors[s] for s in sessions["current_training_stage"]],
-           edgecolor="black", linewidth=0.2)
+    ax.bar(
+        sessions["day"],
+        sessions["trials"],
+        bottom=bottoms,
+        width=0.8,
+        color=[colors[s] for s in sessions["current_training_stage"]],
+        edgecolor="black",
+        linewidth=0.2,
+    )
     handles = [plt.Rectangle((0, 0), 1, 1, color=colors[s]) for s in stages]
     ax.legend(handles, stages, loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=min(len(stages), 4))
     ax.set_ylabel("Number of trials")

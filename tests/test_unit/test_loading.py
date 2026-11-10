@@ -1,4 +1,5 @@
 """Loading the trials and logs of a project, as the daily report does."""
+
 import logging
 
 import pandas as pd
@@ -14,11 +15,15 @@ def write_project(root, raw_trials):
     setup = root / "proj" / "village01"
     (setup / "old_events").mkdir(parents=True)
     header = "date;type;subject;description\n"
-    (setup / "old_events" / "events_1.csv").write_text(header + "2025-09-01 10:00:00;INFO;NUO003;old; with ; separators\n")
-    (setup / "events.csv").write_text(header + "2025-09-05 10:00:00;START;NUO003;TwoAFC started\n"
-                                      "2026-07-01 10:00:00;END;NUO003;TwoAFC ended\n")
-    (setup / "sessions_summary.csv").write_text("date;subject;trials\n2025-09-05 10:00:00;NUO003;100\n"
-                                                "2026-07-01 10:00:00;NUO003;50\n")
+    (setup / "old_events" / "events_1.csv").write_text(
+        header + "2025-09-01 10:00:00;INFO;NUO003;old; with ; separators\n"
+    )
+    (setup / "events.csv").write_text(
+        header + "2025-09-05 10:00:00;START;NUO003;TwoAFC started\n" "2026-07-01 10:00:00;END;NUO003;TwoAFC ended\n"
+    )
+    (setup / "sessions_summary.csv").write_text(
+        "date;subject;trials\n2025-09-05 10:00:00;NUO003;100\n" "2026-07-01 10:00:00;NUO003;50\n"
+    )
 
 
 def test_load_project_trials(tmp_path, raw_trials, caplog):
@@ -73,7 +78,8 @@ def test_load_project_logs_combines_setups(tmp_path, raw_trials):
     # a second box with the same old events (copied) and one more session
     shutil.copytree(tmp_path / "proj" / "village01", tmp_path / "proj" / "village02")
     (tmp_path / "proj" / "village02" / "events.csv").write_text(
-        "date;type;subject;description\n2025-09-03 10:00:00;START;NUO003;TwoAFC started\n")
+        "date;type;subject;description\n2025-09-03 10:00:00;START;NUO003;TwoAFC started\n"
+    )
     events, summary, setups = load_project_logs("proj", max_date="2025-12-31", root=tmp_path)
     assert setups == ["village01", "village02"]
     assert list(events["date"].astype(str)) == ["2025-09-01 10:00:00", "2025-09-03 10:00:00", "2025-09-05 10:00:00"]

@@ -5,6 +5,7 @@ The daily report (village-report-generator) draws these figures for every
 subject every day: a panel that fails there shows a red box. These tests
 catch it before.
 """
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -92,12 +93,14 @@ def test_mixed_old_and_new_format(raw_trials):
 def test_engagement_panel_with_events(prepared_trials):
     # a "back home" event 60 s after the end of each session
     ends = prepared_trials.groupby("date")["TRIAL_END"].max() - prepared_trials.groupby("date")["TRIAL_START"].min()
-    events = pd.DataFrame({
-        "date": [(d + pd.Timedelta(seconds=float(s) + 60)).strftime("%Y-%m-%d %H:%M:%S") for d, s in ends.items()],
-        "type": "INFO",
-        "subject": "NUO003",
-        "description": "Subject back home: NUO003",
-    })
+    events = pd.DataFrame(
+        {
+            "date": [(d + pd.Timedelta(seconds=float(s) + 60)).strftime("%Y-%m-%d %H:%M:%S") for d, s in ends.items()],
+            "type": "INFO",
+            "subject": "NUO003",
+            "description": "Subject back home: NUO003",
+        }
+    )
     fig = fm.subject_progress_figure(prepared_trials, events_df=events)
     assert _problems(fig) == []
     texts = [t.get_text() for ax in fig.axes for t in ax.texts]

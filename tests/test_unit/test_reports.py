@@ -1,4 +1,5 @@
 """Report helpers return a figure and never raise."""
+
 import pandas as pd
 import plotly.graph_objects as go
 from matplotlib.figure import Figure
@@ -15,10 +16,14 @@ def test_tables(prepared_trials):
 
 
 def test_last_days_counts_timeouts_as_errors():
-    df = pd.DataFrame({
-        "subject": ["m"] * 4, "year_month_day": ["2026-11-10"] * 4,
-        "trial": [1, 2, 3, 4], "correct": [True, None, True, False],
-    })
+    df = pd.DataFrame(
+        {
+            "subject": ["m"] * 4,
+            "year_month_day": ["2026-11-10"] * 4,
+            "trial": [1, 2, 3, 4],
+            "correct": [True, None, True, False],
+        }
+    )
     table = overview.last_days(df, n_days=1)
     assert table.loc[0, "performance_2026-11-10"] == "0.500"
     assert table.loc[0, "trials_2026-11-10"] == 4

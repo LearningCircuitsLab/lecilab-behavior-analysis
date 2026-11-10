@@ -1,7 +1,9 @@
 """Performance: per session or day, through trials, by difficulty, by decision,
 repeat or alternate, and the text summaries of a subject or session.
 """
+
 from typing import Tuple
+
 import numpy as np
 import pandas as pd
 
@@ -77,16 +79,18 @@ def get_text_from_subset_df(df: pd.DataFrame, reduced: bool = False) -> str:
         date_text = _join(date)
 
     # write the text
-    text = "\n".join([
-        f"Mouse: {mouse_name}",
-        f"Sessions: {session_text}",
-        f"Dates: {date_text}",
-        f"Training stages: {_join(current_training_stage)}",
-        f"Number of trials: {n_trials}",
-        f"Number of correct trials: {n_correct}",
-        f"Performance: {performance:.2f}%",
-        f"Water consumed: {water:g} μl",
-    ])
+    text = "\n".join(
+        [
+            f"Mouse: {mouse_name}",
+            f"Sessions: {session_text}",
+            f"Dates: {date_text}",
+            f"Training stages: {_join(current_training_stage)}",
+            f"Number of trials: {n_trials}",
+            f"Number of correct trials: {n_correct}",
+            f"Performance: {performance:.2f}%",
+            f"Water consumed: {water:g} μl",
+        ]
+    )
 
     return text
 
@@ -108,12 +112,14 @@ def get_text_from_subject_df(df: pd.DataFrame) -> str:
     avg_sessions_per_day = n_sessions / days_of_training if days_of_training > 0 else 0
 
     # write the text
-    text = "\n".join([
-        f"{mouse_name}",
-        f"{avg_sessions_per_day:.2f} sessions per day",
-        f"{avg_trials_per_day:.0f} trials per day",
-        f"{avg_water_per_day:.0f} μl of water per day",
-    ])
+    text = "\n".join(
+        [
+            f"{mouse_name}",
+            f"{avg_sessions_per_day:.2f} sessions per day",
+            f"{avg_trials_per_day:.0f} trials per day",
+            f"{avg_water_per_day:.0f} μl of water per day",
+        ]
+    )
 
     return text
 
@@ -131,9 +137,7 @@ def get_repeat_or_alternate_series(series: pd.Series) -> pd.Series:
     return repeat_or_alternate_series_comparison(series, prev_choices)
 
 
-def repeat_or_alternate_series_comparison(
-    series: pd.Series, comparison_series: pd.Series
-) -> pd.Series:
+def repeat_or_alternate_series_comparison(series: pd.Series, comparison_series: pd.Series) -> pd.Series:
     """
     Given a series of values, return a series of the same length
     with "repeat" or "alternate" depending on whether the value
@@ -141,11 +145,9 @@ def repeat_or_alternate_series_comparison(
     """
     repeat_or_alternate = np.where(
         series.isna() | comparison_series.isna(),
-        None, # None instead of np.nan to keep dtype the same TODO: check!
-        np.where(
-            series == comparison_series,
-            "repeat",
-            "alternate"))
+        None,  # None instead of np.nan to keep dtype the same TODO: check!
+        np.where(series == comparison_series, "repeat", "alternate"),
+    )
 
     return pd.Series(repeat_or_alternate, index=series.index)
 
@@ -167,16 +169,14 @@ def get_performance_through_trials(df: pd.DataFrame, window: int = 25) -> pd.Dat
     return df
 
 
-def get_repeat_or_alternate_performance(
-    df_in: pd.DataFrame, window: int = 25
-) -> pd.DataFrame:
+def get_repeat_or_alternate_performance(df_in: pd.DataFrame, window: int = 25) -> pd.DataFrame:
     df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
     if "repeat_or_alternate" not in df.columns:
         df["repeat_or_alternate"] = get_repeat_or_alternate_series(df.correct_side)
 
-    df["repeat_or_alternate_performance"] = df.groupby("repeat_or_alternate")[
-        "correct"
-    ].transform(lambda x: x.rolling(window=window).mean() * 100)
+    df["repeat_or_alternate_performance"] = df.groupby("repeat_or_alternate")["correct"].transform(
+        lambda x: x.rolling(window=window).mean() * 100
+    )
     return df
 
 
@@ -191,7 +191,7 @@ def get_performance_by_difficulty(df: pd.DataFrame) -> pd.DataFrame:
     pbd_df = df.groupby(["difficulty", "correct_side"]).correct.mean().unstack().reset_index()
     # melt the dataframe
     pbd_df = pbd_df.melt(id_vars=["difficulty"])
-    # assing a numeric value to the side and the difficulty for plotting purposes
+    # assign a numeric value to the side and the difficulty for plotting purposes
     pbd_df["leftward_evidence"] = pbd_df.apply(side_and_difficulty_to_numeric, axis=1)
     pbd_df["leftward_choices"] = np.where(pbd_df["correct_side"] == "left", pbd_df["value"], 1 - pbd_df["value"])
     return pbd_df
@@ -244,19 +244,23 @@ def get_performance_by_decision_df(df: pd.DataFrame, trial_group_size: int = 500
     Get the performance by decision dataframe.
     """
     # check that there is only one subject
-    if df['subject'].nunique() > 1:
+    if df["subject"].nunique() > 1:
         raise ValueError("The dataframe should contain only one subject.")
     column_checker(df, required_columns={"correct_side", "repeat_or_alternate", "correct", "total_trial"})
     # bin the data into groups of trial_group_size
     df = df.copy()  # Create a copy to avoid SettingWithCopyWarning
-    df['trial_group'] = df['total_trial'] // trial_group_size * trial_group_size
+    df["trial_group"] = df["total_trial"] // trial_group_size * trial_group_size
     # group by the trial group and calculate the mean of the correct column
-    df_binned = df.groupby(['correct_side', 'repeat_or_alternate', 'trial_group'])[['correct']].mean().reset_index()
+    df_binned = df.groupby(["correct_side", "repeat_or_alternate", "trial_group"])[["correct"]].mean().reset_index()
     # performance in between 0 and 100
-    df_binned['correct'] = df_binned['correct'] * 100
+    df_binned["correct"] = df_binned["correct"] * 100
     # get the different combinations of correct side and repeat or alternate
-    df_binned['correct_side_repeat_or_alternate'] = df_binned['correct_side'] + '_' + df_binned['repeat_or_alternate']
+    df_binned["correct_side_repeat_or_alternate"] = df_binned["correct_side"] + "_" + df_binned["repeat_or_alternate"]
     # get only the 4 combinations and remove nans etc
-    df_binned = df_binned[df_binned['correct_side_repeat_or_alternate'].isin(['left_repeat', 'left_alternate', 'right_repeat', 'right_alternate'])]
+    df_binned = df_binned[
+        df_binned["correct_side_repeat_or_alternate"].isin(
+            ["left_repeat", "left_alternate", "right_repeat", "right_alternate"]
+        )
+    ]
 
     return df_binned

@@ -1,7 +1,8 @@
 """Psychometric curve: logistic with independent left and right lapses."""
-from scipy.optimize import minimize
+
 import numpy as np
 import pandas as pd
+from scipy.optimize import minimize
 
 from lecilab_behavior_analysis.common import column_checker
 
@@ -22,12 +23,12 @@ def lapse_logistic_independent(params, x, y):
 def fit_lapse_logistic_independent(x, y, initial_params=None):
     """
     Fit a lapse logistic model with independent lapses for left and right choices.
-    
+
     Args:
         x (np.array): Independent variable (e.g., stimulus intensity).
         y (np.array): Dependent variable (e.g., choice probabilities).
         initial_params (list, optional): Initial guess for the parameters [lapse_left, lapse_right, beta, x0].
-    
+
     Returns:
         tuple: Fitted parameters and the minimized negative log-likelihood.
     """
@@ -38,12 +39,9 @@ def fit_lapse_logistic_independent(x, y, initial_params=None):
 
     if initial_params is None:
         initial_params = [0.05, 0.05, 1, 0]  # Default initial values
-    
+
     result = minimize(
-        lapse_logistic_independent,
-        initial_params,
-        args=(x, y),
-        bounds=[(0, 0.5), (0, 0.5), (None, None), (None, None)]
+        lapse_logistic_independent, initial_params, args=(x, y), bounds=[(0, 0.5), (0, 0.5), (None, None), (None, None)]
     )
 
     # Extract fitted parameters
@@ -56,10 +54,10 @@ def fit_lapse_logistic_independent(x, y, initial_params=None):
     return p_left, (lapse_left, lapse_right, beta, x0)
 
 
-def psychometric_curve_fitting_params(df: pd.DataFrame, x, y, valueType = 'discrete', bins = 6):
+def psychometric_curve_fitting_params(df: pd.DataFrame, x, y, valueType="discrete", bins=6):
     column_checker(df, required_columns={x, y})
     df_copy = df.copy(deep=True)
-    if valueType == 'discrete':
+    if valueType == "discrete":
         if 0 in df_copy[x].unique():
             # if there are 0s in the data, we need to add a small value to avoid log(0)
             df_copy[x + "_fit"] = df_copy[x]
@@ -67,9 +65,8 @@ def psychometric_curve_fitting_params(df: pd.DataFrame, x, y, valueType = 'discr
         df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
     else:
         # bin the continuous values when valueType is not discrete
-        bin_groups = pd.cut(df_copy[x], bins = bins)
+        bin_groups = pd.cut(df_copy[x], bins=bins)
         labels = df_copy[x].groupby(bin_groups, observed=True).mean()
-        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins = bins, labels = labels).astype(float)
-    xs = np.linspace(df_copy[x + "_fit"].min(), df_copy[x + "_fit"].max(), 100).reshape(-1, 1)
+        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins=bins, labels=labels).astype(float)
     p_left, params = fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     return p_left, params

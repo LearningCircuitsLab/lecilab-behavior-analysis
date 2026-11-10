@@ -1,4 +1,5 @@
 """prepare() and the readers of the event columns."""
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -73,11 +74,17 @@ def test_analyze_df_is_prepare(raw_trials):
 
 def test_prepare_without_task_columns():
     """Old or partial files without some columns can still be prepared."""
-    df = pd.DataFrame({
-        "subject": ["m"] * 3, "session": [1] * 3, "trial": [1, 2, 3],
-        "date": ["2025-01-01 10:00:00"] * 3, "correct": [True, False, True],
-        "TRIAL_START": [0.0, 10.0, 20.0], "TRIAL_END": [5.0, 15.0, 25.0],
-    })
+    df = pd.DataFrame(
+        {
+            "subject": ["m"] * 3,
+            "session": [1] * 3,
+            "trial": [1, 2, 3],
+            "date": ["2025-01-01 10:00:00"] * 3,
+            "correct": [True, False, True],
+            "TRIAL_START": [0.0, 10.0, 20.0],
+            "TRIAL_END": [5.0, 15.0, 25.0],
+        }
+    )
     out = prepare(df)
     assert out["total_trial"].tolist() == [1, 2, 3]
     assert out["early_pokeout"].isna().all()

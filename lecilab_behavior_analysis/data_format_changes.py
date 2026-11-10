@@ -50,7 +50,6 @@ from typing import Any, Optional, Tuple
 
 import pandas as pd
 
-
 # ---------------------------------------------------------------------------
 # 1. visual_stimulus: (correct, incorrect) -> (left, right)
 # ---------------------------------------------------------------------------
@@ -92,9 +91,7 @@ def visual_stimulus_is_left_right(date: Any) -> bool:
     return pd.Timestamp(date) >= VISUAL_STIMULUS_LEFT_RIGHT_SINCE
 
 
-def get_left_right_brightness(
-    visual_stimulus: Any, correct_side: str, date: Any
-) -> Optional[Tuple[float, float]]:
+def get_left_right_brightness(visual_stimulus: Any, correct_side: str, date: Any) -> Optional[Tuple[float, float]]:
     """
     Returns (left, right) brightness of the side ports for one trial, whatever
     the format it was saved in. None if the trial had no light stimulus.
@@ -139,9 +136,7 @@ def add_left_right_brightness(df_in: pd.DataFrame) -> pd.DataFrame:
     """
     df = df_in.copy()
     pairs = df.apply(
-        lambda row: get_left_right_brightness(
-            row["visual_stimulus"], row["correct_side"], row["date"]
-        ),
+        lambda row: get_left_right_brightness(row["visual_stimulus"], row["correct_side"], row["date"]),
         axis=1,
     )
     df["left_brightness"] = pairs.apply(lambda p: p[0] if p is not None else float("nan"))
@@ -185,7 +180,7 @@ def normalize_stage(stage: Any) -> Any:
     "TwoAFC_auditory_cot_easy" or "TwoAFC_auditory_easy" -> "TwoAFC_auditory-cot_easy"."""
     if not isinstance(stage, str) or not stage.startswith("TwoAFC_"):
         return stage
-    rest = stage[len("TwoAFC_"):]
+    rest = stage[len("TwoAFC_") :]
     for difficulty in ("easy", "hard"):
         suffix = "_" + difficulty
         if rest.endswith(suffix):

@@ -1,11 +1,15 @@
 # generate fake dataset for testing
+import random
+from pathlib import Path
+from typing import Union
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
-from .utils import get_outpath
-import random
 
-def generate_fake_dataset(outfile: str) -> None:
+from .utils import get_outpath
+
+
+def generate_fake_dataset(outfile: Union[str, Path]) -> None:
     """
     This method generates a fake dataset for testing purposes.
     """
@@ -44,7 +48,6 @@ def generate_fake_dataset(outfile: str) -> None:
     )
 
     for i, session_counter in enumerate(np.arange(1, total_sessions + 1)):
-
         n_trials = np.random.randint(250, 500)
 
         trials = np.arange(1, n_trials + 1)
@@ -72,17 +75,15 @@ def generate_fake_dataset(outfile: str) -> None:
         correct = np.empty(n_trials)
         prob_correctors = [1, 0.8, 0.6]
         for k, dif in enumerate(["easy", "medium", "hard"]):
-            mask = [x==dif for x in difficulty]
+            mask = [x == dif for x in difficulty]
             pc = prob_correctors[k] * prob_correct
-            correct[mask] = np.random.choice(
-                [True, False], np.sum(mask), p=[pc, 1 - pc]
-            )
+            correct[mask] = np.random.choice([True, False], np.sum(mask), p=[pc, 1 - pc])
 
         session = [session_counter] * n_trials
 
         water = [0] * n_trials
         water = np.where(correct, 2, water)
-        
+
         Port1In = []
         Port1Out = []
         Port2In = []
@@ -90,7 +91,7 @@ def generate_fake_dataset(outfile: str) -> None:
         Port3In = []
         Port3Out = []
 
-        #Create the timestamps for Port1, Port2 and Port3
+        # Create the timestamps for Port1, Port2 and Port3
         session_time = 0
         for trial in range(n_trials):
             session_time += random.randint(10, 50)
@@ -100,8 +101,10 @@ def generate_fake_dataset(outfile: str) -> None:
             Port2Out.append(session_time)
             session_time += random.randint(40, 90)
 
-            #Decision of Port 1 or Port 3 depending on the correct side
-            if (correct_side[trial] == "left" and correct[trial] == True) or (correct_side[trial]== "right" and correct[trial] == False):
+            # Decision of Port 1 or Port 3 depending on the correct side
+            if (correct_side[trial] == "left" and correct[trial]) or (
+                correct_side[trial] == "right" and not correct[trial]
+            ):
                 # Port1In y Port1Out
                 Port1In.append(session_time)
                 session_time += random.randint(10, 50)
@@ -129,7 +132,7 @@ def generate_fake_dataset(outfile: str) -> None:
                 "holding_time": holding_time,
                 "date": date,
                 "trial": trials,
-                "Port1In" : Port1In,
+                "Port1In": Port1In,
                 "Port1Out": Port1Out,
                 "Port2In": Port2In,
                 "Port2Out": Port2Out,

@@ -7,6 +7,7 @@ arguments. They are drawn from panels (see the figures package): a panel
 that fails shows a red "Could not generate ..." box instead of stopping the
 figure, and the failures are listed in fig.panel_problems.
 """
+
 import pandas as pd
 import plotly.graph_objects as go
 from matplotlib import pyplot as plt
@@ -61,7 +62,7 @@ def make_temperature_humidity_figure(df):
             y=df["temperature"],
             mode="lines",
             name="Temperature",
-            line=dict(width=2, color="#1f77b4")  # blue
+            line=dict(width=2, color="#1f77b4"),  # blue
         )
     )
 
@@ -73,7 +74,7 @@ def make_temperature_humidity_figure(df):
             mode="lines",
             name="Humidity",
             line=dict(width=2, color="#ff7f0e"),  # orange
-            yaxis="y2"
+            yaxis="y2",
         )
     )
 

@@ -1,5 +1,7 @@
 """Preparing the data once, before any analysis or figure (see prepare())."""
+
 import ast
+
 import numpy as np
 import pandas as pd
 
@@ -29,10 +31,13 @@ def fill_missing_data(df_in: pd.DataFrame) -> pd.DataFrame:
     df = df_in.copy()  # Create a copy to avoid modifying the original DataFrame
     columns_to_fill = ["stimulus_modality", "current_training_stage", "difficulty", "correct_side"]
     for column in columns_to_fill:
-        try:
-            df[column] = df[column].fillna("not saved")
-        except KeyError:
+        if column not in df.columns:
             df[column] = "not saved"
+            continue
+        values = df[column]
+        if values.dtype.kind in "fiub":  # an empty column is read as numbers: make it text
+            values = values.astype(object)
+        df[column] = values.fillna("not saved")
     # Fill missing values in the "correct" column
     try:
         df["correct"] = df["correct"].infer_objects()
@@ -65,13 +70,13 @@ def add_trial_of_day_column_to_df(df: pd.DataFrame) -> pd.DataFrame:
     # Check if the required columns are present
     column_checker(df, required_columns={"year_month_day", "trial"})
     df = df.copy()  # Make a copy to avoid modifying the original DataFrame
-    df['trial_of_day'] = df['trial'] - df.groupby('year_month_day')['trial'].transform('min') + 1
+    df["trial_of_day"] = df["trial"] - df.groupby("year_month_day")["trial"].transform("min") + 1
     return df
 
 
 def reformat_df_columns(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()  # Make a copy to avoid modifying the original DataFrame
-    df['visual_stimulus'] = df['visual_stimulus'].apply(ast.literal_eval)
+    df["visual_stimulus"] = df["visual_stimulus"].apply(ast.literal_eval)
     # TODO: fix issues with this when there are no values
 
     return df

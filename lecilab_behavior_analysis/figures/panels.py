@@ -10,6 +10,7 @@ To add a panel: write a function draw(data, ax) with the @panel decorator,
 and put it in a layout (layouts.py). Raise NotApplicable("message") when
 there is nothing to show for this data.
 """
+
 import pandas as pd
 
 import lecilab_behavior_analysis.data_format_changes as dfc
@@ -29,13 +30,16 @@ from lecilab_behavior_analysis.metrics.performance import (
     get_repeat_or_alternate_series,
     get_training_summary_matrix,
 )
-from lecilab_behavior_analysis.metrics.timing import get_center_hold_df, get_reaction_times_by_date_df
+from lecilab_behavior_analysis.metrics.timing import (
+    adjust_trials_and_time_of_start_to_first_session,
+    get_center_hold_df,
+    get_reaction_times_by_date_df,
+)
 from lecilab_behavior_analysis.metrics.trial_events import (
     add_time_from_session_start,
     side_and_difficulty_to_numeric,
     transform_side_choice_to_numeric,
 )
-from lecilab_behavior_analysis.metrics.timing import adjust_trials_and_time_of_start_to_first_session
 
 
 # ---------------------------------------------------------------------------
@@ -43,10 +47,12 @@ from lecilab_behavior_analysis.metrics.timing import adjust_trials_and_time_of_s
 # ---------------------------------------------------------------------------
 def with_numeric_correct(data: FigureData) -> pd.DataFrame:
     """The trials with correct as 1.0 / 0.0 (timeouts count as errors, see data_format_changes.py)."""
+
     def compute():
         df = data.df.copy()
         df["correct"] = df["correct"].apply(dfc.correct_as_number)
         return df
+
     return data.cached("numeric_correct", compute)
 
 
@@ -60,9 +66,11 @@ def performance_df(data: FigureData) -> pd.DataFrame:
 
 def session_changes(data: FigureData) -> pd.Index:
     """Index (rows of performance_df) of the first trial of each session."""
+
     def compute():
         df = performance_df(data)
         return df[df.session != df.session.shift(1)].index
+
     return data.cached("session_changes", compute)
 
 
@@ -75,9 +83,11 @@ def by_day(df: pd.DataFrame) -> pd.DataFrame:
 
 def day_limits(data: FigureData):
     """First and last day of the data, so that every "by day" panel shares the x axis."""
+
     def compute():
         days = pd.to_datetime(pd.Series(data.df["year_month_day"].unique()))
         return days.min() - pd.Timedelta(days=1), days.max() + pd.Timedelta(days=1)
+
     return data.cached("day_limits", compute)
 
 
@@ -116,7 +126,8 @@ def trials_and_water(data: FigureData, ax) -> None:
     df = data.df
     sessions = (
         df.groupby(["year_month_day", "session", "current_training_stage"], sort=False)
-        .size().reset_index(name="trials")
+        .size()
+        .reset_index(name="trials")
     )
     sessions = by_day(sessions)
     plots.trials_by_day_stacked_plot(sessions, ax=ax)
@@ -173,8 +184,9 @@ def reaction_times_by_day(data: FigureData, ax) -> None:
     plots.mean_and_ci_by_day_plot(daily, "reaction_time", ax=ax, color="tab:blue", ylog=True, label="reaction time (s)")
     ax2 = ax.twinx()
     ax2.spines["right"].set_visible(True)
-    plots.mean_and_ci_by_day_plot(daily, "time_between_trials", ax=ax2, color="tab:orange", ylog=True,
-                                  label="time between trials (s)")
+    plots.mean_and_ci_by_day_plot(
+        daily, "time_between_trials", ax=ax2, color="tab:orange", ylog=True, label="time between trials (s)"
+    )
     _date_axis(data, ax)
     ax.set_title("Reaction time and time between trials")
 
@@ -202,8 +214,7 @@ def engagement(data: FigureData, ax) -> None:
 @panel("summary matrix plot", needs={"session", "difficulty", "correct", "correct_side", "date", "water"})
 def summary_matrix(data: FigureData, ax) -> None:
     matrix, info = get_training_summary_matrix(with_numeric_correct(data))
-    plots.summary_matrix_plot(mat_df=matrix, mat_df_metadata=info, mouse_name="", ax=ax,
-                              training_stage_inlegend=False)
+    plots.summary_matrix_plot(mat_df=matrix, mat_df_metadata=info, mouse_name="", ax=ax, training_stage_inlegend=False)
     ax.legend(bbox_to_anchor=(1.01, 1), loc="upper left", fontsize=7, ncol=1)
 
 
@@ -222,10 +233,13 @@ def _performance_hue(data: FigureData) -> str:
     return hue
 
 
-@panel("performance plot", needs={"session", "trial", "correct", "subject", "current_training_stage", "stimulus_modality"})
+@panel(
+    "performance plot", needs={"session", "trial", "correct", "subject", "current_training_stage", "stimulus_modality"}
+)
 def session_performance(data: FigureData, ax) -> None:
-    plots.performance_vs_trials_plot(performance_df(data), ax, legend=True,
-                                     session_changes=session_changes(data), hue=_performance_hue(data))
+    plots.performance_vs_trials_plot(
+        performance_df(data), ax, legend=True, session_changes=session_changes(data), hue=_performance_hue(data)
+    )
     ax.set_title(f"Performance (window of {data.option('perf_window', 50)} trials)")
 
 
@@ -246,8 +260,10 @@ def repeat_or_alternate(data: FigureData, ax) -> None:
 def psychometric(modality: str):
     """Panel with the choices on the trials of one modality."""
 
-    @panel(f"{modality} psychometric plot",
-           needs={"task", "stimulus_modality", "difficulty", "correct_side", "first_choice"})
+    @panel(
+        f"{modality} psychometric plot",
+        needs={"task", "stimulus_modality", "difficulty", "correct_side", "first_choice"},
+    )
     def draw(data: FigureData, ax) -> None:
         trials = data.df[data.df["task"] != "Habituation"]
         if len(trials) == 0:

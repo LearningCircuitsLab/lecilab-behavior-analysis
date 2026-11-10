@@ -2,6 +2,7 @@
 Old imports keep working after the reorganisation of the package
 (the notebooks, the daily report and the visualizer use them).
 """
+
 import importlib
 
 import pytest
@@ -63,7 +64,7 @@ OLD_NAMES = {
         "get_session_box_usage",
         "add_time_from_session_start",
         "get_previous_row_index",
-        "transform_side_choice_to_numeric"
+        "transform_side_choice_to_numeric",
     ],
     "df_transforms": [
         "fill_missing_data",
@@ -113,7 +114,7 @@ OLD_NAMES = {
         "adjust_trials_and_time_of_start_to_first_session",
         "add_engagement_column",
         "get_box_usage_df",
-        "add_early_pokeouts"
+        "add_early_pokeouts",
     ],
     "plots": [
         "training_calendar_plot",
@@ -150,8 +151,8 @@ OLD_NAMES = {
         "plot_filter_model_variables",
         "plot_trial_time_of_start",
         "plot_box_usage_by_date",
-        "pointplot_stimulus_dual_dependence"
-    ]
+        "pointplot_stimulus_dual_dependence",
+    ],
 }
 
 

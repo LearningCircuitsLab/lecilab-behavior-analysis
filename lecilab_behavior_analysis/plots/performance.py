@@ -1,17 +1,16 @@
 """Plots of performance: through trials, by side, repeat or alternate, by decision."""
+
+import pandas as pd
+import seaborn as sns
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
-import pandas as pd
-import seaborn as sns
 
 import lecilab_behavior_analysis.data_format_changes as dfc
 from lecilab_behavior_analysis.common import column_checker
 
 
-def performance_vs_trials_plot(
-    df: pd.DataFrame, ax: plt.Axes = None, **kwargs
-) -> plt.Axes:
+def performance_vs_trials_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
     """
     Plot the performance vs the number of trials
     """
@@ -20,7 +19,7 @@ def performance_vs_trials_plot(
 
     if ax is None:
         ax = plt.gca()
-    
+
     # if there is no "current_training_stage" column, generate a fake one
     if "current_training_stage" not in df.columns:
         df["current_training_stage"] = "All"
@@ -31,49 +30,45 @@ def performance_vs_trials_plot(
         hue = "current_training_stage"
     if "palette" in kwargs:
         palette = kwargs["palette"]
-    else:    
+    else:
         # standard palette
         palette = sns.color_palette("tab10", n_colors=df[hue].nunique())
-    
+
     # Sort data by trial number to ensure proper line plotting
     df_sorted = df.sort_values("total_trial").reset_index(drop=True)
-    
+
     # Find break points where hue column changes
     hue_changes = df_sorted[hue] != df_sorted[hue].shift(1)
     break_indices = df_sorted[hue_changes].index.tolist()
-    
+
     # Add start and end indices for completeness
     if 0 not in break_indices:
         break_indices.insert(0, 0)
     break_indices.append(len(df_sorted))
-    
+
     # Keep track of which hue values have been labeled
     labeled_hues = set()
-    
+
     # Plot segments between hue changes
     for i in range(len(break_indices) - 1):
         start_idx = break_indices[i]
         end_idx = break_indices[i + 1]
         segment = df_sorted.iloc[start_idx:end_idx]
-        
+
         if len(segment) > 0:
             hue_value = segment[hue].iloc[0]
             color_idx = list(df_sorted[hue].unique()).index(hue_value)
-            
+
             # Only label the first occurrence of each hue value
             label = hue_value if hue_value not in labeled_hues else ""
             if hue_value not in labeled_hues:
                 labeled_hues.add(hue_value)
-            
+
             if len(segment) > 1:
-                ax.plot(segment["total_trial"], segment["performance_w"], 
-                       color=palette[color_idx], 
-                       label=label)
+                ax.plot(segment["total_trial"], segment["performance_w"], color=palette[color_idx], label=label)
             else:
                 # Single point - plot as scatter
-                ax.scatter(segment["total_trial"], segment["performance_w"], 
-                          color=palette[color_idx], 
-                          label=label)
+                ax.scatter(segment["total_trial"], segment["performance_w"], color=palette[color_idx], label=label)
     if "session_changes" in kwargs and len(kwargs["session_changes"]) > 1:
         for sc in kwargs["session_changes"][1:]:
             tt = df.loc[sc]["total_trial"]
@@ -88,14 +83,14 @@ def performance_vs_trials_plot(
     # remove box
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    
+
     # Add legend for the different hue values
     handles, labels = ax.get_legend_handles_labels()
     if handles:  # Only create legend if there are handles
         ax.legend()
-    
+
     if "legend" in kwargs:
-        if kwargs["legend"] == False:
+        if kwargs["legend"] is False:
             legend = ax.get_legend()
             if legend:
                 legend.remove()
@@ -118,7 +113,7 @@ def number_of_correct_responses_plot(df_in: pd.DataFrame, ax: plt.Axes = None) -
         ax = plt.gca()
     column_checker(df_in, required_columns={"correct_side", "correct"})
     df_in = _correct_as_bool(df_in)
-    if "stimulus_modality" not in df_in.columns or df_in['stimulus_modality'].nunique() == 1:
+    if "stimulus_modality" not in df_in.columns or df_in["stimulus_modality"].nunique() == 1:
         # create a copy of the df
         df = df_in.copy()
     else:
@@ -148,14 +143,11 @@ def correct_left_and_right_plot(df: pd.DataFrame, ax: plt.Axes = None) -> plt.Ax
     column_checker(df, required_columns={"correct_side", "correct"})
     df = _correct_as_bool(df)
     # Define colors
-    colors = {
-        True: "forestgreen",
-        False: "firebrick"
-    }
+    colors = {True: "forestgreen", False: "firebrick"}
     sns.countplot(data=df, x="correct_side", hue="correct", ax=ax, hue_order=[False, True], palette=colors)
     ax.set_xlabel("Correct side")
     ax.set_ylabel("Number of trials")
-    ax.set_ylim(top=ax.get_ylim()[1]*1.1)
+    ax.set_ylim(top=ax.get_ylim()[1] * 1.1)
     ax.legend(["Error", "Correct"], bbox_to_anchor=(0.5, 1), loc="upper center", ncol=2, borderaxespad=0.0)
     ax.get_legend().get_frame().set_linewidth(0.0)
     ax.get_legend().set_frame_on(False)
@@ -169,10 +161,7 @@ def partially_stacked_barplot(grouped: pd.DataFrame, ax: plt.Axes = None) -> plt
         ax = plt.gca()
 
     # Define colors
-    colors = {
-        True: "forestgreen",
-        False: "firebrick"
-    }
+    colors = {True: "forestgreen", False: "firebrick"}
 
     # Plot bars (a side with no correct, or no incorrect, trials gets an empty bar)
     sides = grouped.index.get_level_values("correct_side").unique()
@@ -191,7 +180,7 @@ def partially_stacked_barplot(grouped: pd.DataFrame, ax: plt.Axes = None) -> plt
             ax=ax,
             position=i,
             width=0.4,
-            legend=False
+            legend=False,
         )
 
     # Customize plot
@@ -209,22 +198,14 @@ def partially_stacked_barplot(grouped: pd.DataFrame, ax: plt.Axes = None) -> plt
     legend_elements = [
         Line2D([0], [0], marker="o", color="forestgreen", markersize=10, label="Correct"),
         Line2D([0], [0], marker="o", color="firebrick", markersize=10, label="Incorrect"),
-        Patch(facecolor="gray", edgecolor="gray", label="Successful center hold")
+        Patch(facecolor="gray", edgecolor="gray", label="Successful center hold"),
     ]
-    ax.legend(
-        handles=legend_elements, 
-        bbox_to_anchor=(0.5, 1), 
-        loc="lower center", 
-        ncol=2, 
-        frameon=False
-    )
+    ax.legend(handles=legend_elements, bbox_to_anchor=(0.5, 1), loc="lower center", ncol=2, frameon=False)
 
     return ax
 
 
-def repeat_or_alternate_performance_plot(
-    df: pd.DataFrame, ax: plt.Axes = None, **kwargs
-) -> plt.Axes:
+def repeat_or_alternate_performance_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs) -> plt.Axes:
     if ax is None:
         ax = plt.gca()
     column_checker(
@@ -287,30 +268,16 @@ def performance_by_decision_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs
     if ax is None:
         ax = plt.gca()
     column_checker(df, required_columns={"correct", "correct_side_repeat_or_alternate", "trial_group"})
-    # if kwargs has a color_dict, use it to set the colors
-    if "color_dict" in kwargs:
-        color_dict = kwargs["color_dict"]
-    else:
-        color_dict = {
-            "left_repeat": (0.121, 0.466, 0.705, 1),  # tab:blue with alpha=0.8
-            "left_alternate": (0.121, 0.466, 0.705, 0.4),  # tab:orange with alpha=0.8
-            "right_repeat": (1.0, 0.498, 0.054, 1),  # tab:purple with alpha=0.8
-            "right_alternate": (1.0, 0.498, 0.054, 0.4),  # tab:red with alpha=0.8
-        }
-
-    # Create a custom palette using the color_dict
-    palette = {key: color for key, color in color_dict.items()}
-
-    sns.lineplot(data=df, x='trial_group', y='correct', hue='correct_side',
-                 style="repeat_or_alternate",
-                 errorbar=None, ax=ax)#, palette=palette)
+    sns.lineplot(
+        data=df, x="trial_group", y="correct", hue="correct_side", style="repeat_or_alternate", errorbar=None, ax=ax
+    )
     # rotate the x-axis labels and align them to the end
     # for label in ax.get_xticklabels():
     #     label.set_rotation(45)
     #     label.set_horizontalalignment('right')
     # ax.set_title('Performance by "decision"', pad=20)
-    ax.set_xlabel('Trials')
-    ax.set_ylabel('Performance')
+    ax.set_xlabel("Trials")
+    ax.set_ylabel("Performance")
     # Filter legend to only include entries with handles (skip titles like "correct_side")
     handles, labels = ax.get_legend_handles_labels()
     # clean handles and labels to only include the ones that are not titles
@@ -319,7 +286,7 @@ def performance_by_decision_plot(df: pd.DataFrame, ax: plt.Axes = None, **kwargs
             handles.remove(handle)
             labels.remove(label)
     # Recreate legend with only handle-associated labels
-    ax.legend(handles=handles, labels=labels, frameon=False, title='')
+    ax.legend(handles=handles, labels=labels, frameon=False, title="")
 
     # remove the top and right spines
     ax.spines["top"].set_visible(False)

@@ -1,10 +1,10 @@
 """Small helpers shared by every module: column checks, colors, the modality of a dataframe."""
-from matplotlib import pyplot as plt
-from typing import Dict
-from typing import List
-from typing import Tuple
+
+from typing import Dict, List, Tuple
+
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 
 import lecilab_behavior_analysis.data_format_changes as dfc
 
@@ -19,10 +19,7 @@ def column_checker(df: pd.DataFrame, required_columns: set):
     """
     if not required_columns.issubset(df.columns):
         missing_columns = required_columns - set(df.columns)
-        raise ValueError(
-            "The dataframe must have the following columns: "
-            + ", ".join(missing_columns)
-        )
+        raise ValueError("The dataframe must have the following columns: " + ", ".join(missing_columns))
 
 
 def list_to_colors(ids: np.array, cmap: str) -> Tuple[List[tuple], Dict]:
@@ -43,7 +40,5 @@ def _get_single_modality(df: pd.DataFrame) -> str:
     """
     modalities = df["stimulus_modality"].apply(dfc.normalize_modality).unique()
     if len(modalities) != 1:
-        raise ValueError(
-            f"The dataframe must contain one stimulus modality, got {list(modalities)}"
-        )
+        raise ValueError(f"The dataframe must contain one stimulus modality, got {list(modalities)}")
     return modalities[0]

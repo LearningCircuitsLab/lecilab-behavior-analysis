@@ -10,6 +10,7 @@ that one broken cell does not stop the report.
 Performance counts timeouts (correct = None) as errors, as in the figures
 (see data_format_changes.py).
 """
+
 import functools
 import logging
 from typing import Callable, Dict, List
@@ -56,8 +57,9 @@ def reset_failed_cells() -> None:
 # ---------------------------------------------------------------------------
 def _plotly_message(title: str, text: str) -> go.Figure:
     fig = go.Figure()
-    fig.add_annotation(text=text, showarrow=False, font=dict(color="firebrick"),
-                       xref="paper", yref="paper", x=0.5, y=0.5)
+    fig.add_annotation(
+        text=text, showarrow=False, font=dict(color="firebrick"), xref="paper", yref="paper", x=0.5, y=0.5
+    )
     fig.update_layout(title_text=title, xaxis_visible=False, yaxis_visible=False, height=200)
     return fig
 
@@ -128,9 +130,11 @@ def last_days(df: pd.DataFrame, n_days: int = 3) -> pd.DataFrame:
     one column per day ("trials_<day>", "performance_<day>").
     """
     df = df.assign(correct_numeric=_correct_numeric(df))
-    table = df.groupby(["subject", "year_month_day"]).agg(
-        trials=("trial", "count"), performance=("correct_numeric", "mean")
-    ).reset_index()
+    table = (
+        df.groupby(["subject", "year_month_day"])
+        .agg(trials=("trial", "count"), performance=("correct_numeric", "mean"))
+        .reset_index()
+    )
     days = sorted(table["year_month_day"].unique())[-n_days:]
     table = table[table["year_month_day"].isin(days)]
     table["performance"] = table["performance"].map(lambda x: f"{x:.3f}")
@@ -191,11 +195,15 @@ def daily_trials_and_performance(df: pd.DataFrame) -> pd.DataFrame:
     """Trials, performance and misses of each subject per day and training stage."""
     df = df.assign(correct_numeric=_correct_numeric(df))
     keys = ["subject", "year_month_day", "current_training_stage"]
-    table = df.groupby(keys).agg(
-        trials=("trial", "size"),
-        correct=("correct_numeric", "mean"),
-        miss_trial=("miss_trial", "mean"),
-    ).reset_index()
+    table = (
+        df.groupby(keys)
+        .agg(
+            trials=("trial", "size"),
+            correct=("correct_numeric", "mean"),
+            miss_trial=("miss_trial", "mean"),
+        )
+        .reset_index()
+    )
     table["current_training_stage"] = table["current_training_stage"].replace({"not saved": "Habituation"})
     table["day"] = pd.to_datetime(table["year_month_day"])
     return table.sort_values("day")

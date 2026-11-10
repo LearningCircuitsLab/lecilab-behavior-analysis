@@ -1,7 +1,6 @@
 """Helpers used by the tasks themselves (block sizes, side bias), not by the analysis."""
+
 import numpy as np
-
-
 
 
 def get_block_size_truncexp_mean30() -> int:
@@ -14,9 +13,7 @@ def get_block_size_truncexp_mean30() -> int:
     optimal_lambda = 0.0607
     u = np.random.uniform(0, 1)  # Uniform sample
     block_size = (
-        lower_bound
-        - np.log(1 - u * (1 - np.exp(-optimal_lambda * (upper_bound - lower_bound))))
-        / optimal_lambda
+        lower_bound - np.log(1 - u * (1 - np.exp(-optimal_lambda * (upper_bound - lower_bound)))) / optimal_lambda
     )
 
     return int(block_size)
@@ -44,12 +41,8 @@ def get_right_bias(side_and_correct_dict: dict) -> float:
     if len(wrong_sides) == 0 or "ignore" in first_pokes:
         return 0
     wrong_side_proportion = len(wrong_sides) / len(first_pokes)
-    wrong_right_proportion = (
-        wrong_side_proportion * np.nansum(wrong_sides == "right") / len(wrong_sides)
-    )
-    wrong_left_proportion = (
-        wrong_side_proportion * np.nansum(wrong_sides == "left") / len(wrong_sides)
-    )
+    wrong_right_proportion = wrong_side_proportion * np.nansum(wrong_sides == "right") / len(wrong_sides)
+    wrong_left_proportion = wrong_side_proportion * np.nansum(wrong_sides == "left") / len(wrong_sides)
 
     return wrong_left_proportion - wrong_right_proportion
 

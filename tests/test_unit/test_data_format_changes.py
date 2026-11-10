@@ -2,6 +2,7 @@
 Tests for the changes in the format of the saved data
 (lecilab_behavior_analysis/data_format_changes.py) and the functions that use them.
 """
+
 import matplotlib
 
 matplotlib.use("Agg")

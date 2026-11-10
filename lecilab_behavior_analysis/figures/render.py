@@ -15,12 +15,13 @@ instead (not a problem).
 Example::
 
     @panel("reaction times", needs={"reaction_time", "year_month_day"})
-    def reaction_times(data, ax):
-        ...
+    def reaction_times(data, ax): ...
+
 
     LAYOUT = Layout([Row([(summary, 1), (reaction_times, 2)])], width=15, height=4)
     fig, problems = render(LAYOUT, FigureData(prepared_df))
 """
+
 import logging
 import warnings
 from dataclasses import dataclass, field
@@ -147,14 +148,14 @@ def split_cell(ax: Axes, nrows: int = 1, ncols: int = 1, **gridspec_kw) -> List[
 def show_message(ax: Axes, text: str, color: str = MESSAGE_COLOR) -> Axes:
     """Writes a message in the middle of an empty panel."""
     ax.clear()
-    ax.text(0.5, 0.5, text, color=color, ha="center", va="center", wrap=True,
-            fontsize=8, transform=ax.transAxes)
+    ax.text(0.5, 0.5, text, color=color, ha="center", va="center", wrap=True, fontsize=8, transform=ax.transAxes)
     ax.set_axis_off()
     return ax
 
 
-def _replace_with_message(fig: Figure, spec, axes_before: set, text: str, color: str,
-                          projection: Optional[str]) -> None:
+def _replace_with_message(
+    fig: Figure, spec, axes_before: set, text: str, color: str, projection: Optional[str]
+) -> None:
     # remove whatever the panel created (twin axes, split cells...)
     for axis in list(fig.axes):
         if axis not in axes_before:
@@ -191,8 +192,13 @@ def draw_panel(fig: Figure, spec, item: Panel, data: FigureData) -> Optional[Pan
     return None
 
 
-def render(layout: Layout, data: FigureData, width: Optional[float] = None,
-           height: Optional[float] = None, title: Optional[str] = None) -> Tuple[Figure, List[PanelProblem]]:
+def render(
+    layout: Layout,
+    data: FigureData,
+    width: Optional[float] = None,
+    height: Optional[float] = None,
+    title: Optional[str] = None,
+) -> Tuple[Figure, List[PanelProblem]]:
     """
     Draws every panel of the layout. Returns the figure and the panels that
     failed (empty list if all worked). Does not raise because of the data.

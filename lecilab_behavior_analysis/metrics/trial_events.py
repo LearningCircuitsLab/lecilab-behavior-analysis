@@ -2,6 +2,7 @@
 center port holds, misses. Event columns (Port1In, STATE_*_START...) can be
 lists or text such as "[1.2, 3.4]".
 """
+
 import re
 from typing import Any, Dict, List, Optional, Union
 
@@ -9,22 +10,20 @@ import numpy as np
 import pandas as pd
 
 
-
-
 def get_start_and_end_times(df):
     """
     Get the start and end times of the session.
     """
     # ensure that there is only one session in the dataframe
-    if df['session'].nunique() != 1:
+    if df["session"].nunique() != 1:
         raise ValueError("The dataframe contains more than one session.")
     # get the start time of the session as the start of the first trial
-    start_time = df.loc[df['trial'] == np.min(df.trial), 'TRIAL_START'].values[0]
+    start_time = df.loc[df["trial"] == np.min(df.trial), "TRIAL_START"].values[0]
     # get the end time of the session as the end of the last trial
-    end_time = df.loc[df['trial'] == np.max(df.trial), 'TRIAL_END'].values[0]
+    end_time = df.loc[df["trial"] == np.max(df.trial), "TRIAL_END"].values[0]
     # convert the start and end times to datetime
-    start_time = pd.to_datetime(start_time, unit='s')
-    end_time = pd.to_datetime(end_time, unit='s')
+    start_time = pd.to_datetime(start_time, unit="s")
+    end_time = pd.to_datetime(end_time, unit="s")
     return start_time, end_time
 
 
@@ -107,7 +106,9 @@ def first_choice_from_events(stimulus_start: List[float], port1: List[float], po
     return _side_of_first_poke(port1, port3, min(stimulus_start))
 
 
-def last_choice_before_stimulus_from_events(stimulus_start: List[float], port1: List[float], port3: List[float]) -> Optional[str]:
+def last_choice_before_stimulus_from_events(
+    stimulus_start: List[float], port1: List[float], port3: List[float]
+) -> Optional[str]:
     """Side of the last side poke before the stimulus started (None if no poke)."""
     if not stimulus_start:
         return None
@@ -122,7 +123,9 @@ def miss_from_events(stimulus_end: List[float], trial_end: float) -> bool:
     return bool(np.round(max(stimulus_end), 6) == np.round(trial_end, 6))
 
 
-def early_pokeout_from_events(ready_start: List[float], port2_in: List[float], port2_out: List[float], holding_time: float) -> Optional[bool]:
+def early_pokeout_from_events(
+    ready_start: List[float], port2_in: List[float], port2_out: List[float], holding_time: float
+) -> Optional[bool]:
     """True if the first center poke was shorter than holding_time (None if unknown)."""
     if not ready_start or not port2_in or not port2_out:
         return None
@@ -241,13 +244,14 @@ def get_dictionary_event_as_list(ser_dict: Dict, event: str) -> List:
 
 
 def get_repeat_or_alternate_to_numeric(row: pd.Series) -> float:
-    if row['roa_choice'] == 'alternate':
+    if row["roa_choice"] == "alternate":
         return 0
-    elif row['roa_choice'] == 'repeat':
-        if row['first_choice'] == 'left':
+    elif row["roa_choice"] == "repeat":
+        if row["first_choice"] == "left":
             return -1
-        elif row['first_choice'] == 'right':
+        elif row["first_choice"] == "right":
             return 1
+        return np.nan
     else:
         return np.nan
 
@@ -256,7 +260,7 @@ def get_trial_port_hold(row, port_number):
     """
     This calculates everything, including those occurring in the ITIs for example.
     """
-    if not type(row) == pd.Series:
+    if not isinstance(row, pd.Series):
         raise ValueError("row must be a pandas Series")
     return port_holds_from_events(
         parse_events(row["Port" + str(port_number) + "In"]),
@@ -281,13 +285,13 @@ def side_and_difficulty_to_numeric(row: pd.Series) -> float:
             numval *= -1
         case _:
             numval = 0
-    
+
     return round(numval / 3, 3)
 
 
 def add_time_from_session_start(df_in: pd.DataFrame) -> pd.DataFrame:
     # Group by both 'subject' and 'session' to calculate time from session start
-    df_in['time_from_start'] = df_in.groupby(['subject', 'session'])['TRIAL_START'].transform(lambda x: x - x.iloc[0])
+    df_in["time_from_start"] = df_in.groupby(["subject", "session"])["TRIAL_START"].transform(lambda x: x - x.iloc[0])
     return df_in
 
 

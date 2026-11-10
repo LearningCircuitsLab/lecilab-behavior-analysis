@@ -4,6 +4,7 @@ tests/data (real data of one mouse), so that they always show what the
 current code draws. Run by conf.py at the start of every build; the images
 go to source/_static/examples/ (not tracked by git).
 """
+
 import logging
 import sys
 from pathlib import Path
@@ -20,9 +21,17 @@ sys.path.insert(0, str(REPO))
 
 
 def main() -> None:
-    from lecilab_behavior_analysis.figures import FigureData, Layout, NotApplicable, Row, panel, render
+    from lecilab_behavior_analysis.figures import (
+        FigureData,
+        Layout,
+        NotApplicable,
+        Row,
+        panel,
+        render,
+        session_summary,
+        subject_progress,
+    )
     from lecilab_behavior_analysis.figures import panels as p
-    from lecilab_behavior_analysis.figures import session_summary, subject_progress
     from lecilab_behavior_analysis.metrics.performance import get_performance_through_trials
     from lecilab_behavior_analysis.preprocessing import prepare
     from lecilab_behavior_analysis.reports import overview
@@ -60,9 +69,14 @@ def main() -> None:
         if "opto" not in data.df.columns:
             raise NotApplicable("No optogenetics in these sessions")
 
-    layout = Layout([Row([(p.subject_summary, 1), (trials_per_day, 2)]),
-                     Row([(broken, 1), (optogenetics, 1), (p.subject_performance, 1)])],
-                    width=12, height=6)
+    layout = Layout(
+        [
+            Row([(p.subject_summary, 1), (trials_per_day, 2)]),
+            Row([(broken, 1), (optogenetics, 1), (p.subject_performance, 1)]),
+        ],
+        width=12,
+        height=6,
+    )
     fig, problems = render(layout, FigureData(df, perf_window=100))
     save(fig, "custom_layout")
 

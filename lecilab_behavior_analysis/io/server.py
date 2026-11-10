@@ -1,13 +1,11 @@
 """Paths of the data on each computer and on the cluster, and copying it with ssh / rsync."""
-from typing import List
+
 import os
 import socket
 import subprocess
+from typing import List, Optional
 
-
-
-
-#IDIBAPS_TV_PROJECTS = "/archive/training_village/"
+# IDIBAPS_TV_PROJECTS = "/archive/training_village/"
 IDIBAPS_TV_PROJECTS = "/storage/training_village/"
 
 
@@ -59,19 +57,14 @@ def get_idibaps_cluster_credentials():
 
 
 def get_server_projects() -> List[str]:
-    credentials = get_idibaps_cluster_credentials()    
+    credentials = get_idibaps_cluster_credentials()
     return get_folders_from_server(credentials, IDIBAPS_TV_PROJECTS)
 
 
 def get_folders_from_server(credentials: dict, path: str) -> List[str]:
     # Create a single SSH connection to the remote server
-    ssh_command = (
-        f"ssh {credentials['username']}@{credentials['host']} "
-        f"'ls {path}'"
-    )
-    result = subprocess.run(
-        ssh_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    ssh_command = f"ssh {credentials['username']}@{credentials['host']} " f"'ls {path}'"
+    result = subprocess.run(ssh_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # Decode the output and split it into a list of folder names
     if result.returncode == 0:
         folders = result.stdout.decode("utf-8").strip().split("\n")
@@ -112,7 +105,7 @@ def rsync_cluster_data(
     file_path: str,
     credentials: dict,
     local_path: str,
-    exclude: List[str] = None,
+    exclude: Optional[List[str]] = None,
 ) -> bool:
     """
     This method syncs the session data from the server to the local machine.

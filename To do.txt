@@ -1,6 +1,6 @@
 Action points (TODOs) from meeting 2025/07/01
 
-- Mirrors: print the mirror triangular base once the filament arrives and test orientation. 
+- Mirrors: print the mirror triangular base once the filament arrives and test orientation.
 Reiterate print design. Goal: having two printed pieces to hold the mirrors
 
 - Psychometric curves: focus on the visual stimulus ratio for now, and look not only
@@ -32,10 +32,10 @@ Something else you can try here: to explore the differential effects of each tim
 e.g. does the first timebin matter more than the last? You can fit temporal kernels
 (also GLMs) to the animals choices. Your timebins will be your regressors (0 or 1 if they
 contain evidence; or you can make it continuous using the % or number of tones that
-appear in that timebin;√(I don't know if I understand time kernel correctly) 
+appear in that timebin;√(I don't know if I understand time kernel correctly)
 or calculate the evidence strength in each timebin by comparing the two sides). (I think this is what Alexis did)
-Then you can compare the coefficients. Another thing to  test here is the effects of the loudness, 
-which you could also incorporate in your model. This will help us understand how mice are using 
+Then you can compare the coefficients. Another thing to  test here is the effects of the loudness,
+which you could also incorporate in your model. This will help us understand how mice are using
 the stimulus. We can discuss this if this is confusing as there is a lot in here :)
 
 - Psychometric plots in session_summary_figure. Make them work for the different possibilities.

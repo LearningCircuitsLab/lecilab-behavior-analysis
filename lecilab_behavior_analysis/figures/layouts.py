@@ -5,7 +5,8 @@ subject_progress(df) and session_summary(df) prepare the data, draw every
 panel, and return (figure, problems): problems lists the panels that could
 not be drawn, so that a report can show them instead of failing.
 """
-from typing import List, Tuple
+
+from typing import List, Optional, Tuple
 
 import pandas as pd
 from matplotlib.figure import Figure
@@ -30,13 +31,15 @@ SUMMARY_MATRIX_ROW = Row([(p.summary_matrix, 1)])
 SESSION_SUMMARY = Layout(
     rows=[
         Row([(p.session_summary_text, 2), (p.session_performance, 2), (p.correct_responses, 1)]),
-        Row([
-            (p.repeat_or_alternate, 1),
-            (p.psychometric("visual"), 1),
-            (p.psychometric("auditory-cot"), 1),
-            (p.center_pokes_histogram, 1),
-            (p.center_hold_histogram, 1),
-        ]),
+        Row(
+            [
+                (p.repeat_or_alternate, 1),
+                (p.psychometric("visual"), 1),
+                (p.psychometric("auditory-cot"), 1),
+                (p.center_pokes_histogram, 1),
+                (p.center_hold_histogram, 1),
+            ]
+        ),
         Row([(p.trial_start_times, 1), (p.reaction_times_in_session, 1)]),
     ],
     width=15,
@@ -44,9 +47,14 @@ SESSION_SUMMARY = Layout(
 )
 
 
-def subject_progress(df: pd.DataFrame, perf_window: int = 50, events_df: pd.DataFrame = None,
-                     summary_matrix_plot: bool = False, width: float = None,
-                     height: float = None) -> Tuple[Figure, List[PanelProblem]]:
+def subject_progress(
+    df: pd.DataFrame,
+    perf_window: int = 50,
+    events_df: Optional[pd.DataFrame] = None,
+    summary_matrix_plot: bool = False,
+    width: Optional[float] = None,
+    height: Optional[float] = None,
+) -> Tuple[Figure, List[PanelProblem]]:
     """
     Training history of one subject. Returns (figure, panels that failed).
 
@@ -60,14 +68,20 @@ def subject_progress(df: pd.DataFrame, perf_window: int = 50, events_df: pd.Data
         raise ValueError(f"The dataframe contains more than one subject: {df.subject.unique()}.")
     layout = SUBJECT_PROGRESS
     if summary_matrix_plot:
-        layout = Layout(rows=SUBJECT_PROGRESS.rows + [SUMMARY_MATRIX_ROW], width=layout.width,
-                        height=layout.height * 1.25)
+        layout = Layout(
+            rows=SUBJECT_PROGRESS.rows + [SUMMARY_MATRIX_ROW], width=layout.width, height=layout.height * 1.25
+        )
     data = FigureData(prepare(df), perf_window=perf_window, events_df=events_df)
     return render(layout, data, width=width, height=height)
 
 
-def session_summary(df: pd.DataFrame, perf_window: int = 50, perf_hue: str = None,
-                    width: float = None, height: float = None) -> Tuple[Figure, List[PanelProblem]]:
+def session_summary(
+    df: pd.DataFrame,
+    perf_window: int = 50,
+    perf_hue: Optional[str] = None,
+    width: Optional[float] = None,
+    height: Optional[float] = None,
+) -> Tuple[Figure, List[PanelProblem]]:
     """
     Summary of some trials of one subject, usually one day. Returns
     (figure, panels that failed).

@@ -1,8 +1,10 @@
 """Loading csv files: example data, events (with their old_events), trials of a subject or a project."""
+
 import logging
 import os
 from pathlib import Path
 from typing import Any, List, Optional, Union
+
 import pandas as pd
 
 from lecilab_behavior_analysis.io.server import get_outpath
@@ -25,7 +27,7 @@ def load_all_events(events_subfolder_location: str) -> pd.DataFrame:
     events_path = f"{outpath}/{events_subfolder_location}/events.csv"
     if not os.path.exists(events_path):
         raise FileNotFoundError(f"Events file for project {outpath}/{events_subfolder_location} does not exist.")
-    
+
     events_df = read_csv_with_specific_number_of_columns(events_path, expected_columns=4, sep=";")
 
     # read events in old_events if they exist
@@ -33,7 +35,7 @@ def load_all_events(events_subfolder_location: str) -> pd.DataFrame:
     old_events_path = f"{outpath}/{events_subfolder_location}/old_events"
     # list files in the old_events folder
     if os.path.exists(old_events_path):
-        old_events_files = [f for f in os.listdir(old_events_path) if f.endswith('.csv')]
+        old_events_files = [f for f in os.listdir(old_events_path) if f.endswith(".csv")]
         # sort files by name to ensure they are in the correct order
         old_events_files.sort()
         # read each file and concatenate to events_df
@@ -48,7 +50,7 @@ def load_all_events(events_subfolder_location: str) -> pd.DataFrame:
 def read_csv_with_specific_number_of_columns(file_path: str, expected_columns: int, sep: str = ";") -> pd.DataFrame:
     with open(file_path, encoding="utf-8") as f:
         header = f.readline().rstrip("\n").split(sep)
-        rows = [line.rstrip("\n").split(sep, expected_columns-1) for line in f]
+        rows = [line.rstrip("\n").split(sep, expected_columns - 1) for line in f]
 
     return pd.DataFrame(rows, columns=header)
 
@@ -65,15 +67,21 @@ def load_subject_trials(csv_path: Union[str, Path], max_date: Optional[Any] = No
     return df
 
 
-def load_project_trials(project: str, subjects: List[str], max_date: Optional[Any] = None,
-                        root: Optional[Union[str, Path]] = None, window: int = 50) -> pd.DataFrame:
+def load_project_trials(
+    project: str,
+    subjects: List[str],
+    max_date: Optional[Any] = None,
+    root: Optional[Union[str, Path]] = None,
+    window: int = 50,
+) -> pd.DataFrame:
     """
     Trials of several subjects of a project, prepared for analysis
     (preprocessing.prepare), with the performance through trials
     (performance_w, rolling window of `window` trials) of each subject.
 
     Reads <root>/<project>/sessions/<subject>/<subject>.csv, or
-    <subject>.csv.gz if there is no .csv (root defaults to get_outpath()). A subject whose file is missing or unreadable is skipped
+    <subject>.csv.gz if there is no .csv (root defaults to get_outpath()).
+    A subject whose file is missing or unreadable is skipped
     with a warning, so that the other subjects can still be analyzed.
     """
     from lecilab_behavior_analysis.metrics.performance import get_performance_through_trials
@@ -99,8 +107,9 @@ def load_project_trials(project: str, subjects: List[str], max_date: Optional[An
     return prepare(pd.concat(frames, ignore_index=True))
 
 
-def load_setup_logs(project: str, setup_name: str, max_date: Optional[Any] = None,
-                    root: Optional[Union[str, Path]] = None) -> tuple:
+def load_setup_logs(
+    project: str, setup_name: str, max_date: Optional[Any] = None, root: Optional[Union[str, Path]] = None
+) -> tuple:
     """
     Events (events.csv and old_events) and sessions summary
     (sessions_summary.csv) of one setup of a project, with date as datetime
@@ -159,7 +168,8 @@ def find_setups(project: str, root: Optional[Union[str, Path]] = None) -> List[s
     if not folder.is_dir():
         return []
     setups = sorted(
-        child.name for child in folder.iterdir()
+        child.name
+        for child in folder.iterdir()
         if child.is_dir() and child.name != "sessions" and any((child / f).exists() for f in LOG_FILES)
     )
     if any((folder / f).exists() for f in LOG_FILES):
@@ -167,8 +177,12 @@ def find_setups(project: str, root: Optional[Union[str, Path]] = None) -> List[s
     return setups
 
 
-def load_project_logs(project: str, max_date: Optional[Any] = None, root: Optional[Union[str, Path]] = None,
-                      setups: Optional[List[str]] = None) -> tuple:
+def load_project_logs(
+    project: str,
+    max_date: Optional[Any] = None,
+    root: Optional[Union[str, Path]] = None,
+    setups: Optional[List[str]] = None,
+) -> tuple:
     """
     Events and sessions summary of every setup of a project (see find_setups
     and load_setup_logs), together, sorted by date and without repeated rows.
@@ -182,7 +196,11 @@ def load_project_logs(project: str, max_date: Optional[Any] = None, root: Option
         frames = [f for f in frames if f is not None]
         if not frames:
             return None
-        return (pd.concat(frames, ignore_index=True).drop_duplicates()
-                .sort_values("date", kind="stable").reset_index(drop=True))
+        return (
+            pd.concat(frames, ignore_index=True)
+            .drop_duplicates()
+            .sort_values("date", kind="stable")
+            .reset_index(drop=True)
+        )
 
     return combine([e for e, _ in logs]), combine([s for _, s in logs]), setups
