@@ -1,0 +1,6 @@
+reformat\_df\_columns
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.preprocessing
+
+.. autofunction:: reformat_df_columns

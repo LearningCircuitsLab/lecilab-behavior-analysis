@@ -1,0 +1,6 @@
+hierarchical\_partitioning
+==========================
+
+.. currentmodule:: lecilab_behavior_analysis.models.regression
+
+.. autofunction:: hierarchical_partitioning

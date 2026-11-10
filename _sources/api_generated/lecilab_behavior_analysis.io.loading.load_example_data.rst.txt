@@ -1,0 +1,6 @@
+load\_example\_data
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.io.loading
+
+.. autofunction:: load_example_data

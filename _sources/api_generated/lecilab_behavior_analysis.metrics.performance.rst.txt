@@ -1,0 +1,44 @@
+performance
+===========
+
+.. automodule:: lecilab_behavior_analysis.metrics.performance
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      get_day_number_of_trials
+      get_day_performance
+      get_evidence_ratio
+      get_performance_by_decision_df
+      get_performance_by_difficulty
+      get_performance_through_trials
+      get_repeat_or_alternate_performance
+      get_repeat_or_alternate_series
+      get_session_number_of_trials
+      get_session_performance
+      get_text_from_subject_df
+      get_text_from_subset_df
+      get_training_summary_matrix
+      repeat_or_alternate_series_comparison
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

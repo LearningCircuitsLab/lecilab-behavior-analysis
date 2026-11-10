@@ -1,0 +1,6 @@
+add\_engagement\_column
+=======================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.engagement
+
+.. autofunction:: add_engagement_column

@@ -1,0 +1,6 @@
+load\_all\_events
+=================
+
+.. currentmodule:: lecilab_behavior_analysis.io.loading
+
+.. autofunction:: load_all_events

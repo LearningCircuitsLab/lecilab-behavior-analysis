@@ -1,0 +1,38 @@
+timing
+======
+
+.. automodule:: lecilab_behavior_analysis.plots.timing
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      mean_and_ci_by_day_plot
+      plot_box_usage_by_date
+      plot_mean_and_cis_by_date
+      plot_number_of_pokes_histogram
+      plot_port_holding_time_histogram
+      plot_time_between_trials_and_reaction_time
+      plot_trial_time_of_start
+      time_between_trials_and_reaction_time_plot
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

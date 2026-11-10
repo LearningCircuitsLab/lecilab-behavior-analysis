@@ -1,0 +1,6 @@
+reaction\_time\_from\_events
+============================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: reaction_time_from_events

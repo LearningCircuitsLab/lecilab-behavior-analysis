@@ -1,0 +1,42 @@
+timing
+======
+
+.. automodule:: lecilab_behavior_analysis.metrics.timing
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      add_early_pokeouts
+      add_inter_trial_interval_column_to_df
+      add_port_holds
+      add_reaction_time
+      add_time_between_trials
+      add_trial_duration_column_to_df
+      add_trial_initiation_time_to_df
+      add_trial_misses
+      adjust_trials_and_time_of_start_to_first_session
+      calculate_time_between_trials_and_reaction_time
+      get_center_hold_df
+      get_reaction_times_by_date_df
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

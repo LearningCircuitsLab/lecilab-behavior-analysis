@@ -1,0 +1,6 @@
+add\_day\_column\_to\_df
+========================
+
+.. currentmodule:: lecilab_behavior_analysis.preprocessing
+
+.. autofunction:: add_day_column_to_df

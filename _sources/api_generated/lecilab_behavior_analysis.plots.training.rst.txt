@@ -1,0 +1,43 @@
+training
+========
+
+.. automodule:: lecilab_behavior_analysis.plots.training
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      calendar_plot
+      format_date_axis
+      plot_table_from_df
+      rasterize_plot
+      summary_matrix_plot
+      summary_text_plot
+      training_calendar_plot
+      trials_by_day_plot
+      trials_by_day_stacked_plot
+      trials_by_session_hist
+      trials_by_session_plot
+      water_by_date_plot
+      water_by_day_plot
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+is\_this\_a\_miss\_trial
+========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: is_this_a_miss_trial

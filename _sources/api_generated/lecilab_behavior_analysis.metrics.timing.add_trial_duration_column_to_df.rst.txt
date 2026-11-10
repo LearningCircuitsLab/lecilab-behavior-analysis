@@ -1,0 +1,6 @@
+add\_trial\_duration\_column\_to\_df
+====================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: add_trial_duration_column_to_df

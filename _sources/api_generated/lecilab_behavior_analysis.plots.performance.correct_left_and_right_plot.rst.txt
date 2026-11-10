@@ -1,0 +1,6 @@
+correct\_left\_and\_right\_plot
+===============================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.performance
+
+.. autofunction:: correct_left_and_right_plot

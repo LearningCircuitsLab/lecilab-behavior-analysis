@@ -1,0 +1,6 @@
+get\_training\_summary\_matrix
+==============================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.performance
+
+.. autofunction:: get_training_summary_matrix

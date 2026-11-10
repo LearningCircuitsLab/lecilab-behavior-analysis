@@ -1,0 +1,6 @@
+format\_date\_axis
+==================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: format_date_axis

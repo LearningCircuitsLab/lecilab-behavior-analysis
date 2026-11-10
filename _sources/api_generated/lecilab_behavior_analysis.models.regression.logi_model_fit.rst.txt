@@ -1,0 +1,6 @@
+logi\_model\_fit
+================
+
+.. currentmodule:: lecilab_behavior_analysis.models.regression
+
+.. autofunction:: logi_model_fit

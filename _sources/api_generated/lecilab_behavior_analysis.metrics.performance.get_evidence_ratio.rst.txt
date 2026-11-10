@@ -1,0 +1,6 @@
+get\_evidence\_ratio
+====================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.performance
+
+.. autofunction:: get_evidence_ratio

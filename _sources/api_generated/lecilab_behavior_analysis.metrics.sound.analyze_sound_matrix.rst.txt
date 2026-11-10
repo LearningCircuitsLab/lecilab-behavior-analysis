@@ -1,0 +1,6 @@
+analyze\_sound\_matrix
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.sound
+
+.. autofunction:: analyze_sound_matrix

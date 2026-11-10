@@ -1,0 +1,6 @@
+session\_summary
+================
+
+.. currentmodule:: lecilab_behavior_analysis.figures.layouts
+
+.. autofunction:: session_summary

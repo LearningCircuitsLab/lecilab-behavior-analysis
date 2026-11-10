@@ -1,0 +1,6 @@
+trials\_by\_day\_plot
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: trials_by_day_plot

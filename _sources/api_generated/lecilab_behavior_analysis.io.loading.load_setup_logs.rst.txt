@@ -1,0 +1,6 @@
+load\_setup\_logs
+=================
+
+.. currentmodule:: lecilab_behavior_analysis.io.loading
+
+.. autofunction:: load_setup_logs

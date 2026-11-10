@@ -1,0 +1,30 @@
+render
+======
+
+.. automodule:: lecilab_behavior_analysis.figures.render
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

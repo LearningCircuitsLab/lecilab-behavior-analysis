@@ -1,0 +1,6 @@
+number\_of\_correct\_responses\_plot
+====================================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.performance
+
+.. autofunction:: number_of_correct_responses_plot

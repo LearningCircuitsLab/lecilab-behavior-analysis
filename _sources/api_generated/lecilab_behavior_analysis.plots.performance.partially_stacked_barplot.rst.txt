@@ -1,0 +1,6 @@
+partially\_stacked\_barplot
+===========================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.performance
+
+.. autofunction:: partially_stacked_barplot

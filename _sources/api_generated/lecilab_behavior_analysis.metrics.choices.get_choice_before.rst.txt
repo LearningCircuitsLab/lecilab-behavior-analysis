@@ -1,0 +1,6 @@
+get\_choice\_before
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: get_choice_before

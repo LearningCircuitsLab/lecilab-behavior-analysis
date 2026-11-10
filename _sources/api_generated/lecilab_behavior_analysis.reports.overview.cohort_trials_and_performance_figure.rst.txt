@@ -1,0 +1,6 @@
+cohort\_trials\_and\_performance\_figure
+========================================
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: cohort_trials_and_performance_figure

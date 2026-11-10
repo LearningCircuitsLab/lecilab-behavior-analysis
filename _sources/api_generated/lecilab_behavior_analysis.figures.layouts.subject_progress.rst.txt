@@ -1,0 +1,6 @@
+subject\_progress
+=================
+
+.. currentmodule:: lecilab_behavior_analysis.figures.layouts
+
+.. autofunction:: subject_progress

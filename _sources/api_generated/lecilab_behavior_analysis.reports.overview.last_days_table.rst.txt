@@ -1,0 +1,6 @@
+last\_days\_table
+=================
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: last_days_table

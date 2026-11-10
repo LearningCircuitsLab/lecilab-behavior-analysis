@@ -1,0 +1,6 @@
+fill\_missing\_data
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.preprocessing
+
+.. autofunction:: fill_missing_data

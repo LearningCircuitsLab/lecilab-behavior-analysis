@@ -1,0 +1,36 @@
+regression
+==========
+
+.. automodule:: lecilab_behavior_analysis.models.regression
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      drop_one_var_contribution
+      filter_variables_for_model
+      hierarchical_partitioning
+      logi_model_fit
+      logi_model_fit_input
+      verify_params_time_kernel
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

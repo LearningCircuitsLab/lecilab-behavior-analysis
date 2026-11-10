@@ -1,0 +1,6 @@
+get\_center\_hold\_df
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: get_center_hold_df

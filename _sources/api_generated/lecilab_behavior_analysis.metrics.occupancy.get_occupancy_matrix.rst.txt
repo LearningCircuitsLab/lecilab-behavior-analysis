@@ -1,0 +1,6 @@
+get\_occupancy\_matrix
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.occupancy
+
+.. autofunction:: get_occupancy_matrix

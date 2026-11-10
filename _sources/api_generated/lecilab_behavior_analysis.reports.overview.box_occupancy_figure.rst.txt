@@ -1,0 +1,6 @@
+box\_occupancy\_figure
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: box_occupancy_figure

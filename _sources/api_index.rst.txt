@@ -1,21 +1,9 @@
 API
 ===
 
-.. currentmodule:: lecilab_behavior_analysis
-
-utils
------
-
-.. autosummary::
-    :toctree: api_generated
-    :template: custom_module_template.rst
-    :recursive:
-    :nosignatures:
-    
-    lecilab_behavior_analysis.utils
-
-df_transforms
--------------
+Every function has a docstring. The modules ``utils``, ``df_transforms``,
+``plots`` and ``figure_maker`` only re-export these functions under their
+old names, for old code.
 
 .. autosummary::
     :toctree: api_generated
@@ -23,26 +11,11 @@ df_transforms
     :recursive:
     :nosignatures:
 
-    lecilab_behavior_analysis.df_transforms
-
-plots
------
-
-.. autosummary::
-    :toctree: api_generated
-    :template: custom_module_template.rst
-    :recursive:
-    :nosignatures:
-
+    lecilab_behavior_analysis.io
+    lecilab_behavior_analysis.preprocessing
+    lecilab_behavior_analysis.data_format_changes
+    lecilab_behavior_analysis.metrics
+    lecilab_behavior_analysis.models
     lecilab_behavior_analysis.plots
-
-figure_maker
-------------
-
-.. autosummary::
-    :toctree: api_generated
-    :template: custom_module_template.rst
-    :recursive:
-    :nosignatures:
-
-    lecilab_behavior_analysis.figure_maker
+    lecilab_behavior_analysis.figures
+    lecilab_behavior_analysis.reports

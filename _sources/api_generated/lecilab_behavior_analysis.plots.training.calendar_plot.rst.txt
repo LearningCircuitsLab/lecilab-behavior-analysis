@@ -1,0 +1,6 @@
+calendar\_plot
+==============
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: calendar_plot

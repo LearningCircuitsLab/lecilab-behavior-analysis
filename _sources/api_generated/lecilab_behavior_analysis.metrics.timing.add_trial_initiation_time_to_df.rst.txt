@@ -1,0 +1,6 @@
+add\_trial\_initiation\_time\_to\_df
+====================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: add_trial_initiation_time_to_df

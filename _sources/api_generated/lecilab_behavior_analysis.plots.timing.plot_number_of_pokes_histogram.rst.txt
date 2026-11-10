@@ -1,0 +1,6 @@
+plot\_number\_of\_pokes\_histogram
+==================================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.timing
+
+.. autofunction:: plot_number_of_pokes_histogram

@@ -1,0 +1,6 @@
+miss\_from\_events
+==================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: miss_from_events

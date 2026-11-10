@@ -1,0 +1,37 @@
+performance
+===========
+
+.. automodule:: lecilab_behavior_analysis.plots.performance
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      correct_left_and_right_plot
+      number_of_correct_responses_plot
+      partially_stacked_barplot
+      performance_by_decision_plot
+      performance_vs_trials_plot
+      repeat_or_alternate_performance_plot
+      side_correct_performance_plot
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

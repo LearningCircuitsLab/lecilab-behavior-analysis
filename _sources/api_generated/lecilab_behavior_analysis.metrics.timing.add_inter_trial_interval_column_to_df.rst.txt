@@ -1,0 +1,6 @@
+add\_inter\_trial\_interval\_column\_to\_df
+===========================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: add_inter_trial_interval_column_to_df

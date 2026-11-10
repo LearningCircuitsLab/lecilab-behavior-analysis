@@ -1,0 +1,6 @@
+get\_time\_kernel\_impact
+=========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: get_time_kernel_impact

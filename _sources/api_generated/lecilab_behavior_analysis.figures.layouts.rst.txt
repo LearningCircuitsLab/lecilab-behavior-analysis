@@ -1,0 +1,32 @@
+layouts
+=======
+
+.. automodule:: lecilab_behavior_analysis.figures.layouts
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      session_summary
+      subject_progress
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

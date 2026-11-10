@@ -1,0 +1,6 @@
+get\_last\_poke\_of\_trial
+==========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: get_last_poke_of_trial

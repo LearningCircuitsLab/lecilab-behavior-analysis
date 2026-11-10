@@ -1,0 +1,6 @@
+get\_triangle\_polar\_plot\_df
+==============================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: get_triangle_polar_plot_df

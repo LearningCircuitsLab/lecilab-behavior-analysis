@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>lecilab_behavior_analysis.models.regression - lecilab-behavior-analysis</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+      <link rel="canonical" href="https://LearningCircuitsLab.github.io/lecilab-behavior-analysis/_modules/lecilab_behavior_analysis/models/regression.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"light");
+  </script><link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/shibuya.css?v=2ceb65ce" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://LearningCircuitsLab.github.io/lecilab-behavior-analysis/_modules/lecilab_behavior_analysis/models/regression.html"/>
+  <meta property="og:title" content="lecilab_behavior_analysis.models.regression"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../../index.html">
+      
+      
+      <strong>lecilab-behavior-analysis</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../../../getting_started.html">Getting started</a></li><li class="link"><a href="../../../figures.html">Figures</a></li><li class="link"><a href="../../../api_index.html">API</a></li><li class="link">
+          <a href="https://learningcircuitslab.github.io/village-report-generator/documentation/">
+            <span>Daily reports</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/LearningCircuitsLab/lecilab-behavior-analysis" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Data and its formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../figures.html">Figures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reports.html">Daily reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_index.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.html">io</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.html">loading</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.find_setups.html">find_setups</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_all_events.html">load_all_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_example_data.html">load_example_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_project_logs.html">load_project_logs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_project_trials.html">load_project_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_setup_logs.html">load_setup_logs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_subject_trials.html">load_subject_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.read_csv_with_specific_number_of_columns.html">read_csv_with_specific_number_of_columns</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.html">server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_animals_in_project.html">get_animals_in_project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_files_for_animal.html">get_files_for_animal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_folders_from_server.html">get_folders_from_server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_idibaps_cluster_credentials.html">get_idibaps_cluster_credentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_outpath.html">get_outpath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_server_projects.html">get_server_projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.rsync_cluster_data.html">rsync_cluster_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.rsync_specific_file.html">rsync_specific_file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.html">preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.add_day_column_to_df.html">add_day_column_to_df</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.add_trial_of_day_column_to_df.html">add_trial_of_day_column_to_df</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.analyze_df.html">analyze_df</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.fill_missing_data.html">fill_missing_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.prepare.html">prepare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.reformat_df_columns.html">reformat_df_columns</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.html">data_format_changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.add_left_right_brightness.html">add_left_right_brightness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.correct_as_number.html">correct_as_number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.get_correct_incorrect_brightness.html">get_correct_incorrect_brightness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.get_left_right_brightness.html">get_left_right_brightness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_modality.html">normalize_modality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_stage.html">normalize_stage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_task_names.html">normalize_task_names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right.html">visual_stimulus_is_left_right</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.html">metrics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.html">choices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_mouse_first_choice.html">add_mouse_first_choice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_mouse_last_choice.html">add_mouse_last_choice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_port_where_animal_comes_from.html">add_port_where_animal_comes_from</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric.html">add_repeat_or_alternate_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html">add_visual_stimulus_difference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html">create_transition_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html">get_bias_evolution_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_choice_before.html">get_choice_before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_left_auditory_stim.html">get_left_auditory_stim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_left_choice.html">get_left_choice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_diff.html">get_performance_by_difficulty_diff</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_ratio.html">get_performance_by_difficulty_ratio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_time_kernel_impact.html">get_time_kernel_impact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_triangle_polar_plot_df.html">get_triangle_polar_plot_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.parameters_for_fit.html">parameters_for_fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.points_to_lines_for_bias_evolution.html">points_to_lines_for_bias_evolution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.previous_impact_on_time_kernel.html">previous_impact_on_time_kernel</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.html">engagement</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.add_engagement_column.html">add_engagement_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.find_next_end_task_time_in_events.html">find_next_end_task_time_in_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.get_box_usage_df.html">get_box_usage_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.get_session_box_usage.html">get_session_box_usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.get_session_ends.html">get_session_ends</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.html">occupancy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_daily_occupancy_percentages.html">get_daily_occupancy_percentages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_dates_df.html">get_dates_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_occupancy_heatmap.html">get_occupancy_heatmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_occupancy_matrix.html">get_occupancy_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_start_and_end_of_sessions_df.html">get_start_and_end_of_sessions_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_water_df.html">get_water_df</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.html">performance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_day_number_of_trials.html">get_day_number_of_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_day_performance.html">get_day_performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_evidence_ratio.html">get_evidence_ratio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_performance_by_decision_df.html">get_performance_by_decision_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_performance_by_difficulty.html">get_performance_by_difficulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_performance_through_trials.html">get_performance_through_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_performance.html">get_repeat_or_alternate_performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_series.html">get_repeat_or_alternate_series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_session_number_of_trials.html">get_session_number_of_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_session_performance.html">get_session_performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_text_from_subject_df.html">get_text_from_subject_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_text_from_subset_df.html">get_text_from_subset_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_training_summary_matrix.html">get_training_summary_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.repeat_or_alternate_series_comparison.html">repeat_or_alternate_series_comparison</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.html">sound</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.add_auditory_real_statistics.html">add_auditory_real_statistics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.analyze_sound_matrix.html">analyze_sound_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.get_decibels_of_cloud_of_tones.html">get_decibels_of_cloud_of_tones</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.get_sound_stats.html">get_sound_stats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.get_timebin_evidence.html">get_timebin_evidence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.sound_evidence_strength.html">sound_evidence_strength</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.html">timing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_early_pokeouts.html">add_early_pokeouts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_inter_trial_interval_column_to_df.html">add_inter_trial_interval_column_to_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_port_holds.html">add_port_holds</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_reaction_time.html">add_reaction_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_time_between_trials.html">add_time_between_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_trial_duration_column_to_df.html">add_trial_duration_column_to_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_trial_initiation_time_to_df.html">add_trial_initiation_time_to_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_trial_misses.html">add_trial_misses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.adjust_trials_and_time_of_start_to_first_session.html">adjust_trials_and_time_of_start_to_first_session</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.calculate_time_between_trials_and_reaction_time.html">calculate_time_between_trials_and_reaction_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.get_center_hold_df.html">get_center_hold_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.get_reaction_times_by_date_df.html">get_reaction_times_by_date_df</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.html">trial_events</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.add_time_from_session_start.html">add_time_from_session_start</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.early_pokeout_from_events.html">early_pokeout_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.first_choice_from_events.html">first_choice_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.first_poke_after_stimulus_state.html">first_poke_after_stimulus_state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_dictionary_event_as_list.html">get_dictionary_event_as_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_last_poke_before_stimulus_state.html">get_last_poke_before_stimulus_state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_last_poke_of_trial.html">get_last_poke_of_trial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_previous_row_index.html">get_previous_row_index</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_repeat_or_alternate_to_numeric.html">get_repeat_or_alternate_to_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_start_and_end_times.html">get_start_and_end_times</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_trial_port_hold.html">get_trial_port_hold</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.initiation_time_from_events.html">initiation_time_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.is_this_a_miss_trial.html">is_this_a_miss_trial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.is_this_an_early_pokeout_trial.html">is_this_an_early_pokeout_trial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.last_choice_before_stimulus_from_events.html">last_choice_before_stimulus_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.miss_from_events.html">miss_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.parse_event_column.html">parse_event_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.parse_events.html">parse_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.port_holds_from_events.html">port_holds_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.reaction_time_from_events.html">reaction_time_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.side_and_difficulty_to_numeric.html">side_and_difficulty_to_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.transform_side_choice_to_numeric.html">transform_side_choice_to_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.trial_initiation_time.html">trial_initiation_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.trial_reaction_time.html">trial_reaction_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.EventColumns.html">EventColumns</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.html">models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.psychometric.html">psychometric</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.psychometric.fit_lapse_logistic_independent.html">fit_lapse_logistic_independent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.psychometric.lapse_logistic_independent.html">lapse_logistic_independent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.psychometric.psychometric_curve_fitting_params.html">psychometric_curve_fitting_params</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.html">regression</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.drop_one_var_contribution.html">drop_one_var_contribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.filter_variables_for_model.html">filter_variables_for_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.hierarchical_partitioning.html">hierarchical_partitioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.logi_model_fit.html">logi_model_fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.logi_model_fit_input.html">logi_model_fit_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.verify_params_time_kernel.html">verify_params_time_kernel</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.html">plots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.html">choices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.bias_vs_trials_plot.html">bias_vs_trials_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.choice_by_difficulty_plot.html">choice_by_difficulty_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.plot_decision_evolution_triangle.html">plot_decision_evolution_triangle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.plot_filter_model_variables.html">plot_filter_model_variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.pointplot_stimulus_dual_dependence.html">pointplot_stimulus_dual_dependence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.psychometric_plot.html">psychometric_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.triangle_polar_plot.html">triangle_polar_plot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.html">occupancy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_percentage_of_occupancy_per_day.html">plot_percentage_of_occupancy_per_day</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_training_times_clock_heatmap.html">plot_training_times_clock_heatmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_training_times_heatmap.html">plot_training_times_heatmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_transition_matrix.html">plot_transition_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_transition_network_with_curved_edges.html">plot_transition_network_with_curved_edges</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.html">performance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.correct_left_and_right_plot.html">correct_left_and_right_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.number_of_correct_responses_plot.html">number_of_correct_responses_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.partially_stacked_barplot.html">partially_stacked_barplot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.performance_by_decision_plot.html">performance_by_decision_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.performance_vs_trials_plot.html">performance_vs_trials_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.repeat_or_alternate_performance_plot.html">repeat_or_alternate_performance_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.side_correct_performance_plot.html">side_correct_performance_plot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.html">timing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.mean_and_ci_by_day_plot.html">mean_and_ci_by_day_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_box_usage_by_date.html">plot_box_usage_by_date</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_mean_and_cis_by_date.html">plot_mean_and_cis_by_date</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_number_of_pokes_histogram.html">plot_number_of_pokes_histogram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_port_holding_time_histogram.html">plot_port_holding_time_histogram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_time_between_trials_and_reaction_time.html">plot_time_between_trials_and_reaction_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_trial_time_of_start.html">plot_trial_time_of_start</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.time_between_trials_and_reaction_time_plot.html">time_between_trials_and_reaction_time_plot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.html">training</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.calendar_plot.html">calendar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.format_date_axis.html">format_date_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.plot_table_from_df.html">plot_table_from_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.rasterize_plot.html">rasterize_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.summary_matrix_plot.html">summary_matrix_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.summary_text_plot.html">summary_text_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.training_calendar_plot.html">training_calendar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.trials_by_day_plot.html">trials_by_day_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.trials_by_day_stacked_plot.html">trials_by_day_stacked_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.trials_by_session_hist.html">trials_by_session_hist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.trials_by_session_plot.html">trials_by_session_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.water_by_date_plot.html">water_by_date_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.water_by_day_plot.html">water_by_day_plot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.html">figures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.html">layouts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.session_summary.html">session_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.subject_progress.html">subject_progress</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.html">panels</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.by_day.html">by_day</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.day_limits.html">day_limits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.performance_df.html">performance_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.psychometric.html">psychometric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.session_changes.html">session_changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.with_numeric_correct.html">with_numeric_correct</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.render.html">render</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.html">reports</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.html">overview</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.box_occupancy_figure.html">box_occupancy_figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.cohort_trials_and_performance_figure.html">cohort_trials_and_performance_figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.daily_trials_and_performance.html">daily_trials_and_performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.failed_cells.html">failed_cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.last_days.html">last_days</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.last_days_table.html">last_days_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.never_raises.html">never_raises</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.performance_over_trials_figure.html">performance_over_trials_figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.problems_table.html">problems_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.reset_failed_cells.html">reset_failed_cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.trials_by_stage.html">trials_by_stage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.trials_by_stage_table.html">trials_by_stage_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.tv_report_table.html">tv_report_table</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.tables.html">tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.tables.generate_tv_report.html">generate_tv_report</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name">lecilab-behavior-analysis</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">Module code</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">lecilab_behavior_analysis.models.regression</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <h1>Source code for lecilab_behavior_analysis.models.regression</h1><div class="highlight"><pre>
+<span></span><span data-line="1"><span class="sd">"""Logistic regressions of the choices and how much each regressor contributes."""</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">defaultdict</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span>
+</span><span data-line="4"><span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+</span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span data-line="6"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span data-line="7"><span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
+</span><span data-line="8">
+</span><span data-line="9"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">column_checker</span>
+</span><span data-line="10"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.metrics.choices</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_time_kernel_impact</span><span class="p">,</span> <span class="n">previous_impact_on_time_kernel</span>
+</span><span data-line="11"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.metrics.trial_events</span><span class="w"> </span><span class="kn">import</span> <span class="n">transform_side_choice_to_numeric</span>
+</span><span data-line="12">
+</span><span data-line="13">
+<div class="viewcode-block" id="logi_model_fit_input">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.models.regression.logi_model_fit_input.html#lecilab_behavior_analysis.models.regression.logi_model_fit_input">[docs]</a>
+</span><span data-line="14"><span class="k">def</span><span class="w"> </span><span class="nf">logi_model_fit_input</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'newton'</span><span class="p">):</span>
+</span><span data-line="15">    <span class="n">column_checker</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">{</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X</span><span class="p">})</span>
+</span><span data-line="16">    <span class="n">column_checker</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="p">{</span><span class="n">y</span><span class="p">})</span>
+</span><span data-line="17">
+</span><span data-line="18">    <span class="c1"># drop NaN values if any</span>
+</span><span data-line="19">    <span class="n">df_for_fit</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">X</span> <span class="o">+</span> <span class="p">[</span><span class="n">y</span><span class="p">])</span>
+</span><span data-line="20">    <span class="n">df_for_fit</span> <span class="o">=</span> <span class="n">df_for_fit</span><span class="p">[</span><span class="n">X</span> <span class="o">+</span> <span class="p">[</span><span class="n">y</span><span class="p">]]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+</span><span data-line="21">
+</span><span data-line="22">    <span class="c1"># to make coefficients comparable</span>
+</span><span data-line="23">    <span class="n">df_for_fit</span><span class="p">[</span><span class="n">X</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_for_fit</span><span class="p">[</span><span class="n">X</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">x</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+</span><span data-line="24">
+</span><span data-line="25">    <span class="c1"># Prepare the independent variables</span>
+</span><span data-line="26">    <span class="n">X_multi</span> <span class="o">=</span> <span class="n">df_for_fit</span><span class="p">[</span><span class="n">X</span><span class="p">]</span>
+</span><span data-line="27">    <span class="n">X_multi_const</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">add_constant</span><span class="p">(</span><span class="n">X_multi</span><span class="p">)</span>
+</span><span data-line="28">    <span class="n">y_predict</span> <span class="o">=</span> <span class="n">df_for_fit</span><span class="p">[</span><span class="n">y</span><span class="p">]</span>
+</span><span data-line="29">    <span class="k">return</span> <span class="n">X_multi_const</span><span class="p">,</span> <span class="n">y_predict</span></div>
+
+</span><span data-line="30">
+</span><span data-line="31">
+<div class="viewcode-block" id="logi_model_fit">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.models.regression.logi_model_fit.html#lecilab_behavior_analysis.models.regression.logi_model_fit">[docs]</a>
+</span><span data-line="32"><span class="k">def</span><span class="w"> </span><span class="nf">logi_model_fit</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'newton'</span><span class="p">):</span>
+</span><span data-line="33">    <span class="n">X_multi_const</span><span class="p">,</span> <span class="n">y_predict</span> <span class="o">=</span> <span class="n">logi_model_fit_input</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+</span><span data-line="34">
+</span><span data-line="35">    <span class="c1"># Fit the logistic regression model with multiple regressors</span>
+</span><span data-line="36">    <span class="n">logit_model_multi</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Logit</span><span class="p">(</span><span class="n">y_predict</span><span class="p">,</span> <span class="n">X_multi_const</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+</span><span data-line="37">
+</span><span data-line="38">    <span class="c1"># Display the summary, which includes p-values for all regressors</span>
+</span><span data-line="39">    <span class="n">results</span> <span class="o">=</span> <span class="n">logit_model_multi</span><span class="o">.</span><span class="n">summary</span><span class="p">(</span><span class="n">xname</span><span class="o">=</span> <span class="p">[</span><span class="s2">"intercept"</span><span class="p">]</span> <span class="o">+</span> <span class="n">X</span><span class="p">)</span>
+</span><span data-line="40">    
+</span><span data-line="41">    <span class="k">return</span> <span class="n">results</span><span class="p">,</span> <span class="n">logit_model_multi</span></div>
+
+</span><span data-line="42">
+</span><span data-line="43">
+<div class="viewcode-block" id="hierarchical_partitioning">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.models.regression.hierarchical_partitioning.html#lecilab_behavior_analysis.models.regression.hierarchical_partitioning">[docs]</a>
+</span><span data-line="44"><span class="k">def</span><span class="w"> </span><span class="nf">hierarchical_partitioning</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x_cols</span><span class="p">,</span> <span class="n">y_col</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'newton'</span><span class="p">):</span>
+</span><span data-line="45">    <span class="n">contributions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+</span><span data-line="46">    <span class="n">n_vars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_cols</span><span class="p">)</span>
+</span><span data-line="47">
+</span><span data-line="48">    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_vars</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+</span><span data-line="49">        <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">x_cols</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span> <span class="c1"># generate all the combinations of the variables</span>
+</span><span data-line="50">            <span class="n">subset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+</span><span data-line="51">            <span class="c1"># fit model input and generate model </span>
+</span><span data-line="52">            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">logi_model_fit_input</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">subset</span><span class="p">,</span> <span class="n">y_col</span><span class="p">)</span>
+</span><span data-line="53">            <span class="n">model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Logit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+</span><span data-line="54">            
+</span><span data-line="55">            <span class="n">r2</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+</span><span data-line="56">
+</span><span data-line="57">            <span class="c1"># contribution for each variable in the combinations</span>
+</span><span data-line="58">            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">:</span>
+</span><span data-line="59">                <span class="n">reduced_subset</span> <span class="o">=</span> <span class="n">subset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span data-line="60">                <span class="n">reduced_subset</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+</span><span data-line="61">                <span class="n">X_reduced</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">reduced_subset</span><span class="p">]</span> <span class="k">if</span> <span class="n">reduced_subset</span> <span class="k">else</span> <span class="n">X</span><span class="p">[</span><span class="s1">'const'</span><span class="p">]</span> <span class="c1"># if no feature after remove only calcalate constant</span>
+</span><span data-line="62">                <span class="n">model_reduced</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Logit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">X_reduced</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+</span><span data-line="63">                <span class="n">r2_reduced</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">model_reduced</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_reduced</span><span class="p">))</span>
+</span><span data-line="64">                <span class="n">delta</span> <span class="o">=</span> <span class="n">r2</span> <span class="o">-</span> <span class="n">r2_reduced</span>
+</span><span data-line="65">                <span class="n">contributions</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+</span><span data-line="66">    
+</span><span data-line="67">    <span class="c1"># normalize the contributions</span>
+</span><span data-line="68">    <span class="n">avg_contrib</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">contrib</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">contrib</span> <span class="ow">in</span> <span class="n">contributions</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span data-line="69">    <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">avg_contrib</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span data-line="70">    <span class="n">norm_contrib</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">val</span> <span class="o">/</span> <span class="n">total</span> <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">avg_contrib</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span data-line="71">    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">norm_contrib</span><span class="p">)</span></div>
+
+</span><span data-line="72">
+</span><span data-line="73">
+<div class="viewcode-block" id="drop_one_var_contribution">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.models.regression.drop_one_var_contribution.html#lecilab_behavior_analysis.models.regression.drop_one_var_contribution">[docs]</a>
+</span><span data-line="74"><span class="k">def</span><span class="w"> </span><span class="nf">drop_one_var_contribution</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x_cols</span><span class="p">,</span> <span class="n">y_col</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'newton'</span><span class="p">):</span>
+</span><span data-line="75"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="76"><span class="sd">    Calculate the contribution of each variable in a logistic regression model</span>
+</span><span data-line="77"><span class="sd">    by dropping one variable at a time and measuring the change in R^2.</span>
+</span><span data-line="78"><span class="sd">    Args:</span>
+</span><span data-line="79"><span class="sd">        df (pd.DataFrame): DataFrame containing the data.</span>
+</span><span data-line="80"><span class="sd">        x_cols (list): List of independent variable column names.</span>
+</span><span data-line="81"><span class="sd">        y_col (str): Dependent variable column name.</span>
+</span><span data-line="82"><span class="sd">        method (str): Optimization method for fitting the model.</span>
+</span><span data-line="83"><span class="sd">    Returns:</span>
+</span><span data-line="84"><span class="sd">        pd.Series: Normalized contributions of each variable.</span>
+</span><span data-line="85"><span class="sd">    """</span>
+</span><span data-line="86">    <span class="c1"># Calculate r^2 for the full model</span>
+</span><span data-line="87">    <span class="n">contributions</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">x_cols</span><span class="p">}</span>
+</span><span data-line="88">    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">logi_model_fit_input</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x_cols</span><span class="p">,</span> <span class="n">y_col</span><span class="p">)</span>
+</span><span data-line="89">    <span class="n">model</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Logit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+</span><span data-line="90">    <span class="n">r2</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+</span><span data-line="91">    <span class="c1"># Iterate over each variable, drop it, and calculate the change in r^2</span>
+</span><span data-line="92">    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">x_cols</span><span class="p">:</span>
+</span><span data-line="93">        <span class="n">X_reduced</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">var</span><span class="p">])</span>
+</span><span data-line="94">        <span class="n">model_reduced</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">Logit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">X_reduced</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+</span><span data-line="95">        <span class="n">r2_reduced</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">model_reduced</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_reduced</span><span class="p">))</span>
+</span><span data-line="96">        <span class="n">delta</span> <span class="o">=</span> <span class="n">r2</span> <span class="o">-</span> <span class="n">r2_reduced</span>
+</span><span data-line="97">        <span class="n">contributions</span><span class="p">[</span><span class="n">var</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+</span><span data-line="98">    <span class="c1"># normalize the contributions</span>
+</span><span data-line="99">    <span class="n">avg_contrib</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">contrib</span><span class="p">)</span> <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">contrib</span> <span class="ow">in</span> <span class="n">contributions</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span data-line="100">    <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">avg_contrib</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span data-line="101">    <span class="n">norm_contrib</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="n">val</span> <span class="o">/</span> <span class="n">total</span> <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">avg_contrib</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span data-line="102">    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">norm_contrib</span><span class="p">)</span></div>
+
+</span><span data-line="103">
+</span><span data-line="104">
+<div class="viewcode-block" id="verify_params_time_kernel">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.models.regression.verify_params_time_kernel.html#lecilab_behavior_analysis.models.regression.verify_params_time_kernel">[docs]</a>
+</span><span data-line="105"><span class="k">def</span><span class="w"> </span><span class="nf">verify_params_time_kernel</span><span class="p">(</span><span class="n">dic</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">max_lag_range</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span> <span class="n">tau_range</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)):</span>
+</span><span data-line="106">    <span class="n">combinations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">max_lag_range</span><span class="p">,</span> <span class="n">tau_range</span><span class="p">))</span>
+</span><span data-line="107">    <span class="n">comb_dict</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="108">    <span class="c1"># iterate all the combinations of max_lag and tau of time kernel</span>
+</span><span data-line="109">    <span class="k">for</span> <span class="n">comb</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">:</span>
+</span><span data-line="110">        <span class="n">max_lag</span> <span class="o">=</span> <span class="n">comb</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="111">        <span class="n">tau</span> <span class="o">=</span> <span class="n">comb</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="112">        <span class="n">previous_impact_on_kernel_mice</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="113">        <span class="k">for</span> <span class="n">df_name</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dic</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">dic</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+</span><span data-line="114">            <span class="k">if</span> <span class="n">y</span> <span class="o">==</span> <span class="s1">'first_choice_numeric'</span><span class="p">:</span>
+</span><span data-line="115">                <span class="c1"># df = add_mouse_first_choice(df)</span>
+</span><span data-line="116">                <span class="n">df</span><span class="p">[</span><span class="s1">'first_choice_numeric'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'first_choice'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+</span><span data-line="117">                        <span class="n">transform_side_choice_to_numeric</span>
+</span><span data-line="118">                        <span class="p">)</span>
+</span><span data-line="119">            <span class="k">elif</span> <span class="n">y</span> <span class="o">==</span> <span class="s1">'correct_numeric'</span><span class="p">:</span>
+</span><span data-line="120">                <span class="n">df</span><span class="p">[</span><span class="s1">'correct_numeric'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'correct'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+</span><span data-line="121">            <span class="k">else</span><span class="p">:</span>
+</span><span data-line="122">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"impact should be either 'first_choice_numeric' or 'correct_numeric'"</span><span class="p">)</span>
+</span><span data-line="123">            
+</span><span data-line="124">            <span class="k">for</span> <span class="n">session</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">'session'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+</span><span data-line="125">                <span class="n">df_session</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'session'</span><span class="p">]</span> <span class="o">==</span> <span class="n">session</span><span class="p">]</span>
+</span><span data-line="126">                <span class="n">df_session</span><span class="p">[</span><span class="s1">'previous_impact_on_kernel'</span><span class="p">]</span> <span class="o">=</span> <span class="n">previous_impact_on_time_kernel</span><span class="p">(</span><span class="n">df_session</span><span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">max_lag</span><span class="o">=</span><span class="n">max_lag</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">)</span>
+</span><span data-line="127">                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df_session</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s1">'previous_impact_on_kernel'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_session</span><span class="p">[</span><span class="s1">'previous_impact_on_kernel'</span><span class="p">]</span>
+</span><span data-line="128">            <span class="n">_</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">logi_model_fit</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="p">[</span><span class="s1">'previous_impact_on_kernel'</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+</span><span data-line="129">            <span class="n">previous_impact_on_kernel_mice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">'previous_impact_on_kernel'</span><span class="p">]))</span>
+</span><span data-line="130">        <span class="n">comb_dict</span><span class="p">[</span><span class="n">comb</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">previous_impact_on_kernel_mice</span><span class="p">)</span>
+</span><span data-line="131">    <span class="k">return</span> <span class="n">comb_dict</span></div>
+
+</span><span data-line="132">
+</span><span data-line="133">
+<div class="viewcode-block" id="filter_variables_for_model">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.models.regression.filter_variables_for_model.html#lecilab_behavior_analysis.models.regression.filter_variables_for_model">[docs]</a>
+</span><span data-line="134"><span class="k">def</span><span class="w"> </span><span class="nf">filter_variables_for_model</span><span class="p">(</span><span class="n">dic_fit</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">max_lag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span data-line="135"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="136"><span class="sd">    This function filters the variables for the logistic regression model.</span>
+</span><span data-line="137"><span class="sd">    Calculate the correlation matrix and the contribution of each variable</span>
+</span><span data-line="138"><span class="sd">    by dropping one variable at a time. For different subjects, calculate the mean values.</span>
+</span><span data-line="139"><span class="sd">    Args:</span>
+</span><span data-line="140"><span class="sd">        dic_fit (dict): Dictionary with dataframes for each subject.</span>
+</span><span data-line="141"><span class="sd">        X (list): List of independent variable column names.</span>
+</span><span data-line="142"><span class="sd">        y (str): Dependent variable column name.</span>
+</span><span data-line="143"><span class="sd">        max_lag (int, optional): Maximum lag for the time kernel impact.</span>
+</span><span data-line="144"><span class="sd">        tau (int, optional): Time constant for the time kernel impact.</span>
+</span><span data-line="145"><span class="sd">    Returns:</span>
+</span><span data-line="146"><span class="sd">        corr_mat_list (list): List of correlation matrices for each subject.</span>
+</span><span data-line="147"><span class="sd">        norm_contribution_df (pd.DataFrame): DataFrame with normalized contributions of each subject</span>
+</span><span data-line="148"><span class="sd">    """</span>
+</span><span data-line="149">    <span class="n">corr_mat_list</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="150">    <span class="n">norm_contribution_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([])</span>
+</span><span data-line="151">    <span class="k">for</span> <span class="n">df_name</span><span class="p">,</span> <span class="n">df_for_fit</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dic_fit</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">dic_fit</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+</span><span data-line="152">        <span class="c1"># if there is "time_kernel_impact" in the variables, get the time kernel impact</span>
+</span><span data-line="153">        <span class="k">if</span> <span class="p">(</span><span class="n">max_lag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">tau</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+</span><span data-line="154">            <span class="n">df_for_fit</span> <span class="o">=</span> <span class="n">get_time_kernel_impact</span><span class="p">(</span><span class="n">df_for_fit</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">max_lag</span><span class="o">=</span><span class="n">max_lag</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">)</span>
+</span><span data-line="155">        <span class="c1"># calculate the correlation matrix of each two variables</span>
+</span><span data-line="156">        <span class="n">corr_fit_X_df</span> <span class="o">=</span> <span class="n">df_for_fit</span><span class="p">[</span><span class="n">X</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+</span><span data-line="157">        <span class="n">corr_mat_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">corr_fit_X_df</span><span class="p">)</span>
+</span><span data-line="158">        <span class="c1"># calculate the contribution of each variable by dropping one variable at a time</span>
+</span><span data-line="159">        <span class="n">norm_contribution</span> <span class="o">=</span> <span class="n">drop_one_var_contribution</span><span class="p">(</span><span class="n">df_for_fit</span><span class="p">,</span> <span class="n">x_cols</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y_col</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">'bfgs'</span><span class="p">)</span>
+</span><span data-line="160">        <span class="n">norm_contribution_df</span><span class="p">[</span><span class="n">df_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm_contribution</span>
+</span><span data-line="161">
+</span><span data-line="162">    <span class="k">return</span> <span class="n">corr_mat_list</span><span class="p">,</span> <span class="n">norm_contribution_df</span></div>
+
+</span></pre></div>
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2022, Learning Circuits Lab</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/LearningCircuitsLab/lecilab-behavior-analysis" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../_static/documentation_options.js?v=8768056e"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/shibuya.js?v=50760d75"></script></body>
+</html>

@@ -1,0 +1,6 @@
+create\_transition\_matrix
+==========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: create_transition_matrix

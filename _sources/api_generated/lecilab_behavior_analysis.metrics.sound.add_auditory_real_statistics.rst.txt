@@ -1,0 +1,6 @@
+add\_auditory\_real\_statistics
+===============================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.sound
+
+.. autofunction:: add_auditory_real_statistics

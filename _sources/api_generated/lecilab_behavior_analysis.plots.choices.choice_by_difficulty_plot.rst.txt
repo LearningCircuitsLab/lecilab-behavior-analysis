@@ -1,0 +1,6 @@
+choice\_by\_difficulty\_plot
+============================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.choices
+
+.. autofunction:: choice_by_difficulty_plot

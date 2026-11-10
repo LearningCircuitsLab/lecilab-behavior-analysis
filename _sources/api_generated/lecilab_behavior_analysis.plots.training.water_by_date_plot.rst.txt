@@ -1,0 +1,6 @@
+water\_by\_date\_plot
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: water_by_date_plot

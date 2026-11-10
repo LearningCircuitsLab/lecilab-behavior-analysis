@@ -1,0 +1,6 @@
+transform\_side\_choice\_to\_numeric
+====================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: transform_side_choice_to_numeric

@@ -1,0 +1,6 @@
+first\_choice\_from\_events
+===========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: first_choice_from_events

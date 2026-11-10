@@ -1,0 +1,6 @@
+add\_time\_between\_trials
+==========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: add_time_between_trials

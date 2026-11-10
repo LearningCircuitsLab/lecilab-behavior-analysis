@@ -1,0 +1,31 @@
+tables
+======
+
+.. automodule:: lecilab_behavior_analysis.reports.tables
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      generate_tv_report
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

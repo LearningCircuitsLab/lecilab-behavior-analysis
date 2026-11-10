@@ -1,0 +1,6 @@
+drop\_one\_var\_contribution
+============================
+
+.. currentmodule:: lecilab_behavior_analysis.models.regression
+
+.. autofunction:: drop_one_var_contribution

@@ -1,0 +1,6 @@
+parse\_events
+=============
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: parse_events

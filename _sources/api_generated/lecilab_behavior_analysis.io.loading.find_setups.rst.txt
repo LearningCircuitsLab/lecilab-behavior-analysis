@@ -1,0 +1,6 @@
+find\_setups
+============
+
+.. currentmodule:: lecilab_behavior_analysis.io.loading
+
+.. autofunction:: find_setups

@@ -1,0 +1,6 @@
+get\_session\_box\_usage
+========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.engagement
+
+.. autofunction:: get_session_box_usage

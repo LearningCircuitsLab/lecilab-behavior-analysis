@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../../../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>lecilab_behavior_analysis.metrics.trial_events - lecilab-behavior-analysis</title><link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" />
+      <link rel="canonical" href="https://LearningCircuitsLab.github.io/lecilab-behavior-analysis/_modules/lecilab_behavior_analysis/metrics/trial_events.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"light");
+  </script><link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/shibuya.css?v=2ceb65ce" />
+    <link media="print" rel="stylesheet" type="text/css" href="../../../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://LearningCircuitsLab.github.io/lecilab-behavior-analysis/_modules/lecilab_behavior_analysis/metrics/trial_events.html"/>
+  <meta property="og:title" content="lecilab_behavior_analysis.metrics.trial_events"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../../../index.html">
+      
+      
+      <strong>lecilab-behavior-analysis</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../../../getting_started.html">Getting started</a></li><li class="link"><a href="../../../figures.html">Figures</a></li><li class="link"><a href="../../../api_index.html">API</a></li><li class="link">
+          <a href="https://learningcircuitslab.github.io/village-report-generator/documentation/">
+            <span>Daily reports</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/LearningCircuitsLab/lecilab-behavior-analysis" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data.html">Data and its formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../figures.html">Figures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reports.html">Daily reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_index.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.html">io</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.html">loading</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.find_setups.html">find_setups</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_all_events.html">load_all_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_example_data.html">load_example_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_project_logs.html">load_project_logs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_project_trials.html">load_project_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_setup_logs.html">load_setup_logs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.load_subject_trials.html">load_subject_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.loading.read_csv_with_specific_number_of_columns.html">read_csv_with_specific_number_of_columns</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.html">server</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_animals_in_project.html">get_animals_in_project</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_files_for_animal.html">get_files_for_animal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_folders_from_server.html">get_folders_from_server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_idibaps_cluster_credentials.html">get_idibaps_cluster_credentials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_outpath.html">get_outpath</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.get_server_projects.html">get_server_projects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.rsync_cluster_data.html">rsync_cluster_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.io.server.rsync_specific_file.html">rsync_specific_file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.html">preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.add_day_column_to_df.html">add_day_column_to_df</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.add_trial_of_day_column_to_df.html">add_trial_of_day_column_to_df</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.analyze_df.html">analyze_df</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.fill_missing_data.html">fill_missing_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.prepare.html">prepare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.preprocessing.reformat_df_columns.html">reformat_df_columns</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.html">data_format_changes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.add_left_right_brightness.html">add_left_right_brightness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.correct_as_number.html">correct_as_number</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.get_correct_incorrect_brightness.html">get_correct_incorrect_brightness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.get_left_right_brightness.html">get_left_right_brightness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_modality.html">normalize_modality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_stage.html">normalize_stage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_task_names.html">normalize_task_names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right.html">visual_stimulus_is_left_right</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.html">metrics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.html">choices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_mouse_first_choice.html">add_mouse_first_choice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_mouse_last_choice.html">add_mouse_last_choice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_port_where_animal_comes_from.html">add_port_where_animal_comes_from</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric.html">add_repeat_or_alternate_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html">add_visual_stimulus_difference</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html">create_transition_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html">get_bias_evolution_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_choice_before.html">get_choice_before</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_left_auditory_stim.html">get_left_auditory_stim</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_left_choice.html">get_left_choice</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_diff.html">get_performance_by_difficulty_diff</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_ratio.html">get_performance_by_difficulty_ratio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_time_kernel_impact.html">get_time_kernel_impact</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_triangle_polar_plot_df.html">get_triangle_polar_plot_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.parameters_for_fit.html">parameters_for_fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.points_to_lines_for_bias_evolution.html">points_to_lines_for_bias_evolution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.previous_impact_on_time_kernel.html">previous_impact_on_time_kernel</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.html">engagement</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.add_engagement_column.html">add_engagement_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.find_next_end_task_time_in_events.html">find_next_end_task_time_in_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.get_box_usage_df.html">get_box_usage_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.get_session_box_usage.html">get_session_box_usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.engagement.get_session_ends.html">get_session_ends</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.html">occupancy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_daily_occupancy_percentages.html">get_daily_occupancy_percentages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_dates_df.html">get_dates_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_occupancy_heatmap.html">get_occupancy_heatmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_occupancy_matrix.html">get_occupancy_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_start_and_end_of_sessions_df.html">get_start_and_end_of_sessions_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.occupancy.get_water_df.html">get_water_df</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.html">performance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_day_number_of_trials.html">get_day_number_of_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_day_performance.html">get_day_performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_evidence_ratio.html">get_evidence_ratio</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_performance_by_decision_df.html">get_performance_by_decision_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_performance_by_difficulty.html">get_performance_by_difficulty</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_performance_through_trials.html">get_performance_through_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_performance.html">get_repeat_or_alternate_performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_series.html">get_repeat_or_alternate_series</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_session_number_of_trials.html">get_session_number_of_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_session_performance.html">get_session_performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_text_from_subject_df.html">get_text_from_subject_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_text_from_subset_df.html">get_text_from_subset_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.get_training_summary_matrix.html">get_training_summary_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.performance.repeat_or_alternate_series_comparison.html">repeat_or_alternate_series_comparison</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.html">sound</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.add_auditory_real_statistics.html">add_auditory_real_statistics</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.analyze_sound_matrix.html">analyze_sound_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.get_decibels_of_cloud_of_tones.html">get_decibels_of_cloud_of_tones</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.get_sound_stats.html">get_sound_stats</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.get_timebin_evidence.html">get_timebin_evidence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.sound.sound_evidence_strength.html">sound_evidence_strength</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.html">timing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_early_pokeouts.html">add_early_pokeouts</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_inter_trial_interval_column_to_df.html">add_inter_trial_interval_column_to_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_port_holds.html">add_port_holds</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_reaction_time.html">add_reaction_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_time_between_trials.html">add_time_between_trials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_trial_duration_column_to_df.html">add_trial_duration_column_to_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_trial_initiation_time_to_df.html">add_trial_initiation_time_to_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.add_trial_misses.html">add_trial_misses</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.adjust_trials_and_time_of_start_to_first_session.html">adjust_trials_and_time_of_start_to_first_session</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.calculate_time_between_trials_and_reaction_time.html">calculate_time_between_trials_and_reaction_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.get_center_hold_df.html">get_center_hold_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.timing.get_reaction_times_by_date_df.html">get_reaction_times_by_date_df</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.html">trial_events</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.add_time_from_session_start.html">add_time_from_session_start</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.early_pokeout_from_events.html">early_pokeout_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.first_choice_from_events.html">first_choice_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.first_poke_after_stimulus_state.html">first_poke_after_stimulus_state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_dictionary_event_as_list.html">get_dictionary_event_as_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_last_poke_before_stimulus_state.html">get_last_poke_before_stimulus_state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_last_poke_of_trial.html">get_last_poke_of_trial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_previous_row_index.html">get_previous_row_index</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_repeat_or_alternate_to_numeric.html">get_repeat_or_alternate_to_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_start_and_end_times.html">get_start_and_end_times</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_trial_port_hold.html">get_trial_port_hold</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.initiation_time_from_events.html">initiation_time_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.is_this_a_miss_trial.html">is_this_a_miss_trial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.is_this_an_early_pokeout_trial.html">is_this_an_early_pokeout_trial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.last_choice_before_stimulus_from_events.html">last_choice_before_stimulus_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.miss_from_events.html">miss_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.parse_event_column.html">parse_event_column</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.parse_events.html">parse_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.port_holds_from_events.html">port_holds_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.reaction_time_from_events.html">reaction_time_from_events</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.side_and_difficulty_to_numeric.html">side_and_difficulty_to_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.transform_side_choice_to_numeric.html">transform_side_choice_to_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.trial_initiation_time.html">trial_initiation_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.trial_reaction_time.html">trial_reaction_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.EventColumns.html">EventColumns</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.html">models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.psychometric.html">psychometric</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.psychometric.fit_lapse_logistic_independent.html">fit_lapse_logistic_independent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.psychometric.lapse_logistic_independent.html">lapse_logistic_independent</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.psychometric.psychometric_curve_fitting_params.html">psychometric_curve_fitting_params</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.html">regression</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.drop_one_var_contribution.html">drop_one_var_contribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.filter_variables_for_model.html">filter_variables_for_model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.hierarchical_partitioning.html">hierarchical_partitioning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.logi_model_fit.html">logi_model_fit</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.logi_model_fit_input.html">logi_model_fit_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.models.regression.verify_params_time_kernel.html">verify_params_time_kernel</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.html">plots</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.html">choices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.bias_vs_trials_plot.html">bias_vs_trials_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.choice_by_difficulty_plot.html">choice_by_difficulty_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.plot_decision_evolution_triangle.html">plot_decision_evolution_triangle</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.plot_filter_model_variables.html">plot_filter_model_variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.pointplot_stimulus_dual_dependence.html">pointplot_stimulus_dual_dependence</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.psychometric_plot.html">psychometric_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.choices.triangle_polar_plot.html">triangle_polar_plot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.html">occupancy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_percentage_of_occupancy_per_day.html">plot_percentage_of_occupancy_per_day</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_training_times_clock_heatmap.html">plot_training_times_clock_heatmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_training_times_heatmap.html">plot_training_times_heatmap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_transition_matrix.html">plot_transition_matrix</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.occupancy.plot_transition_network_with_curved_edges.html">plot_transition_network_with_curved_edges</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.html">performance</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.correct_left_and_right_plot.html">correct_left_and_right_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.number_of_correct_responses_plot.html">number_of_correct_responses_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.partially_stacked_barplot.html">partially_stacked_barplot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.performance_by_decision_plot.html">performance_by_decision_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.performance_vs_trials_plot.html">performance_vs_trials_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.repeat_or_alternate_performance_plot.html">repeat_or_alternate_performance_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.performance.side_correct_performance_plot.html">side_correct_performance_plot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.html">timing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.mean_and_ci_by_day_plot.html">mean_and_ci_by_day_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_box_usage_by_date.html">plot_box_usage_by_date</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_mean_and_cis_by_date.html">plot_mean_and_cis_by_date</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_number_of_pokes_histogram.html">plot_number_of_pokes_histogram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_port_holding_time_histogram.html">plot_port_holding_time_histogram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_time_between_trials_and_reaction_time.html">plot_time_between_trials_and_reaction_time</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.plot_trial_time_of_start.html">plot_trial_time_of_start</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.timing.time_between_trials_and_reaction_time_plot.html">time_between_trials_and_reaction_time_plot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.html">training</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.calendar_plot.html">calendar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.format_date_axis.html">format_date_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.plot_table_from_df.html">plot_table_from_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.rasterize_plot.html">rasterize_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.summary_matrix_plot.html">summary_matrix_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.summary_text_plot.html">summary_text_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.training_calendar_plot.html">training_calendar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.trials_by_day_plot.html">trials_by_day_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.trials_by_day_stacked_plot.html">trials_by_day_stacked_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.trials_by_session_hist.html">trials_by_session_hist</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.trials_by_session_plot.html">trials_by_session_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.water_by_date_plot.html">water_by_date_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.plots.training.water_by_day_plot.html">water_by_day_plot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.html">figures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.html">layouts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.session_summary.html">session_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.subject_progress.html">subject_progress</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.html">panels</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.by_day.html">by_day</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.day_limits.html">day_limits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.performance_df.html">performance_df</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.psychometric.html">psychometric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.session_changes.html">session_changes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.panels.with_numeric_correct.html">with_numeric_correct</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.render.html">render</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.html">reports</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.html">overview</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.box_occupancy_figure.html">box_occupancy_figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.cohort_trials_and_performance_figure.html">cohort_trials_and_performance_figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.daily_trials_and_performance.html">daily_trials_and_performance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.failed_cells.html">failed_cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.last_days.html">last_days</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.last_days_table.html">last_days_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.never_raises.html">never_raises</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.performance_over_trials_figure.html">performance_over_trials_figure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.problems_table.html">problems_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.reset_failed_cells.html">reset_failed_cells</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.trials_by_stage.html">trials_by_stage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.trials_by_stage_table.html">trials_by_stage_table</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.overview.tv_report_table.html">tv_report_table</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.tables.html">tables</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.reports.tables.generate_tv_report.html">generate_tv_report</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../../index.html"><span itemprop="name">lecilab-behavior-analysis</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../../index.html"><span itemprop="name">Module code</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">lecilab_behavior_analysis.metrics.trial_events</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue" role="main">
+          <h1>Source code for lecilab_behavior_analysis.metrics.trial_events</h1><div class="highlight"><pre>
+<span></span><span data-line="1"><span class="sd">"""Reading the events of one trial (a row): first and last choice, reaction time,</span>
+</span><span data-line="2"><span class="sd">center port holds, misses. Event columns (Port1In, STATE_*_START...) can be</span>
+</span><span data-line="3"><span class="sd">lists or text such as "[1.2, 3.4]".</span>
+</span><span data-line="4"><span class="sd">"""</span>
+</span><span data-line="5"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span data-line="6"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+</span><span data-line="7">
+</span><span data-line="8"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span data-line="9"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span data-line="10">
+</span><span data-line="11">
+</span><span data-line="12">
+</span><span data-line="13">
+<div class="viewcode-block" id="get_start_and_end_times">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_start_and_end_times.html#lecilab_behavior_analysis.metrics.trial_events.get_start_and_end_times">[docs]</a>
+</span><span data-line="14"><span class="k">def</span><span class="w"> </span><span class="nf">get_start_and_end_times</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+</span><span data-line="15"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="16"><span class="sd">    Get the start and end times of the session.</span>
+</span><span data-line="17"><span class="sd">    """</span>
+</span><span data-line="18">    <span class="c1"># ensure that there is only one session in the dataframe</span>
+</span><span data-line="19">    <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="s1">'session'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="20">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The dataframe contains more than one session."</span><span class="p">)</span>
+</span><span data-line="21">    <span class="c1"># get the start time of the session as the start of the first trial</span>
+</span><span data-line="22">    <span class="n">start_time</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'trial'</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">trial</span><span class="p">),</span> <span class="s1">'TRIAL_START'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="23">    <span class="c1"># get the end time of the session as the end of the last trial</span>
+</span><span data-line="24">    <span class="n">end_time</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">'trial'</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">trial</span><span class="p">),</span> <span class="s1">'TRIAL_END'</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="25">    <span class="c1"># convert the start and end times to datetime</span>
+</span><span data-line="26">    <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_time</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'s'</span><span class="p">)</span>
+</span><span data-line="27">    <span class="n">end_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">end_time</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">'s'</span><span class="p">)</span>
+</span><span data-line="28">    <span class="k">return</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span></div>
+
+</span><span data-line="29">
+</span><span data-line="30">
+</span><span data-line="31"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="32"><span class="c1"># Reading event times</span>
+</span><span data-line="33"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="34"><span class="c1"># Event and state columns (Port1In, STATE_stimulus_state_START...) hold the</span>
+</span><span data-line="35"><span class="c1"># times of that event in the trial. In the .csv they are text such as</span>
+</span><span data-line="36"><span class="c1"># "[1.2, 3.4]" ("[nan]" for a state that was not visited, empty if the event</span>
+</span><span data-line="37"><span class="c1"># did not happen). parse_events reads any of these forms once, much faster</span>
+</span><span data-line="38"><span class="c1"># than ast.literal_eval. NaN times are left out, so a state that was not</span>
+</span><span data-line="39"><span class="c1"># visited gives an empty list.</span>
+</span><span data-line="40"><span class="n">_NUMPY_SCALAR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?:np|numpy)\.\w+\(([^)]*)\)"</span><span class="p">)</span>
+</span><span data-line="41"><span class="n">_NUMBER</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?|nan|inf"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+</span><span data-line="42">
+</span><span data-line="43">
+<div class="viewcode-block" id="parse_events">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.parse_events.html#lecilab_behavior_analysis.metrics.trial_events.parse_events">[docs]</a>
+</span><span data-line="44"><span class="k">def</span><span class="w"> </span><span class="nf">parse_events</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+</span><span data-line="45"><span class="w">    </span><span class="sd">"""Times of one event in one trial, as a list of floats ([] if none)."""</span>
+</span><span data-line="46">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="47">        <span class="n">text</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="48">        <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"["</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"]"</span><span class="p">):</span>
+</span><span data-line="49">            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="50">        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+</span><span data-line="51">            <span class="k">return</span> <span class="p">[]</span>
+</span><span data-line="52">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="53">            <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)]</span>
+</span><span data-line="54">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="55">            <span class="c1"># e.g. "[np.float64(1.2)]"</span>
+</span><span data-line="56">            <span class="n">text</span> <span class="o">=</span> <span class="n">_NUMPY_SCALAR</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\1"</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span data-line="57">            <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_NUMBER</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span>
+</span><span data-line="58">        <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">times</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
+</span><span data-line="59">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+</span><span data-line="60">        <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
+</span><span data-line="61">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+</span><span data-line="62">        <span class="k">return</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">value</span> <span class="k">else</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
+</span><span data-line="63">    <span class="k">return</span> <span class="p">[]</span></div>
+
+</span><span data-line="64">
+</span><span data-line="65">
+<div class="viewcode-block" id="parse_event_column">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.parse_event_column.html#lecilab_behavior_analysis.metrics.trial_events.parse_event_column">[docs]</a>
+</span><span data-line="66"><span class="k">def</span><span class="w"> </span><span class="nf">parse_event_column</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+</span><span data-line="67"><span class="w">    </span><span class="sd">"""parse_events for every trial of a column ([] for every trial if the column is missing)."""</span>
+</span><span data-line="68">    <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+</span><span data-line="69">        <span class="k">return</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))]</span>
+</span><span data-line="70">    <span class="k">return</span> <span class="p">[</span><span class="n">parse_events</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)]</span></div>
+
+</span><span data-line="71">
+</span><span data-line="72">
+</span><span data-line="73"><span class="k">def</span><span class="w"> </span><span class="nf">_side_of_first_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">after</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="74">    <span class="n">left</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">]</span>
+</span><span data-line="75">    <span class="n">right</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">after</span><span class="p">]</span>
+</span><span data-line="76">    <span class="k">if</span> <span class="ow">not</span> <span class="n">left</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
+</span><span data-line="77">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="78">    <span class="k">if</span> <span class="ow">not</span> <span class="n">left</span><span class="p">:</span>
+</span><span data-line="79">        <span class="k">return</span> <span class="s2">"right"</span>
+</span><span data-line="80">    <span class="k">if</span> <span class="ow">not</span> <span class="n">right</span><span class="p">:</span>
+</span><span data-line="81">        <span class="k">return</span> <span class="s2">"left"</span>
+</span><span data-line="82">    <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">right</span><span class="p">):</span>
+</span><span data-line="83">        <span class="k">return</span> <span class="s2">"left"</span>
+</span><span data-line="84">    <span class="k">if</span> <span class="nb">min</span><span class="p">(</span><span class="n">right</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">left</span><span class="p">):</span>
+</span><span data-line="85">        <span class="k">return</span> <span class="s2">"right"</span>
+</span><span data-line="86">    <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="87">
+</span><span data-line="88">
+</span><span data-line="89"><span class="k">def</span><span class="w"> </span><span class="nf">_side_of_last_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="90">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">port3</span><span class="p">:</span>
+</span><span data-line="91">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="92">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port1</span><span class="p">:</span>
+</span><span data-line="93">        <span class="k">return</span> <span class="s2">"right"</span>
+</span><span data-line="94">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port3</span><span class="p">:</span>
+</span><span data-line="95">        <span class="k">return</span> <span class="s2">"left"</span>
+</span><span data-line="96">    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">port1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">port3</span><span class="p">):</span>
+</span><span data-line="97">        <span class="k">return</span> <span class="s2">"left"</span>
+</span><span data-line="98">    <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">port3</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">port1</span><span class="p">):</span>
+</span><span data-line="99">        <span class="k">return</span> <span class="s2">"right"</span>
+</span><span data-line="100">    <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="101">
+</span><span data-line="102">
+<div class="viewcode-block" id="first_choice_from_events">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.first_choice_from_events.html#lecilab_behavior_analysis.metrics.trial_events.first_choice_from_events">[docs]</a>
+</span><span data-line="103"><span class="k">def</span><span class="w"> </span><span class="nf">first_choice_from_events</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="104"><span class="w">    </span><span class="sd">"""Side of the first side poke after the stimulus started (None if no poke)."""</span>
+</span><span data-line="105">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_start</span><span class="p">:</span>
+</span><span data-line="106">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="107">    <span class="k">return</span> <span class="n">_side_of_first_poke</span><span class="p">(</span><span class="n">port1</span><span class="p">,</span> <span class="n">port3</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">))</span></div>
+
+</span><span data-line="108">
+</span><span data-line="109">
+<div class="viewcode-block" id="last_choice_before_stimulus_from_events">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.last_choice_before_stimulus_from_events.html#lecilab_behavior_analysis.metrics.trial_events.last_choice_before_stimulus_from_events">[docs]</a>
+</span><span data-line="110"><span class="k">def</span><span class="w"> </span><span class="nf">last_choice_before_stimulus_from_events</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="111"><span class="w">    </span><span class="sd">"""Side of the last side poke before the stimulus started (None if no poke)."""</span>
+</span><span data-line="112">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_start</span><span class="p">:</span>
+</span><span data-line="113">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="114">    <span class="n">start</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">stimulus_start</span><span class="p">)</span>
+</span><span data-line="115">    <span class="k">return</span> <span class="n">_side_of_last_poke</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">],</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">start</span><span class="p">])</span></div>
+
+</span><span data-line="116">
+</span><span data-line="117">
+<div class="viewcode-block" id="miss_from_events">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.miss_from_events.html#lecilab_behavior_analysis.metrics.trial_events.miss_from_events">[docs]</a>
+</span><span data-line="118"><span class="k">def</span><span class="w"> </span><span class="nf">miss_from_events</span><span class="p">(</span><span class="n">stimulus_end</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">trial_end</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="119"><span class="w">    </span><span class="sd">"""True if the trial ended when the stimulus state ended (no choice)."""</span>
+</span><span data-line="120">    <span class="k">if</span> <span class="ow">not</span> <span class="n">stimulus_end</span><span class="p">:</span>
+</span><span data-line="121">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="122">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">stimulus_end</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">trial_end</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span></div>
+
+</span><span data-line="123">
+</span><span data-line="124">
+<div class="viewcode-block" id="early_pokeout_from_events">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.early_pokeout_from_events.html#lecilab_behavior_analysis.metrics.trial_events.early_pokeout_from_events">[docs]</a>
+</span><span data-line="125"><span class="k">def</span><span class="w"> </span><span class="nf">early_pokeout_from_events</span><span class="p">(</span><span class="n">ready_start</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port2_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port2_out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">holding_time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+</span><span data-line="126"><span class="w">    </span><span class="sd">"""True if the first center poke was shorter than holding_time (None if unknown)."""</span>
+</span><span data-line="127">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ready_start</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">port2_in</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">port2_out</span><span class="p">:</span>
+</span><span data-line="128">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="129">    <span class="n">first_ready</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ready_start</span><span class="p">)</span>
+</span><span data-line="130">    <span class="n">ins</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port2_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">first_ready</span><span class="p">]</span>
+</span><span data-line="131">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ins</span><span class="p">:</span>
+</span><span data-line="132">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="133">    <span class="n">first_in</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span>
+</span><span data-line="134">    <span class="n">outs</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port2_out</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">first_in</span><span class="p">]</span>
+</span><span data-line="135">    <span class="k">if</span> <span class="ow">not</span> <span class="n">outs</span><span class="p">:</span>
+</span><span data-line="136">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="137">    <span class="k">return</span> <span class="nb">bool</span><span class="p">((</span><span class="nb">min</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="n">first_in</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">holding_time</span><span class="p">)</span></div>
+
+</span><span data-line="138">
+</span><span data-line="139">
+<div class="viewcode-block" id="reaction_time_from_events">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.reaction_time_from_events.html#lecilab_behavior_analysis.metrics.trial_events.reaction_time_from_events">[docs]</a>
+</span><span data-line="140"><span class="k">def</span><span class="w"> </span><span class="nf">reaction_time_from_events</span><span class="p">(</span><span class="n">port2_out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port1_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">port3_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="141"><span class="w">    </span><span class="sd">"""Time from the last center poke out to the next side poke (NaN if none)."""</span>
+</span><span data-line="142">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port2_out</span><span class="p">:</span>
+</span><span data-line="143">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+</span><span data-line="144">    <span class="n">out_time</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">port2_out</span><span class="p">)</span>
+</span><span data-line="145">    <span class="n">side_ins</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port1_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">out_time</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">port3_in</span> <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="n">out_time</span><span class="p">]</span>
+</span><span data-line="146">    <span class="k">if</span> <span class="ow">not</span> <span class="n">side_ins</span><span class="p">:</span>
+</span><span data-line="147">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+</span><span data-line="148">    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">side_ins</span><span class="p">)</span> <span class="o">-</span> <span class="n">out_time</span></div>
+
+</span><span data-line="149">
+</span><span data-line="150">
+<div class="viewcode-block" id="initiation_time_from_events">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.initiation_time_from_events.html#lecilab_behavior_analysis.metrics.trial_events.initiation_time_from_events">[docs]</a>
+</span><span data-line="151"><span class="k">def</span><span class="w"> </span><span class="nf">initiation_time_from_events</span><span class="p">(</span><span class="n">port2_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">trial_start</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="152"><span class="w">    </span><span class="sd">"""Time from the start of the trial to the first center poke (NaN if none)."""</span>
+</span><span data-line="153">    <span class="k">if</span> <span class="ow">not</span> <span class="n">port2_in</span><span class="p">:</span>
+</span><span data-line="154">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+</span><span data-line="155">    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">port2_in</span><span class="p">)</span> <span class="o">-</span> <span class="n">trial_start</span></div>
+
+</span><span data-line="156">
+</span><span data-line="157">
+<div class="viewcode-block" id="port_holds_from_events">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.port_holds_from_events.html#lecilab_behavior_analysis.metrics.trial_events.port_holds_from_events">[docs]</a>
+</span><span data-line="158"><span class="k">def</span><span class="w"> </span><span class="nf">port_holds_from_events</span><span class="p">(</span><span class="n">ins</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">outs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+</span><span data-line="159"><span class="w">    </span><span class="sd">"""Duration of every poke in a port during the trial (including the ITI)."""</span>
+</span><span data-line="160">    <span class="k">if</span> <span class="ow">not</span> <span class="n">ins</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">outs</span><span class="p">:</span>
+</span><span data-line="161">        <span class="k">return</span> <span class="p">[]</span>
+</span><span data-line="162">    <span class="c1"># if the first out is earlier than the first in, remove it</span>
+</span><span data-line="163">    <span class="k">if</span> <span class="n">outs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ins</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+</span><span data-line="164">        <span class="n">outs</span> <span class="o">=</span> <span class="n">outs</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+</span><span data-line="165">    <span class="c1"># if they are different lengths, pad the shorter one with NaNs</span>
+</span><span data-line="166">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">):</span>
+</span><span data-line="167">        <span class="n">outs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">))</span>
+</span><span data-line="168">    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">):</span>
+</span><span data-line="169">        <span class="n">ins</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ins</span><span class="p">))</span>
+</span><span data-line="170">    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">outs</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span></div>
+
+</span><span data-line="171">
+</span><span data-line="172">
+</span><span data-line="173"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="174"><span class="c1"># The same, for one trial given as a row (kept for old code; prefer the</span>
+</span><span data-line="175"><span class="c1"># columns that preprocessing.prepare adds)</span>
+</span><span data-line="176"><span class="c1"># ---------------------------------------------------------------------------</span>
+<div class="viewcode-block" id="is_this_a_miss_trial">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.is_this_a_miss_trial.html#lecilab_behavior_analysis.metrics.trial_events.is_this_a_miss_trial">[docs]</a>
+</span><span data-line="177"><span class="k">def</span><span class="w"> </span><span class="nf">is_this_a_miss_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="178"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="179"><span class="sd">    checks if STATE_stimulus_state_END is the last state</span>
+</span><span data-line="180"><span class="sd">    """</span>
+</span><span data-line="181">    <span class="k">return</span> <span class="n">miss_from_events</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_END"</span><span class="p">)),</span> <span class="n">series</span><span class="p">[</span><span class="s2">"TRIAL_END"</span><span class="p">])</span></div>
+
+</span><span data-line="182">
+</span><span data-line="183">
+<div class="viewcode-block" id="is_this_an_early_pokeout_trial">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.is_this_an_early_pokeout_trial.html#lecilab_behavior_analysis.metrics.trial_events.is_this_an_early_pokeout_trial">[docs]</a>
+</span><span data-line="184"><span class="k">def</span><span class="w"> </span><span class="nf">is_this_an_early_pokeout_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="185"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="186"><span class="sd">    checks if there was an early pokeout in the center port before holding the required time</span>
+</span><span data-line="187"><span class="sd">    """</span>
+</span><span data-line="188">    <span class="k">return</span> <span class="n">early_pokeout_from_events</span><span class="p">(</span>
+</span><span data-line="189">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_ready_to_initiate_START"</span><span class="p">)),</span>
+</span><span data-line="190">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2In"</span><span class="p">)),</span>
+</span><span data-line="191">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2Out"</span><span class="p">)),</span>
+</span><span data-line="192">        <span class="n">series</span><span class="p">[</span><span class="s2">"holding_time"</span><span class="p">],</span>
+</span><span data-line="193">    <span class="p">)</span></div>
+
+</span><span data-line="194">
+</span><span data-line="195">
+<div class="viewcode-block" id="trial_reaction_time">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.trial_reaction_time.html#lecilab_behavior_analysis.metrics.trial_events.trial_reaction_time">[docs]</a>
+</span><span data-line="196"><span class="k">def</span><span class="w"> </span><span class="nf">trial_reaction_time</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="197"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="198"><span class="sd">    This method calculates the reaction time of a trial.</span>
+</span><span data-line="199"><span class="sd">    """</span>
+</span><span data-line="200">    <span class="k">return</span> <span class="n">reaction_time_from_events</span><span class="p">(</span>
+</span><span data-line="201">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2Out"</span><span class="p">)),</span>
+</span><span data-line="202">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
+</span><span data-line="203">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
+</span><span data-line="204">    <span class="p">)</span></div>
+
+</span><span data-line="205">
+</span><span data-line="206">
+<div class="viewcode-block" id="trial_initiation_time">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.trial_initiation_time.html#lecilab_behavior_analysis.metrics.trial_events.trial_initiation_time">[docs]</a>
+</span><span data-line="207"><span class="k">def</span><span class="w"> </span><span class="nf">trial_initiation_time</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="208"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="209"><span class="sd">    This method calculates the initiation time of a trial.</span>
+</span><span data-line="210"><span class="sd">    """</span>
+</span><span data-line="211">    <span class="k">return</span> <span class="n">initiation_time_from_events</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port2In"</span><span class="p">)),</span> <span class="n">series</span><span class="p">[</span><span class="s2">"TRIAL_START"</span><span class="p">])</span></div>
+
+</span><span data-line="212">
+</span><span data-line="213">
+<div class="viewcode-block" id="first_poke_after_stimulus_state">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.first_poke_after_stimulus_state.html#lecilab_behavior_analysis.metrics.trial_events.first_poke_after_stimulus_state">[docs]</a>
+</span><span data-line="214"><span class="k">def</span><span class="w"> </span><span class="nf">first_poke_after_stimulus_state</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="215">    <span class="k">return</span> <span class="n">first_choice_from_events</span><span class="p">(</span>
+</span><span data-line="216">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_START"</span><span class="p">)),</span>
+</span><span data-line="217">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
+</span><span data-line="218">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
+</span><span data-line="219">    <span class="p">)</span></div>
+
+</span><span data-line="220">
+</span><span data-line="221">
+<div class="viewcode-block" id="get_last_poke_of_trial">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_last_poke_of_trial.html#lecilab_behavior_analysis.metrics.trial_events.get_last_poke_of_trial">[docs]</a>
+</span><span data-line="222"><span class="k">def</span><span class="w"> </span><span class="nf">get_last_poke_of_trial</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="223">    <span class="k">return</span> <span class="n">_side_of_last_poke</span><span class="p">(</span><span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span> <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)))</span></div>
+
+</span><span data-line="224">
+</span><span data-line="225">
+<div class="viewcode-block" id="get_last_poke_before_stimulus_state">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_last_poke_before_stimulus_state.html#lecilab_behavior_analysis.metrics.trial_events.get_last_poke_before_stimulus_state">[docs]</a>
+</span><span data-line="226"><span class="k">def</span><span class="w"> </span><span class="nf">get_last_poke_before_stimulus_state</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="227"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="228"><span class="sd">    Sometimes the animal can poke in the center port and not wait long enough</span>
+</span><span data-line="229"><span class="sd">    to get the stimulus state. If trial is not aborted due to selected settings,</span>
+</span><span data-line="230"><span class="sd">    the animal can keep poking.</span>
+</span><span data-line="231"><span class="sd">    """</span>
+</span><span data-line="232">    <span class="k">return</span> <span class="n">last_choice_before_stimulus_from_events</span><span class="p">(</span>
+</span><span data-line="233">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"STATE_stimulus_state_START"</span><span class="p">)),</span>
+</span><span data-line="234">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port1In"</span><span class="p">)),</span>
+</span><span data-line="235">        <span class="n">parse_events</span><span class="p">(</span><span class="n">series</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"Port3In"</span><span class="p">)),</span>
+</span><span data-line="236">    <span class="p">)</span></div>
+
+</span><span data-line="237">
+</span><span data-line="238">
+<div class="viewcode-block" id="get_dictionary_event_as_list">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_dictionary_event_as_list.html#lecilab_behavior_analysis.metrics.trial_events.get_dictionary_event_as_list">[docs]</a>
+</span><span data-line="239"><span class="k">def</span><span class="w"> </span><span class="nf">get_dictionary_event_as_list</span><span class="p">(</span><span class="n">ser_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+</span><span data-line="240">    <span class="k">return</span> <span class="n">parse_events</span><span class="p">(</span><span class="n">ser_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">event</span><span class="p">))</span></div>
+
+</span><span data-line="241">
+</span><span data-line="242">
+<div class="viewcode-block" id="get_repeat_or_alternate_to_numeric">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_repeat_or_alternate_to_numeric.html#lecilab_behavior_analysis.metrics.trial_events.get_repeat_or_alternate_to_numeric">[docs]</a>
+</span><span data-line="243"><span class="k">def</span><span class="w"> </span><span class="nf">get_repeat_or_alternate_to_numeric</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="244">    <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">'roa_choice'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'alternate'</span><span class="p">:</span>
+</span><span data-line="245">        <span class="k">return</span> <span class="mi">0</span>
+</span><span data-line="246">    <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="s1">'roa_choice'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'repeat'</span><span class="p">:</span>
+</span><span data-line="247">        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">'first_choice'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'left'</span><span class="p">:</span>
+</span><span data-line="248">            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</span><span data-line="249">        <span class="k">elif</span> <span class="n">row</span><span class="p">[</span><span class="s1">'first_choice'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'right'</span><span class="p">:</span>
+</span><span data-line="250">            <span class="k">return</span> <span class="mi">1</span>
+</span><span data-line="251">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="252">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
+
+</span><span data-line="253">
+</span><span data-line="254">
+<div class="viewcode-block" id="get_trial_port_hold">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_trial_port_hold.html#lecilab_behavior_analysis.metrics.trial_events.get_trial_port_hold">[docs]</a>
+</span><span data-line="255"><span class="k">def</span><span class="w"> </span><span class="nf">get_trial_port_hold</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">port_number</span><span class="p">):</span>
+</span><span data-line="256"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="257"><span class="sd">    This calculates everything, including those occurring in the ITIs for example.</span>
+</span><span data-line="258"><span class="sd">    """</span>
+</span><span data-line="259">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+</span><span data-line="260">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"row must be a pandas Series"</span><span class="p">)</span>
+</span><span data-line="261">    <span class="k">return</span> <span class="n">port_holds_from_events</span><span class="p">(</span>
+</span><span data-line="262">        <span class="n">parse_events</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"Port"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">port_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"In"</span><span class="p">]),</span>
+</span><span data-line="263">        <span class="n">parse_events</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">"Port"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">port_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"Out"</span><span class="p">]),</span>
+</span><span data-line="264">    <span class="p">)</span></div>
+
+</span><span data-line="265">
+</span><span data-line="266">
+<div class="viewcode-block" id="side_and_difficulty_to_numeric">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.side_and_difficulty_to_numeric.html#lecilab_behavior_analysis.metrics.trial_events.side_and_difficulty_to_numeric">[docs]</a>
+</span><span data-line="267"><span class="k">def</span><span class="w"> </span><span class="nf">side_and_difficulty_to_numeric</span><span class="p">(</span><span class="n">row</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="268">    <span class="k">match</span> <span class="n">row</span><span class="o">.</span><span class="n">difficulty</span><span class="p">:</span>
+</span><span data-line="269">        <span class="k">case</span> <span class="s2">"easy"</span><span class="p">:</span>
+</span><span data-line="270">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">3</span>
+</span><span data-line="271">        <span class="k">case</span> <span class="s2">"medium"</span><span class="p">:</span>
+</span><span data-line="272">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">2</span>
+</span><span data-line="273">        <span class="k">case</span> <span class="s2">"hard"</span><span class="p">:</span>
+</span><span data-line="274">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span data-line="275">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+</span><span data-line="276">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span data-line="277">    <span class="k">match</span> <span class="n">row</span><span class="o">.</span><span class="n">correct_side</span><span class="p">:</span>
+</span><span data-line="278">        <span class="k">case</span> <span class="s2">"left"</span><span class="p">:</span>
+</span><span data-line="279">            <span class="k">pass</span>
+</span><span data-line="280">        <span class="k">case</span> <span class="s2">"right"</span><span class="p">:</span>
+</span><span data-line="281">            <span class="n">numval</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+</span><span data-line="282">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+</span><span data-line="283">            <span class="n">numval</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span data-line="284">    
+</span><span data-line="285">    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">numval</span> <span class="o">/</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
+
+</span><span data-line="286">
+</span><span data-line="287">
+<div class="viewcode-block" id="add_time_from_session_start">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.add_time_from_session_start.html#lecilab_behavior_analysis.metrics.trial_events.add_time_from_session_start">[docs]</a>
+</span><span data-line="288"><span class="k">def</span><span class="w"> </span><span class="nf">add_time_from_session_start</span><span class="p">(</span><span class="n">df_in</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+</span><span data-line="289">    <span class="c1"># Group by both 'subject' and 'session' to calculate time from session start</span>
+</span><span data-line="290">    <span class="n">df_in</span><span class="p">[</span><span class="s1">'time_from_start'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_in</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">'subject'</span><span class="p">,</span> <span class="s1">'session'</span><span class="p">])[</span><span class="s1">'TRIAL_START'</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</span><span data-line="291">    <span class="k">return</span> <span class="n">df_in</span></div>
+
+</span><span data-line="292">
+</span><span data-line="293">
+<div class="viewcode-block" id="get_previous_row_index">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.get_previous_row_index.html#lecilab_behavior_analysis.metrics.trial_events.get_previous_row_index">[docs]</a>
+</span><span data-line="294"><span class="k">def</span><span class="w"> </span><span class="nf">get_previous_row_index</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">current_index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span data-line="295">    <span class="c1"># Get the position of the current index</span>
+</span><span data-line="296">    <span class="n">current_pos</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">current_index</span><span class="p">)</span>
+</span><span data-line="297">    <span class="c1"># Ensure it's not the first row</span>
+</span><span data-line="298">    <span class="k">if</span> <span class="n">current_pos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span data-line="299">        <span class="c1"># Return the previous index</span>
+</span><span data-line="300">        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">current_pos</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+</span><span data-line="301">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="302">        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">"No previous row exists for the given index."</span><span class="p">)</span></div>
+
+</span><span data-line="303">
+</span><span data-line="304">
+<div class="viewcode-block" id="transform_side_choice_to_numeric">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.transform_side_choice_to_numeric.html#lecilab_behavior_analysis.metrics.trial_events.transform_side_choice_to_numeric">[docs]</a>
+</span><span data-line="305"><span class="k">def</span><span class="w"> </span><span class="nf">transform_side_choice_to_numeric</span><span class="p">(</span><span class="n">side</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+</span><span data-line="306">    <span class="k">match</span> <span class="n">side</span><span class="p">:</span>
+</span><span data-line="307">        <span class="k">case</span> <span class="s2">"left"</span><span class="p">:</span>
+</span><span data-line="308">            <span class="k">return</span> <span class="mi">1</span>
+</span><span data-line="309">        <span class="k">case</span> <span class="s2">"right"</span><span class="p">:</span>
+</span><span data-line="310">            <span class="k">return</span> <span class="mi">0</span>
+</span><span data-line="311">        <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+</span><span data-line="312">            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
+
+</span><span data-line="313">
+</span><span data-line="314">
+<div class="viewcode-block" id="EventColumns">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.EventColumns.html#lecilab_behavior_analysis.metrics.trial_events.EventColumns">[docs]</a>
+</span><span data-line="315"><span class="k">class</span><span class="w"> </span><span class="nc">EventColumns</span><span class="p">:</span>
+</span><span data-line="316"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="317"><span class="sd">    Event columns of a dataframe, read with parse_events. Each column is read</span>
+</span><span data-line="318"><span class="sd">    the first time it is used and kept, so that several functions can share it:</span>
+</span><span data-line="319">
+</span><span data-line="320"><span class="sd">        events = EventColumns(df)</span>
+</span><span data-line="321"><span class="sd">        df = add_mouse_first_choice(df, events)</span>
+</span><span data-line="322"><span class="sd">        df = add_trial_misses(df, events)</span>
+</span><span data-line="323">
+</span><span data-line="324"><span class="sd">    The lists follow the order of the rows of df.</span>
+</span><span data-line="325"><span class="sd">    """</span>
+</span><span data-line="326">
+<div class="viewcode-block" id="EventColumns.__init__">
+<a class="viewcode-back" href="../../../api_generated/lecilab_behavior_analysis.metrics.trial_events.EventColumns.html#lecilab_behavior_analysis.metrics.trial_events.EventColumns.__init__">[docs]</a>
+</span><span data-line="327">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+</span><span data-line="328">        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span>
+</span><span data-line="329">        <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span></div>
+
+</span><span data-line="330">
+</span><span data-line="331">    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+</span><span data-line="332">        <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">:</span>
+</span><span data-line="333">            <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">parse_event_column</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span>
+</span><span data-line="334">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="n">column</span><span class="p">]</span></div>
+
+</span></pre></div>
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2022, Learning Circuits Lab</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/LearningCircuitsLab/lecilab-behavior-analysis" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../../../_static/documentation_options.js?v=8768056e"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/shibuya.js?v=50760d75"></script></body>
+</html>

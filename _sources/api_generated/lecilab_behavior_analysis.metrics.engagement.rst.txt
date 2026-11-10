@@ -1,0 +1,35 @@
+engagement
+==========
+
+.. automodule:: lecilab_behavior_analysis.metrics.engagement
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      add_engagement_column
+      find_next_end_task_time_in_events
+      get_box_usage_df
+      get_session_box_usage
+      get_session_ends
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

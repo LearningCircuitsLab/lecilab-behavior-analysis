@@ -1,0 +1,6 @@
+parameters\_for\_fit
+====================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: parameters_for_fit

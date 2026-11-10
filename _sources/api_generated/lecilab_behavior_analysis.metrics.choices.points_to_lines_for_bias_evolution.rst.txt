@@ -1,0 +1,6 @@
+points\_to\_lines\_for\_bias\_evolution
+=======================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: points_to_lines_for_bias_evolution

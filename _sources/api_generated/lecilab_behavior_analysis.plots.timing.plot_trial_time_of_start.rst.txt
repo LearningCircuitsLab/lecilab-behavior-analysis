@@ -1,0 +1,6 @@
+plot\_trial\_time\_of\_start
+============================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.timing
+
+.. autofunction:: plot_trial_time_of_start

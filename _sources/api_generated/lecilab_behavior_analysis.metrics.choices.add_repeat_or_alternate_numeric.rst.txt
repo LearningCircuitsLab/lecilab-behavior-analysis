@@ -1,0 +1,6 @@
+add\_repeat\_or\_alternate\_numeric
+===================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: add_repeat_or_alternate_numeric

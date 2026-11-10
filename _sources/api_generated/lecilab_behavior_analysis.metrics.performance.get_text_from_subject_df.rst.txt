@@ -1,0 +1,6 @@
+get\_text\_from\_subject\_df
+============================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.performance
+
+.. autofunction:: get_text_from_subject_df

@@ -1,0 +1,6 @@
+visual\_stimulus\_is\_left\_right
+=================================
+
+.. currentmodule:: lecilab_behavior_analysis.data_format_changes
+
+.. autofunction:: visual_stimulus_is_left_right

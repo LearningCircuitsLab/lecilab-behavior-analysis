@@ -1,0 +1,6 @@
+sound\_evidence\_strength
+=========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.sound
+
+.. autofunction:: sound_evidence_strength

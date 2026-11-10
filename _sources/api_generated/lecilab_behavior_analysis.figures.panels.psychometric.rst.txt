@@ -1,0 +1,6 @@
+psychometric
+============
+
+.. currentmodule:: lecilab_behavior_analysis.figures.panels
+
+.. autofunction:: psychometric

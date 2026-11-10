@@ -1,0 +1,6 @@
+normalize\_modality
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.data_format_changes
+
+.. autofunction:: normalize_modality

@@ -1,0 +1,6 @@
+get\_bias\_evolution\_df
+========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: get_bias_evolution_df

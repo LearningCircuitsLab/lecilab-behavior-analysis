@@ -1,0 +1,6 @@
+normalize\_task\_names
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.data_format_changes
+
+.. autofunction:: normalize_task_names

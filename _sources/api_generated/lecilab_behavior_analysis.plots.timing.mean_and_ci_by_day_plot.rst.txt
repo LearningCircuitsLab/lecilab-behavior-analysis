@@ -1,0 +1,6 @@
+mean\_and\_ci\_by\_day\_plot
+============================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.timing
+
+.. autofunction:: mean_and_ci_by_day_plot

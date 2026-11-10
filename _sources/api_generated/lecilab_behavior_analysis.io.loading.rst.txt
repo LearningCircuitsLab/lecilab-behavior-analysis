@@ -1,0 +1,38 @@
+loading
+=======
+
+.. automodule:: lecilab_behavior_analysis.io.loading
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      find_setups
+      load_all_events
+      load_example_data
+      load_project_logs
+      load_project_trials
+      load_setup_logs
+      load_subject_trials
+      read_csv_with_specific_number_of_columns
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

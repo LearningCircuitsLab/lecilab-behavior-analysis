@@ -1,0 +1,40 @@
+﻿models
+======
+
+.. automodule:: lecilab_behavior_analysis.models
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module_template.rst
+   :recursive:
+
+   psychometric
+   regression
+

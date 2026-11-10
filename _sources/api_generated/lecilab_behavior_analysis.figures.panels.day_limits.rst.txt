@@ -1,0 +1,6 @@
+day\_limits
+===========
+
+.. currentmodule:: lecilab_behavior_analysis.figures.panels
+
+.. autofunction:: day_limits

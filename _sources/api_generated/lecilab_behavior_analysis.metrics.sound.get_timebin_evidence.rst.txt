@@ -1,0 +1,6 @@
+get\_timebin\_evidence
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.sound
+
+.. autofunction:: get_timebin_evidence

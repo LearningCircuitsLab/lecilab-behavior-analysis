@@ -1,0 +1,33 @@
+psychometric
+============
+
+.. automodule:: lecilab_behavior_analysis.models.psychometric
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      fit_lapse_logistic_independent
+      lapse_logistic_independent
+      psychometric_curve_fitting_params
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

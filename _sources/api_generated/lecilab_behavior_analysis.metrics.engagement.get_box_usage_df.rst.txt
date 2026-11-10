@@ -1,0 +1,6 @@
+get\_box\_usage\_df
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.engagement
+
+.. autofunction:: get_box_usage_df

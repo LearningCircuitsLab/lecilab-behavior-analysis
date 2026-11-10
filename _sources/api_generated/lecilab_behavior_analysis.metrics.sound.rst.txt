@@ -1,0 +1,36 @@
+sound
+=====
+
+.. automodule:: lecilab_behavior_analysis.metrics.sound
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      add_auditory_real_statistics
+      analyze_sound_matrix
+      get_decibels_of_cloud_of_tones
+      get_sound_stats
+      get_timebin_evidence
+      sound_evidence_strength
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

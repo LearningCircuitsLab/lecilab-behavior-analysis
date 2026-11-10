@@ -1,0 +1,6 @@
+pointplot\_stimulus\_dual\_dependence
+=====================================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.choices
+
+.. autofunction:: pointplot_stimulus_dual_dependence

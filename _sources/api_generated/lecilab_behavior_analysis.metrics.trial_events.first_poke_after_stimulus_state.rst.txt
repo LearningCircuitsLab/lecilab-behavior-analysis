@@ -1,0 +1,6 @@
+first\_poke\_after\_stimulus\_state
+===================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: first_poke_after_stimulus_state

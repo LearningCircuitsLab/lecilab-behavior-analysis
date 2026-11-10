@@ -1,0 +1,6 @@
+is\_this\_an\_early\_pokeout\_trial
+===================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: is_this_an_early_pokeout_trial

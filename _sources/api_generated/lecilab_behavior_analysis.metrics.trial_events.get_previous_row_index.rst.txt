@@ -1,0 +1,6 @@
+get\_previous\_row\_index
+=========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: get_previous_row_index

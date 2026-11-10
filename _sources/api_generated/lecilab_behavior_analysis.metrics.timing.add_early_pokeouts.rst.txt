@@ -1,0 +1,6 @@
+add\_early\_pokeouts
+====================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: add_early_pokeouts

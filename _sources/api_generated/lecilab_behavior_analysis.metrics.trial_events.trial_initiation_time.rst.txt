@@ -1,0 +1,6 @@
+trial\_initiation\_time
+=======================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: trial_initiation_time

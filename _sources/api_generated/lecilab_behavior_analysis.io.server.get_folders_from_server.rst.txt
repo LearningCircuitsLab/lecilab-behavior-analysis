@@ -1,0 +1,6 @@
+get\_folders\_from\_server
+==========================
+
+.. currentmodule:: lecilab_behavior_analysis.io.server
+
+.. autofunction:: get_folders_from_server

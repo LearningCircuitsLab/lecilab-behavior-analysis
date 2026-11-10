@@ -1,0 +1,6 @@
+get\_daily\_occupancy\_percentages
+==================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.occupancy
+
+.. autofunction:: get_daily_occupancy_percentages

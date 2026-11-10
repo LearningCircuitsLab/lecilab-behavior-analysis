@@ -1,0 +1,6 @@
+get\_sound\_stats
+=================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.sound
+
+.. autofunction:: get_sound_stats

@@ -1,0 +1,6 @@
+trials\_by\_stage\_table
+========================
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: trials_by_stage_table

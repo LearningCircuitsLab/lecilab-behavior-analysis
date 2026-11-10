@@ -1,0 +1,36 @@
+﻿preprocessing
+=============
+
+.. automodule:: lecilab_behavior_analysis.preprocessing
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      add_day_column_to_df
+      add_trial_of_day_column_to_df
+      analyze_df
+      fill_missing_data
+      prepare
+      reformat_df_columns
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

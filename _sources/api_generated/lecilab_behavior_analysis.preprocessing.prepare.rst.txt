@@ -1,0 +1,6 @@
+prepare
+=======
+
+.. currentmodule:: lecilab_behavior_analysis.preprocessing
+
+.. autofunction:: prepare

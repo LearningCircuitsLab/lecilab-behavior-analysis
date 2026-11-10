@@ -1,0 +1,6 @@
+get\_animals\_in\_project
+=========================
+
+.. currentmodule:: lecilab_behavior_analysis.io.server
+
+.. autofunction:: get_animals_in_project

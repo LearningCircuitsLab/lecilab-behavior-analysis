@@ -1,0 +1,36 @@
+occupancy
+=========
+
+.. automodule:: lecilab_behavior_analysis.metrics.occupancy
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      get_daily_occupancy_percentages
+      get_dates_df
+      get_occupancy_heatmap
+      get_occupancy_matrix
+      get_start_and_end_of_sessions_df
+      get_water_df
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

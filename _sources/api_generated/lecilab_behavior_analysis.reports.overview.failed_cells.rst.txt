@@ -1,0 +1,6 @@
+failed\_cells
+=============
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: failed_cells

@@ -1,0 +1,6 @@
+problems\_table
+===============
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: problems_table

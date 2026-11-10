@@ -1,0 +1,35 @@
+occupancy
+=========
+
+.. automodule:: lecilab_behavior_analysis.plots.occupancy
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      plot_percentage_of_occupancy_per_day
+      plot_training_times_clock_heatmap
+      plot_training_times_heatmap
+      plot_transition_matrix
+      plot_transition_network_with_curved_edges
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

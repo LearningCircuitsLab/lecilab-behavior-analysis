@@ -1,0 +1,6 @@
+get\_trial\_port\_hold
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: get_trial_port_hold

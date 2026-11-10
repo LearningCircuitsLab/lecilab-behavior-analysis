@@ -1,0 +1,6 @@
+get\_start\_and\_end\_of\_sessions\_df
+======================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.occupancy
+
+.. autofunction:: get_start_and_end_of_sessions_df

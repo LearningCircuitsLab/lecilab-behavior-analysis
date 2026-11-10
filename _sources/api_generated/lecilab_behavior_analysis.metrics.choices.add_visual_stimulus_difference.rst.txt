@@ -1,0 +1,6 @@
+add\_visual\_stimulus\_difference
+=================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: add_visual_stimulus_difference

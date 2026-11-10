@@ -1,0 +1,6 @@
+plot\_transition\_matrix
+========================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.occupancy
+
+.. autofunction:: plot_transition_matrix

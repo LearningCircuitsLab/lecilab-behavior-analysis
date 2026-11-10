@@ -1,0 +1,6 @@
+side\_and\_difficulty\_to\_numeric
+==================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: side_and_difficulty_to_numeric

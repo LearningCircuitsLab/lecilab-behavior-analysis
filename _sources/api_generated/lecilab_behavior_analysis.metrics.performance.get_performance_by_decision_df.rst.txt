@@ -1,0 +1,6 @@
+get\_performance\_by\_decision\_df
+==================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.performance
+
+.. autofunction:: get_performance_by_decision_df

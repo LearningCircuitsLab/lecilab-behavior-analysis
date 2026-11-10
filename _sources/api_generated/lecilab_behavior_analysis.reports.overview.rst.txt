@@ -1,0 +1,43 @@
+overview
+========
+
+.. automodule:: lecilab_behavior_analysis.reports.overview
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      box_occupancy_figure
+      cohort_trials_and_performance_figure
+      daily_trials_and_performance
+      failed_cells
+      last_days
+      last_days_table
+      never_raises
+      performance_over_trials_figure
+      problems_table
+      reset_failed_cells
+      trials_by_stage
+      trials_by_stage_table
+      tv_report_table
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

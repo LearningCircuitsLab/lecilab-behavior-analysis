@@ -1,0 +1,6 @@
+add\_reaction\_time
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: add_reaction_time

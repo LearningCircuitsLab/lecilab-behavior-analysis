@@ -1,0 +1,6 @@
+add\_port\_holds
+================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: add_port_holds

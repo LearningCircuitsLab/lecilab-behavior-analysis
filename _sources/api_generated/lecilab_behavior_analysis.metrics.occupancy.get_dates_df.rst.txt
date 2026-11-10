@@ -1,0 +1,6 @@
+get\_dates\_df
+==============
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.occupancy
+
+.. autofunction:: get_dates_df

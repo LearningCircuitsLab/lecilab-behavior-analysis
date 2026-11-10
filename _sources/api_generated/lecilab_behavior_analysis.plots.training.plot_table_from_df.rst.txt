@@ -1,0 +1,6 @@
+plot\_table\_from\_df
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: plot_table_from_df

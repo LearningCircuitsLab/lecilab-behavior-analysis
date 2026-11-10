@@ -1,0 +1,62 @@
+trial\_events
+=============
+
+.. automodule:: lecilab_behavior_analysis.metrics.trial_events
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      add_time_from_session_start
+      early_pokeout_from_events
+      first_choice_from_events
+      first_poke_after_stimulus_state
+      get_dictionary_event_as_list
+      get_last_poke_before_stimulus_state
+      get_last_poke_of_trial
+      get_previous_row_index
+      get_repeat_or_alternate_to_numeric
+      get_start_and_end_times
+      get_trial_port_hold
+      initiation_time_from_events
+      is_this_a_miss_trial
+      is_this_an_early_pokeout_trial
+      last_choice_before_stimulus_from_events
+      miss_from_events
+      parse_event_column
+      parse_events
+      port_holds_from_events
+      reaction_time_from_events
+      side_and_difficulty_to_numeric
+      transform_side_choice_to_numeric
+      trial_initiation_time
+      trial_reaction_time
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class_template.rst
+   
+      EventColumns
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+performance\_over\_trials\_figure
+=================================
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: performance_over_trials_figure

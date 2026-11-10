@@ -1,0 +1,6 @@
+last\_choice\_before\_stimulus\_from\_events
+============================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: last_choice_before_stimulus_from_events

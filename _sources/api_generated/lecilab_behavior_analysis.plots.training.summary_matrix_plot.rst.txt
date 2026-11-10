@@ -1,0 +1,6 @@
+summary\_matrix\_plot
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: summary_matrix_plot

@@ -1,0 +1,6 @@
+get\_performance\_through\_trials
+=================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.performance
+
+.. autofunction:: get_performance_through_trials

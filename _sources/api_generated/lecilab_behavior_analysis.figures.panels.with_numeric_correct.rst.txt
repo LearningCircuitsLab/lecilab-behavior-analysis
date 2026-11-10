@@ -1,0 +1,6 @@
+with\_numeric\_correct
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.figures.panels
+
+.. autofunction:: with_numeric_correct

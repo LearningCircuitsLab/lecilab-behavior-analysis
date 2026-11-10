@@ -1,0 +1,6 @@
+add\_port\_where\_animal\_comes\_from
+=====================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: add_port_where_animal_comes_from

@@ -1,0 +1,6 @@
+analyze\_df
+===========
+
+.. currentmodule:: lecilab_behavior_analysis.preprocessing
+
+.. autofunction:: analyze_df

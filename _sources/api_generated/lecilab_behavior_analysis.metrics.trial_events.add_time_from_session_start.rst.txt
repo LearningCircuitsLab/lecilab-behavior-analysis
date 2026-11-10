@@ -1,0 +1,6 @@
+add\_time\_from\_session\_start
+===============================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: add_time_from_session_start

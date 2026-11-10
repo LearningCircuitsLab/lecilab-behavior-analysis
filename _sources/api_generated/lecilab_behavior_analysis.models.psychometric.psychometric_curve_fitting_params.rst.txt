@@ -1,0 +1,6 @@
+psychometric\_curve\_fitting\_params
+====================================
+
+.. currentmodule:: lecilab_behavior_analysis.models.psychometric
+
+.. autofunction:: psychometric_curve_fitting_params

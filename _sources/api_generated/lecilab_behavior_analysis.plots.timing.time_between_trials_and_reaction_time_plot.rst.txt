@@ -1,0 +1,6 @@
+time\_between\_trials\_and\_reaction\_time\_plot
+================================================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.timing
+
+.. autofunction:: time_between_trials_and_reaction_time_plot

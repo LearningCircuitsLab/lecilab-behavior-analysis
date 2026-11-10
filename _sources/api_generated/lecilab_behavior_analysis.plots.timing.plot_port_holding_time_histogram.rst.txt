@@ -1,0 +1,6 @@
+plot\_port\_holding\_time\_histogram
+====================================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.timing
+
+.. autofunction:: plot_port_holding_time_histogram

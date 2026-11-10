@@ -1,0 +1,6 @@
+get\_left\_choice
+=================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: get_left_choice

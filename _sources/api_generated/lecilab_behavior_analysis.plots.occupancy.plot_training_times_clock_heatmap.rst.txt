@@ -1,0 +1,6 @@
+plot\_training\_times\_clock\_heatmap
+=====================================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.occupancy
+
+.. autofunction:: plot_training_times_clock_heatmap

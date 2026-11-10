@@ -1,0 +1,6 @@
+get\_performance\_by\_difficulty\_diff
+======================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: get_performance_by_difficulty_diff

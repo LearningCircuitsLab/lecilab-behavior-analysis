@@ -1,0 +1,6 @@
+plot\_box\_usage\_by\_date
+==========================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.timing
+
+.. autofunction:: plot_box_usage_by_date

@@ -1,0 +1,6 @@
+performance\_df
+===============
+
+.. currentmodule:: lecilab_behavior_analysis.figures.panels
+
+.. autofunction:: performance_df

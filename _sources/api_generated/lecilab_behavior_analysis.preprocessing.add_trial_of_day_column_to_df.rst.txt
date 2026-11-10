@@ -1,0 +1,6 @@
+add\_trial\_of\_day\_column\_to\_df
+===================================
+
+.. currentmodule:: lecilab_behavior_analysis.preprocessing
+
+.. autofunction:: add_trial_of_day_column_to_df

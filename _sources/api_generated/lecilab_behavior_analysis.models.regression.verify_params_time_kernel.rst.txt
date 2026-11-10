@@ -1,0 +1,6 @@
+verify\_params\_time\_kernel
+============================
+
+.. currentmodule:: lecilab_behavior_analysis.models.regression
+
+.. autofunction:: verify_params_time_kernel

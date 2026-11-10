@@ -1,0 +1,6 @@
+get\_files\_for\_animal
+=======================
+
+.. currentmodule:: lecilab_behavior_analysis.io.server
+
+.. autofunction:: get_files_for_animal

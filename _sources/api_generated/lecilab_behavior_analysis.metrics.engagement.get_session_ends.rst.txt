@@ -1,0 +1,6 @@
+get\_session\_ends
+==================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.engagement
+
+.. autofunction:: get_session_ends

@@ -1,0 +1,6 @@
+add\_mouse\_last\_choice
+========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: add_mouse_last_choice

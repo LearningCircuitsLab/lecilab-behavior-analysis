@@ -1,0 +1,6 @@
+triangle\_polar\_plot
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.choices
+
+.. autofunction:: triangle_polar_plot

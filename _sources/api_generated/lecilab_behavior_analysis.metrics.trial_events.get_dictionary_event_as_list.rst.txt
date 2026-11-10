@@ -1,0 +1,6 @@
+get\_dictionary\_event\_as\_list
+================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: get_dictionary_event_as_list

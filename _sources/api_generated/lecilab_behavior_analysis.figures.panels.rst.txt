@@ -1,0 +1,36 @@
+panels
+======
+
+.. automodule:: lecilab_behavior_analysis.figures.panels
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      by_day
+      day_limits
+      performance_df
+      psychometric
+      session_changes
+      with_numeric_correct
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+trials\_by\_session\_hist
+=========================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: trials_by_session_hist

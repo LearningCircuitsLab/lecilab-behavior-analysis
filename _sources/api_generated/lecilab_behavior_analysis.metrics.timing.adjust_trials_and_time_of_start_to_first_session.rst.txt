@@ -1,0 +1,6 @@
+adjust\_trials\_and\_time\_of\_start\_to\_first\_session
+========================================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.timing
+
+.. autofunction:: adjust_trials_and_time_of_start_to_first_session

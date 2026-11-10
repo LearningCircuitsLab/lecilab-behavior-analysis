@@ -1,0 +1,6 @@
+generate\_tv\_report
+====================
+
+.. currentmodule:: lecilab_behavior_analysis.reports.tables
+
+.. autofunction:: generate_tv_report

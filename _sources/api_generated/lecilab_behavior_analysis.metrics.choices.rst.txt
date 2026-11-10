@@ -1,0 +1,47 @@
+choices
+=======
+
+.. automodule:: lecilab_behavior_analysis.metrics.choices
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      add_mouse_first_choice
+      add_mouse_last_choice
+      add_port_where_animal_comes_from
+      add_repeat_or_alternate_numeric
+      add_visual_stimulus_difference
+      create_transition_matrix
+      get_bias_evolution_df
+      get_choice_before
+      get_left_auditory_stim
+      get_left_choice
+      get_performance_by_difficulty_diff
+      get_performance_by_difficulty_ratio
+      get_time_kernel_impact
+      get_triangle_polar_plot_df
+      parameters_for_fit
+      points_to_lines_for_bias_evolution
+      previous_impact_on_time_kernel
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

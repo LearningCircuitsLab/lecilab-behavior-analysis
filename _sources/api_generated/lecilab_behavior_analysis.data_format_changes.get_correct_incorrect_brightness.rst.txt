@@ -1,0 +1,6 @@
+get\_correct\_incorrect\_brightness
+===================================
+
+.. currentmodule:: lecilab_behavior_analysis.data_format_changes
+
+.. autofunction:: get_correct_incorrect_brightness

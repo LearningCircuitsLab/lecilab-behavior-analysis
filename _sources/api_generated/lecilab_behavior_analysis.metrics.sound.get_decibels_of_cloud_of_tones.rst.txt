@@ -1,0 +1,6 @@
+get\_decibels\_of\_cloud\_of\_tones
+===================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.sound
+
+.. autofunction:: get_decibels_of_cloud_of_tones

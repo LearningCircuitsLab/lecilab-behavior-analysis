@@ -1,0 +1,6 @@
+get\_last\_poke\_before\_stimulus\_state
+========================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.trial_events
+
+.. autofunction:: get_last_poke_before_stimulus_state

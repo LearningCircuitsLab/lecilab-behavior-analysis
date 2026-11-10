@@ -1,0 +1,6 @@
+plot\_filter\_model\_variables
+==============================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.choices
+
+.. autofunction:: plot_filter_model_variables

@@ -1,0 +1,6 @@
+get\_session\_performance
+=========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.performance
+
+.. autofunction:: get_session_performance

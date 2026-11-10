@@ -1,0 +1,6 @@
+bias\_vs\_trials\_plot
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.choices
+
+.. autofunction:: bias_vs_trials_plot

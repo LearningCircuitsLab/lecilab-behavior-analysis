@@ -1,0 +1,37 @@
+choices
+=======
+
+.. automodule:: lecilab_behavior_analysis.plots.choices
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      bias_vs_trials_plot
+      choice_by_difficulty_plot
+      plot_decision_evolution_triangle
+      plot_filter_model_variables
+      pointplot_stimulus_dual_dependence
+      psychometric_plot
+      triangle_polar_plot
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

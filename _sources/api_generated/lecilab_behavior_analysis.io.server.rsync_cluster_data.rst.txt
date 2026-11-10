@@ -1,0 +1,6 @@
+rsync\_cluster\_data
+====================
+
+.. currentmodule:: lecilab_behavior_analysis.io.server
+
+.. autofunction:: rsync_cluster_data

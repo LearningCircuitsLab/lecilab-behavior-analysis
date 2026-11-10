@@ -1,0 +1,6 @@
+rsync\_specific\_file
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.io.server
+
+.. autofunction:: rsync_specific_file

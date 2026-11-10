@@ -1,0 +1,6 @@
+get\_water\_df
+==============
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.occupancy
+
+.. autofunction:: get_water_df

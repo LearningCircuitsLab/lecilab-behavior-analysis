@@ -1,0 +1,6 @@
+daily\_trials\_and\_performance
+===============================
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: daily_trials_and_performance

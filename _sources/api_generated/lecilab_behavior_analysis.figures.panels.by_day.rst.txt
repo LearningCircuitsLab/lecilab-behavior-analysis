@@ -1,0 +1,6 @@
+by\_day
+=======
+
+.. currentmodule:: lecilab_behavior_analysis.figures.panels
+
+.. autofunction:: by_day

@@ -1,0 +1,6 @@
+filter\_variables\_for\_model
+=============================
+
+.. currentmodule:: lecilab_behavior_analysis.models.regression
+
+.. autofunction:: filter_variables_for_model

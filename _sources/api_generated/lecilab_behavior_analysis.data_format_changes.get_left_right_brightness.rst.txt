@@ -1,0 +1,6 @@
+get\_left\_right\_brightness
+============================
+
+.. currentmodule:: lecilab_behavior_analysis.data_format_changes
+
+.. autofunction:: get_left_right_brightness

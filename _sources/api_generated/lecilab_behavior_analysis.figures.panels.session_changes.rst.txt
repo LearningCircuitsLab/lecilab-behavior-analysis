@@ -1,0 +1,6 @@
+session\_changes
+================
+
+.. currentmodule:: lecilab_behavior_analysis.figures.panels
+
+.. autofunction:: session_changes

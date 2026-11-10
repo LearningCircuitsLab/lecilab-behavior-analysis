@@ -1,0 +1,6 @@
+plot\_decision\_evolution\_triangle
+===================================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.choices
+
+.. autofunction:: plot_decision_evolution_triangle

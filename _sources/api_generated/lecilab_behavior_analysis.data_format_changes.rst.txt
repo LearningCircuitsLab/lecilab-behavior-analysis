@@ -1,0 +1,38 @@
+﻿data\_format\_changes
+=====================
+
+.. automodule:: lecilab_behavior_analysis.data_format_changes
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      add_left_right_brightness
+      correct_as_number
+      get_correct_incorrect_brightness
+      get_left_right_brightness
+      normalize_modality
+      normalize_stage
+      normalize_task_names
+      visual_stimulus_is_left_right
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

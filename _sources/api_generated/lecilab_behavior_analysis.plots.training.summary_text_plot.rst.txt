@@ -1,0 +1,6 @@
+summary\_text\_plot
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: summary_text_plot

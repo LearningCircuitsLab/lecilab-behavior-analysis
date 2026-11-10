@@ -1,0 +1,6 @@
+load\_project\_trials
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.io.loading
+
+.. autofunction:: load_project_trials

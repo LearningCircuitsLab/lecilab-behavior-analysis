@@ -1,0 +1,38 @@
+server
+======
+
+.. automodule:: lecilab_behavior_analysis.io.server
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      get_animals_in_project
+      get_files_for_animal
+      get_folders_from_server
+      get_idibaps_cluster_credentials
+      get_outpath
+      get_server_projects
+      rsync_cluster_data
+      rsync_specific_file
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
