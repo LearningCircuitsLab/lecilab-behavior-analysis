@@ -208,14 +208,16 @@ def load_project_logs(
 
 def load_session_dates(project: str, subjects: List[str], root: Optional[Union[str, Path]] = None) -> pd.DataFrame:
     """
-    Start of every session of some subjects of a project: columns subject and
-    date (datetime), sorted by date. It tells when new data was collected
-    (the boxes send each session to the data folder).
+    Start of every session of some subjects of a project: columns subject,
+    date (datetime) and setup (the box), sorted by date. It tells when new
+    data was collected, and where (the boxes send each session to the data
+    folder).
 
     Read from the sessions summaries of every setup of the project (only the
     given subjects: a box can hold subjects of other projects). Subjects that
     are in no sessions summary are read from the date column of their trials
-    file instead. Subjects without data are left out.
+    file instead (the setup is then its system_name column, or None).
+    Subjects without data are left out.
     """
     root = Path(root) if root is not None else Path(get_outpath())
     frames = []
@@ -228,7 +230,7 @@ def load_session_dates(project: str, subjects: List[str], root: Optional[Union[s
         except Exception as error:
             logger.warning("Could not read %s: %s: %s", path, type(error).__name__, error)
             continue
-        frames.append(summary[summary["subject"].isin(subjects)])
+        frames.append(summary[summary["subject"].isin(subjects)].assign(setup=setup or None))
     found = set(pd.concat(frames)["subject"]) if frames else set()
     for subject in subjects:
         if subject in found:
@@ -239,13 +241,21 @@ def load_session_dates(project: str, subjects: List[str], root: Optional[Union[s
         if not path.exists():
             continue
         try:
-            dates = pd.read_csv(path, sep=";", usecols=["date"])
+            columns = pd.read_csv(path, sep=";", nrows=0).columns
+            usecols = ["date"] + (["system_name"] if "system_name" in columns else [])
+            dates = pd.read_csv(path, sep=";", usecols=usecols)
         except Exception as error:
             logger.warning("Could not read %s: %s: %s", path, type(error).__name__, error)
             continue
-        frames.append(dates.drop_duplicates().assign(subject=subject))
+        dates = dates.rename(columns={"system_name": "setup"}).drop_duplicates()
+        if "setup" not in dates.columns:
+            dates["setup"] = None
+        frames.append(dates.assign(subject=subject))
     if not frames:
-        return pd.DataFrame({"subject": pd.Series(dtype=str), "date": pd.Series(dtype="datetime64[ns]")})
-    dates = pd.concat(frames, ignore_index=True)[["subject", "date"]]
+        return pd.DataFrame(
+            {"subject": pd.Series(dtype=str), "date": pd.Series(dtype="datetime64[ns]"), "setup": pd.Series(dtype=str)}
+        )
+    dates = pd.concat(frames, ignore_index=True)[["subject", "date", "setup"]]
     dates["date"] = pd.to_datetime(dates["date"], errors="coerce")
-    return dates.dropna().drop_duplicates().sort_values("date", kind="stable").reset_index(drop=True)
+    dates = dates.dropna(subset=["subject", "date"]).drop_duplicates()
+    return dates.sort_values("date", kind="stable").reset_index(drop=True)

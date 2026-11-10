@@ -65,8 +65,9 @@ def psychometric_curve_fitting_params(df: pd.DataFrame, x, y, valueType="discret
         df_copy[x + "_fit"] = np.sign(df_copy[x]) * (np.log(abs(df_copy[x])).round(4))
     else:
         # bin the continuous values when valueType is not discrete
+        # each value is replaced by the mean of its bin (bins may be empty,
+        # e.g. sound levels never close to 0)
         bin_groups = pd.cut(df_copy[x], bins=bins)
-        labels = df_copy[x].groupby(bin_groups, observed=True).mean()
-        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins=bins, labels=labels).astype(float)
+        df_copy[x + "_fit"] = df_copy[x].groupby(bin_groups, observed=True).transform("mean").astype(float)
     p_left, params = fit_lapse_logistic_independent(df_copy[x + "_fit"], df_copy[y])
     return p_left, params

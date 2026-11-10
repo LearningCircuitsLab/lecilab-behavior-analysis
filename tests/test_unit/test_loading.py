@@ -114,4 +114,7 @@ def test_load_session_dates(tmp_path, raw_trials):
     dates = load_session_dates("proj", ["NUO003", "NUO004", "MISSING"], root=tmp_path)
     assert set(dates["subject"]) == {"NUO003", "NUO004"}
     assert list(dates[dates.subject == "NUO003"]["date"].astype(str)) == ["2025-09-05 10:00:00"]
+    assert list(dates[dates.subject == "NUO003"]["setup"]) == ["village01"]
+    # from the trials file: the setup is its system_name
+    assert set(dates[dates.subject == "NUO004"]["setup"]) == set(raw_trials.head(5)["system_name"])
     assert dates["date"].is_monotonic_increasing

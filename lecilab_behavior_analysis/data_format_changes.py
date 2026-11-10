@@ -150,6 +150,11 @@ def add_left_right_brightness(df_in: pd.DataFrame) -> pd.DataFrame:
 # Before: stimulus_modality "auditory" (main / new_tv versions of the task) or
 #         "auditory_cot" and "auditory_local_wn" (nuo_dev version), and stages
 #         such as "TwoAFC_auditory_easy" or "TwoAFC_auditory_cot_easy".
+#         A version used in the project frequency_vs_locationPureTone (e.g.
+#         NUO066-NUO077) called the sound location modality "auditory_locaPT"
+#         (location, pure tone; a few first trials "auditory_loca"): it is the
+#         current sound location modality, with the same auditory_stimulus
+#         (sound_db_spl...).
 # After:  "auditory-cot" (cloud of tones) and "auditory-local-wn" (white noise
 #         from the side of the reward), and stages such as
 #         "TwoAFC_auditory-cot_easy".
@@ -165,6 +170,8 @@ LEGACY_MODALITY_NAMES = {
     "auditory": "auditory-cot",
     "auditory_cot": "auditory-cot",
     "auditory_local_wn": "auditory-local-wn",
+    "auditory_locaPT": "auditory-local-wn",
+    "auditory_loca": "auditory-local-wn",
 }
 
 

@@ -2,6 +2,7 @@
 psychometric data (visual and cloud of tones) and model regressors.
 """
 
+import re
 from typing import Optional, Union
 
 import numpy as np
@@ -485,3 +486,46 @@ def get_time_kernel_impact(df: pd.DataFrame, y: str, max_lag, tau):
         raise ValueError("impact should be either 'first_choice_numeric' and 'correct_numeric'")
 
     return df_copy
+
+
+# keys of auditory_stimulus with the loudness of a sound location trial, in
+# order of preference ("sound_db_spl" in the current task)
+SOUND_LEVEL_KEYS = ("sound_db_spl", "sound_db", "db_spl", "db", "amplitude_db", "amplitude")
+
+
+def _sound_level(stimulus) -> float:
+    """Loudness of a sound location trial from its auditory_stimulus (dict or its text)."""
+    import ast
+
+    if isinstance(stimulus, str):
+        # numbers saved by numpy 2 look like np.float64(59.1)
+        text = re.sub(r"(?:np|numpy)\.\w+\(([^()]*)\)", r"\1", stimulus)
+        try:
+            stimulus = ast.literal_eval(re.sub(r"\bnan\b", "None", text))
+        except (ValueError, SyntaxError):
+            return np.nan
+    if not isinstance(stimulus, dict):
+        return np.nan
+    for key in SOUND_LEVEL_KEYS:
+        value = stimulus.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return float(value)
+    return np.nan
+
+
+def add_sound_location_level(df_in: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds sound_location_db: loudness of the sound of a sound location trial
+    (auditory-local-wn), positive if it came from the left and negative if
+    from the right (the side in auditory_output_side, or the correct side, as
+    the sound plays on the side of the reward). NaN if it is not known.
+    """
+    column_checker(df_in, required_columns={"auditory_stimulus", "correct_side"})
+    df = df_in.copy()
+    level = df["auditory_stimulus"].apply(_sound_level)
+    side = df["correct_side"]
+    if "auditory_output_side" in df.columns:
+        side = df["auditory_output_side"].where(df["auditory_output_side"].isin(["left", "right"]), side)
+    sign = side.map({"left": 1.0, "right": -1.0})
+    df["sound_location_db"] = level * sign
+    return df

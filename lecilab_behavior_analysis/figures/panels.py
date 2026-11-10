@@ -17,6 +17,7 @@ import lecilab_behavior_analysis.data_format_changes as dfc
 import lecilab_behavior_analysis.plots as plots
 from lecilab_behavior_analysis.figures.render import FigureData, NotApplicable, panel, split_cell
 from lecilab_behavior_analysis.metrics.choices import (
+    add_sound_location_level,
     get_bias_evolution_df,
     get_performance_by_difficulty_ratio,
     points_to_lines_for_bias_evolution,
@@ -271,20 +272,35 @@ def psychometric(modality: str):
         if modality not in trials["stimulus_modality"].unique():
             raise NotApplicable(f"No trials in {modality}")
         df = trials[trials["stimulus_modality"] == modality].copy()
-        if df["difficulty"].nunique() == 1 and df["difficulty"].unique()[0] == "easy":
-            # only easy trials: choices by side and difficulty
-            df["side_difficulty"] = df.apply(side_and_difficulty_to_numeric, axis=1)
-            df["first_choice_numeric"] = df["first_choice"].apply(transform_side_choice_to_numeric)
-            plots.choice_by_difficulty_plot(df, ax=ax)
-        else:
-            if modality == "visual":
-                x, value_type = "visual_stimulus_ratio", "discrete"
-            elif modality == "auditory-cot":
-                x, value_type = "total_evidence_strength", "continue"
-            else:
-                raise NotApplicable(f"No psychometric plot for {modality}")
+        df["first_choice_numeric"] = df["first_choice"].apply(transform_side_choice_to_numeric)
+        only_easy = df["difficulty"].nunique() == 1 and df["difficulty"].unique()[0] == "easy"
+        sound_location = None
+        if modality == "auditory-local-wn" and not only_easy:
+            sound_location = add_sound_location_level(df)
+            if sound_location["sound_location_db"].notna().sum() == 0:
+                sound_location = None  # loudness not saved: choices by difficulty
+        if modality in ("visual", "auditory-cot") and not only_easy:
+            x, value_type = (
+                ("visual_stimulus_ratio", "discrete")
+                if modality == "visual"
+                else ("total_evidence_strength", "continue")
+            )
             psych = get_performance_by_difficulty_ratio(df)
             plots.psychometric_plot(psych, x=x, y="first_choice_numeric", ax=ax, valueType=value_type)
+        elif sound_location is not None:
+            # loudness of the sound, positive on the left
+            plots.psychometric_plot(
+                sound_location.dropna(subset=["sound_location_db"]),
+                x="sound_location_db",
+                y="first_choice_numeric",
+                ax=ax,
+                valueType="continue",
+            )
+            ax.set_xlabel("Sound level (dB SPL, + left / - right)")
+        else:
+            # only easy trials, or no stimulus value: choices by side and difficulty
+            df["side_difficulty"] = df.apply(side_and_difficulty_to_numeric, axis=1)
+            plots.choice_by_difficulty_plot(df, ax=ax)
         ax.set_title(f"choices on {modality} trials")
         if ax.get_legend() is not None:
             ax.get_legend().remove()

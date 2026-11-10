@@ -28,23 +28,49 @@ SUBJECT_PROGRESS = Layout(
 
 SUMMARY_MATRIX_ROW = Row([(p.summary_matrix, 1)])
 
-SESSION_SUMMARY = Layout(
-    rows=[
-        Row([(p.session_summary_text, 2), (p.session_performance, 2), (p.correct_responses, 1)]),
-        Row(
-            [
-                (p.repeat_or_alternate, 1),
-                (p.psychometric("visual"), 1),
-                (p.psychometric("auditory-cot"), 1),
-                (p.center_pokes_histogram, 1),
-                (p.center_hold_histogram, 1),
-            ]
-        ),
-        Row([(p.trial_start_times, 1), (p.reaction_times_in_session, 1)]),
-    ],
-    width=15,
-    height=10,
-)
+# order of the psychometric panels of the session summary
+MODALITY_ORDER = ("visual", "auditory-cot", "auditory-local-wn")
+
+
+def session_modalities(df: pd.DataFrame) -> List[str]:
+    """
+    Stimulus modalities of the trials (not habituation) of a prepared
+    dataframe, in MODALITY_ORDER (others after, alphabetically).
+    """
+    if "stimulus_modality" not in df.columns:
+        return []
+    trials = df[df["task"] != "Habituation"] if "task" in df.columns else df
+    present = {
+        m for m in trials["stimulus_modality"].dropna().unique() if m not in ("not saved", "none", "multisensory")
+    }
+    return [m for m in MODALITY_ORDER if m in present] + sorted(present - set(MODALITY_ORDER))
+
+
+def session_summary_layout(modalities: List[str]) -> Layout:
+    """
+    Layout of the session summary with one psychometric panel per modality
+    (several in multisensory sessions). With one (or none), the performance
+    by repeat / alternate on its left takes the space of the second one.
+    """
+    psychometrics = [(p.psychometric(m), 1) for m in modalities] or [(p.psychometric("visual"), 1)]
+    repeat_width = 2 if len(psychometrics) == 1 else 1
+    return Layout(
+        rows=[
+            Row([(p.session_summary_text, 2), (p.session_performance, 2), (p.correct_responses, 1)]),
+            Row(
+                [(p.repeat_or_alternate, repeat_width)]
+                + psychometrics
+                + [(p.center_pokes_histogram, 1), (p.center_hold_histogram, 1)]
+            ),
+            Row([(p.trial_start_times, 1), (p.reaction_times_in_session, 1)]),
+        ],
+        width=15,
+        height=10,
+    )
+
+
+# with the two modalities of the multisensory task
+SESSION_SUMMARY = session_summary_layout(["visual", "auditory-cot"])
 
 
 def subject_progress(
@@ -93,5 +119,7 @@ def session_summary(
         perf_hue: column that colors the performance (default: training stage
             if there are several, otherwise stimulus modality).
     """
-    data = FigureData(prepare(df), perf_window=perf_window, perf_hue=perf_hue)
-    return render(SESSION_SUMMARY, data, width=width, height=height)
+    prepared = prepare(df)
+    data = FigureData(prepared, perf_window=perf_window, perf_hue=perf_hue)
+    layout = session_summary_layout(session_modalities(prepared))
+    return render(layout, data, width=width, height=height)

@@ -152,3 +152,72 @@ def test_a_failing_panel_does_not_stop_the_figure():
     assert "No trials in this modality" in texts
     # the working panel was drawn
     assert any(len(ax.lines) == 1 for ax in fig.axes)
+
+
+# psychometric panels: one per modality ----------------------------------------
+def _psychometric_axes(fig):
+    return [ax for ax in fig.axes if ax.get_title().startswith("choices on")]
+
+
+def _sound_location_day(raw_trials, modality="auditory_locaPT", with_level=True):
+    """A day of real trials made into sound location trials (old name), with medium and hard trials."""
+    day = raw_trials[raw_trials["date"].dt.strftime("%Y-%m-%d") == "2026-01-05"].copy()
+    rng = np.random.default_rng(0)
+    level = rng.uniform(40, 70, len(day))
+    day["stimulus_modality"] = modality
+    day["current_training_stage"] = f"TwoAFC_{modality}_hard"
+    day["difficulty"] = np.where(level > 55, "medium", "hard")
+    if with_level:
+        day["auditory_stimulus"] = [str({"frequency_hz": 1000, "sound_db_spl": round(v, 1)}) for v in level]
+    else:
+        day["auditory_stimulus"] = [str({"frequency_hz": 1000}) for _ in level]
+    return day
+
+
+def test_old_sound_location_name_is_read_as_the_current_one(raw_trials):
+    from lecilab_behavior_analysis.preprocessing import prepare
+
+    prepared = prepare(_sound_location_day(raw_trials))
+    assert set(prepared["stimulus_modality"]) == {"auditory-local-wn"}
+    assert set(prepared["current_training_stage"]) == {"TwoAFC_auditory-local-wn_hard"}
+
+
+def test_one_psychometric_panel_for_one_modality(raw_trials):
+    from lecilab_behavior_analysis.figures.layouts import session_modalities, session_summary_layout
+
+    fig = fm.session_summary_figure(_sound_location_day(raw_trials))
+    assert _problems(fig) == []
+    psychometric = _psychometric_axes(fig)
+    assert [ax.get_title() for ax in psychometric] == ["choices on auditory-local-wn trials"]
+    assert psychometric[0].get_xlabel().startswith("Sound level")
+    assert len(psychometric[0].lines) + len(psychometric[0].collections) > 0
+    # the repeat / alternate panel takes the place of the second psychometric panel
+    layout = session_summary_layout(["auditory-local-wn"])
+    widths = dict((cell.name, width) for cell, width in layout.rows[1].cells)
+    assert widths["repeat or alternate plot"] == 2 and len(layout.rows[1].cells) == 4
+    assert session_modalities(
+        pd.DataFrame({"task": ["TwoAFC"] * 2, "stimulus_modality": ["visual", "auditory-cot"]})
+    ) == ["visual", "auditory-cot"]
+
+
+def test_sound_location_without_saved_level(raw_trials):
+    fig = fm.session_summary_figure(_sound_location_day(raw_trials, with_level=False))
+    assert _problems(fig) == []
+    assert len(_psychometric_axes(fig)) == 1
+
+
+def test_two_psychometric_panels_for_two_modalities(raw_trials):
+    day = raw_trials[raw_trials["date"].dt.strftime("%Y-%m-%d") == "2026-01-05"].copy()
+    day["stimulus_modality"] = np.where(np.arange(len(day)) % 2 == 0, "visual", "auditory")
+    fig = fm.session_summary_figure(day)
+    assert sorted(ax.get_title() for ax in _psychometric_axes(fig)) == [
+        "choices on auditory-cot trials",
+        "choices on visual trials",
+    ]
+
+
+def test_first_sound_location_name_is_read_as_the_current_one():
+    from lecilab_behavior_analysis.data_format_changes import normalize_modality, normalize_stage
+
+    assert normalize_modality("auditory_loca") == "auditory-local-wn"
+    assert normalize_stage("TwoAFC_auditory_loca_easy") == "TwoAFC_auditory-local-wn_easy"

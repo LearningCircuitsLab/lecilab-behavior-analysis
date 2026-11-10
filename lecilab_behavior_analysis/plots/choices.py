@@ -51,9 +51,10 @@ def psychometric_plot(
         ax.set_xlabel("log_" + x)
     else:
         # bin the continuous values when valueType is not discrete
+        # each value is replaced by the mean of its bin (bins may be empty,
+        # e.g. sound levels never close to 0)
         bin_groups = pd.cut(df_copy[x], bins=bins)
-        labels = df_copy[x].groupby(bin_groups, observed=True).mean()
-        df_copy[x + "_fit"] = pd.cut(df_copy[x], bins=bins, labels=labels).astype(float)
+        df_copy[x + "_fit"] = df_copy[x].groupby(bin_groups, observed=True).transform("mean").astype(float)
         # df_copy[x + "_fit"] = np.sign(df_copy[x + "_fit"]) * (np.log(abs(df_copy[x + "_fit"]*10)).round(4))
         # ax.set_xlabel("log_" + x + "*10")
         ax.set_xlabel(x + " (binned)")
