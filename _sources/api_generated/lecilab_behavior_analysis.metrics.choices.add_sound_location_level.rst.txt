@@ -1,0 +1,6 @@
+add\_sound\_location\_level
+===========================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: add_sound_location_level

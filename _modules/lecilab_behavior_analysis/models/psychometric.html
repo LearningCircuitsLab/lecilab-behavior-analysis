@@ -122,6 +122,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_mouse_last_choice.html">add_mouse_last_choice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_port_where_animal_comes_from.html">add_port_where_animal_comes_from</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric.html">add_repeat_or_alternate_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_sound_location_level.html">add_sound_location_level</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html">add_visual_stimulus_difference</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html">create_transition_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html">get_bias_evolution_df</a></li>
@@ -303,7 +304,9 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.html">figures</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.html">layouts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.session_modalities.html">session_modalities</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.session_summary.html">session_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.session_summary_layout.html">session_summary_layout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../api_generated/lecilab_behavior_analysis.figures.layouts.subject_progress.html">subject_progress</a></li>
 </ul>
 </li>
@@ -465,11 +468,12 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="65">        <span class="n">df_copy</span><span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="s2">"_fit"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">df_copy</span><span class="p">[</span><span class="n">x</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">df_copy</span><span class="p">[</span><span class="n">x</span><span class="p">]))</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
 </span><span data-line="66">    <span class="k">else</span><span class="p">:</span>
 </span><span data-line="67">        <span class="c1"># bin the continuous values when valueType is not discrete</span>
-</span><span data-line="68">        <span class="n">bin_groups</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">df_copy</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
-</span><span data-line="69">        <span class="n">labels</span> <span class="o">=</span> <span class="n">df_copy</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">bin_groups</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-</span><span data-line="70">        <span class="n">df_copy</span><span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="s2">"_fit"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">df_copy</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-</span><span data-line="71">    <span class="n">p_left</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="n">fit_lapse_logistic_independent</span><span class="p">(</span><span class="n">df_copy</span><span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="s2">"_fit"</span><span class="p">],</span> <span class="n">df_copy</span><span class="p">[</span><span class="n">y</span><span class="p">])</span>
-</span><span data-line="72">    <span class="k">return</span> <span class="n">p_left</span><span class="p">,</span> <span class="n">params</span></div>
+</span><span data-line="68">        <span class="c1"># each value is replaced by the mean of its bin (bins may be empty,</span>
+</span><span data-line="69">        <span class="c1"># e.g. sound levels never close to 0)</span>
+</span><span data-line="70">        <span class="n">bin_groups</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">df_copy</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
+</span><span data-line="71">        <span class="n">df_copy</span><span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="s2">"_fit"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_copy</span><span class="p">[</span><span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">bin_groups</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s2">"mean"</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+</span><span data-line="72">    <span class="n">p_left</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="n">fit_lapse_logistic_independent</span><span class="p">(</span><span class="n">df_copy</span><span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="s2">"_fit"</span><span class="p">],</span> <span class="n">df_copy</span><span class="p">[</span><span class="n">y</span><span class="p">])</span>
+</span><span data-line="73">    <span class="k">return</span> <span class="n">p_left</span><span class="p">,</span> <span class="n">params</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -501,7 +505,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../../_static/documentation_options.js?v=2361992e"></script>
+      <script src="../../../_static/documentation_options.js?v=b99ddeff"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../_static/shibuya.js?v=50760d75"></script></body>

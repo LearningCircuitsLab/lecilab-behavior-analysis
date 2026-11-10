@@ -122,6 +122,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_mouse_last_choice.html">add_mouse_last_choice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_port_where_animal_comes_from.html">add_port_where_animal_comes_from</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric.html">add_repeat_or_alternate_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_sound_location_level.html">add_sound_location_level</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html">add_visual_stimulus_difference</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html">create_transition_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html">get_bias_evolution_df</a></li>
@@ -303,7 +304,9 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l2"><a class="reference internal" href="lecilab_behavior_analysis.figures.html">figures</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.html">layouts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_modalities.html">session_modalities</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary.html">session_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary_layout.html">session_summary_layout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.subject_progress.html">subject_progress</a></li>
 </ul>
 </li>
@@ -448,43 +451,46 @@ psychometric data (visual and cloud of tones) and model regressors.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric.html#lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric" title="lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_repeat_or_alternate_numeric</span></code></a></p></td>
 <td><p>Adds roa_choice_numeric: 0 if the animal alternated, -1 if it repeated to the left, 1 if it repeated to the right (NaN otherwise).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html#lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference" title="lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_visual_stimulus_difference</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_sound_location_level.html#lecilab_behavior_analysis.metrics.choices.add_sound_location_level" title="lecilab_behavior_analysis.metrics.choices.add_sound_location_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_sound_location_level</span></code></a></p></td>
+<td><p>Adds sound_location_db: loudness of the sound of a sound location trial (auditory-local-wn), positive if it came from the left and negative if from the right (the side in auditory_output_side, or the correct side, as the sound plays on the side of the reward).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html#lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference" title="lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_visual_stimulus_difference</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html#lecilab_behavior_analysis.metrics.choices.create_transition_matrix" title="lecilab_behavior_analysis.metrics.choices.create_transition_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_transition_matrix</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html#lecilab_behavior_analysis.metrics.choices.create_transition_matrix" title="lecilab_behavior_analysis.metrics.choices.create_transition_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_transition_matrix</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html#lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df" title="lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bias_evolution_df</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html#lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df" title="lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_bias_evolution_df</span></code></a></p></td>
 <td><p>Gets how the bias of the animals (alternating, right bias, or left bias) evolves over time.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_choice_before.html#lecilab_behavior_analysis.metrics.choices.get_choice_before" title="lecilab_behavior_analysis.metrics.choices.get_choice_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_choice_before</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_choice_before.html#lecilab_behavior_analysis.metrics.choices.get_choice_before" title="lecilab_behavior_analysis.metrics.choices.get_choice_before"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_choice_before</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_left_auditory_stim.html#lecilab_behavior_analysis.metrics.choices.get_left_auditory_stim" title="lecilab_behavior_analysis.metrics.choices.get_left_auditory_stim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_left_auditory_stim</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_left_auditory_stim.html#lecilab_behavior_analysis.metrics.choices.get_left_auditory_stim" title="lecilab_behavior_analysis.metrics.choices.get_left_auditory_stim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_left_auditory_stim</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_left_choice.html#lecilab_behavior_analysis.metrics.choices.get_left_choice" title="lecilab_behavior_analysis.metrics.choices.get_left_choice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_left_choice</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_left_choice.html#lecilab_behavior_analysis.metrics.choices.get_left_choice" title="lecilab_behavior_analysis.metrics.choices.get_left_choice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_left_choice</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_diff.html#lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_diff" title="lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_performance_by_difficulty_diff</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_diff.html#lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_diff" title="lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_performance_by_difficulty_diff</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_ratio.html#lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_ratio" title="lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_performance_by_difficulty_ratio</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_ratio.html#lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_ratio" title="lecilab_behavior_analysis.metrics.choices.get_performance_by_difficulty_ratio"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_performance_by_difficulty_ratio</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_time_kernel_impact.html#lecilab_behavior_analysis.metrics.choices.get_time_kernel_impact" title="lecilab_behavior_analysis.metrics.choices.get_time_kernel_impact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_time_kernel_impact</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_time_kernel_impact.html#lecilab_behavior_analysis.metrics.choices.get_time_kernel_impact" title="lecilab_behavior_analysis.metrics.choices.get_time_kernel_impact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_time_kernel_impact</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_triangle_polar_plot_df.html#lecilab_behavior_analysis.metrics.choices.get_triangle_polar_plot_df" title="lecilab_behavior_analysis.metrics.choices.get_triangle_polar_plot_df"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_triangle_polar_plot_df</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_triangle_polar_plot_df.html#lecilab_behavior_analysis.metrics.choices.get_triangle_polar_plot_df" title="lecilab_behavior_analysis.metrics.choices.get_triangle_polar_plot_df"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_triangle_polar_plot_df</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.parameters_for_fit.html#lecilab_behavior_analysis.metrics.choices.parameters_for_fit" title="lecilab_behavior_analysis.metrics.choices.parameters_for_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameters_for_fit</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.parameters_for_fit.html#lecilab_behavior_analysis.metrics.choices.parameters_for_fit" title="lecilab_behavior_analysis.metrics.choices.parameters_for_fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameters_for_fit</span></code></a></p></td>
 <td><p>Get the parameters for the fit</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.points_to_lines_for_bias_evolution.html#lecilab_behavior_analysis.metrics.choices.points_to_lines_for_bias_evolution" title="lecilab_behavior_analysis.metrics.choices.points_to_lines_for_bias_evolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">points_to_lines_for_bias_evolution</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.points_to_lines_for_bias_evolution.html#lecilab_behavior_analysis.metrics.choices.points_to_lines_for_bias_evolution" title="lecilab_behavior_analysis.metrics.choices.points_to_lines_for_bias_evolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">points_to_lines_for_bias_evolution</span></code></a></p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.previous_impact_on_time_kernel.html#lecilab_behavior_analysis.metrics.choices.previous_impact_on_time_kernel" title="lecilab_behavior_analysis.metrics.choices.previous_impact_on_time_kernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">previous_impact_on_time_kernel</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.previous_impact_on_time_kernel.html#lecilab_behavior_analysis.metrics.choices.previous_impact_on_time_kernel" title="lecilab_behavior_analysis.metrics.choices.previous_impact_on_time_kernel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">previous_impact_on_time_kernel</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -535,7 +541,7 @@ psychometric data (visual and cloud of tones) and model regressors.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=2361992e"></script>
+      <script src="../_static/documentation_options.js?v=b99ddeff"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/shibuya.js?v=50760d75"></script></body>

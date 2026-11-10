@@ -16,7 +16,9 @@ layouts
       :recursive:
       :nosignatures:
    
+      session_modalities
       session_summary
+      session_summary_layout
       subject_progress
    
 

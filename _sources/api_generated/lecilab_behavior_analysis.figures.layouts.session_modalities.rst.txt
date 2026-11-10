@@ -1,0 +1,6 @@
+session\_modalities
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.figures.layouts
+
+.. autofunction:: session_modalities

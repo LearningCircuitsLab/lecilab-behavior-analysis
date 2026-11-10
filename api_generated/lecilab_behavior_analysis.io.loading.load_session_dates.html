@@ -122,6 +122,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_mouse_last_choice.html">add_mouse_last_choice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_port_where_animal_comes_from.html">add_port_where_animal_comes_from</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric.html">add_repeat_or_alternate_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_sound_location_level.html">add_sound_location_level</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html">add_visual_stimulus_difference</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html">create_transition_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html">get_bias_evolution_df</a></li>
@@ -303,7 +304,9 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l2"><a class="reference internal" href="lecilab_behavior_analysis.figures.html">figures</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.html">layouts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_modalities.html">session_modalities</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary.html">session_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary_layout.html">session_summary_layout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.subject_progress.html">subject_progress</a></li>
 </ul>
 </li>
@@ -440,13 +443,15 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py function">
 <dt class="sig sig-object py" id="lecilab_behavior_analysis.io.loading.load_session_dates">
 <span class="sig-name descname"><span class="pre">load_session_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subjects</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/lecilab_behavior_analysis/io/loading.html#load_session_dates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lecilab_behavior_analysis.io.loading.load_session_dates" title="Link to this definition">#</a></dt>
-<dd><p>Start of every session of some subjects of a project: columns subject and
-date (datetime), sorted by date. It tells when new data was collected
-(the boxes send each session to the data folder).</p>
+<dd><p>Start of every session of some subjects of a project: columns subject,
+date (datetime) and setup (the box), sorted by date. It tells when new
+data was collected, and where (the boxes send each session to the data
+folder).</p>
 <p>Read from the sessions summaries of every setup of the project (only the
 given subjects: a box can hold subjects of other projects). Subjects that
 are in no sessions summary are read from the date column of their trials
-file instead. Subjects without data are left out.</p>
+file instead (the setup is then its system_name column, or None).
+Subjects without data are left out.</p>
 </dd></dl>
 
 </section>
@@ -494,7 +499,7 @@ file instead. Subjects without data are left out.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=2361992e"></script>
+      <script src="../_static/documentation_options.js?v=b99ddeff"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/shibuya.js?v=50760d75"></script></body>

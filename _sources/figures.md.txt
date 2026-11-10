@@ -14,7 +14,11 @@ events).
 
 ## Summary of a session
 
-`figures.session_summary(df_of_one_day, perf_window=50)`.
+`figures.session_summary(df_of_one_day, perf_window=50)`. It has one
+psychometric panel per stimulus modality of the trials (two in multisensory
+sessions); with only one, the performance by repeat / alternate on its left
+is wider. Sound location trials (`auditory-local-wn`) are plotted against the
+sound level, positive for sounds on the left.
 
 ![Session summary](_static/examples/session_summary.png)
 

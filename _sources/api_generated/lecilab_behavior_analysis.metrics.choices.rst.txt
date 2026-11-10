@@ -20,6 +20,7 @@ choices
       add_mouse_last_choice
       add_port_where_animal_comes_from
       add_repeat_or_alternate_numeric
+      add_sound_location_level
       add_visual_stimulus_difference
       create_transition_matrix
       get_bias_evolution_df

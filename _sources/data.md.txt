@@ -23,7 +23,8 @@ column above. `prepare` only adds what is missing.
 
 The tasks have changed what some columns mean over time (for example,
 `visual_stimulus` went from (correct, incorrect) to (left, right) on
-2026-11-09, and timeouts are saved with `correct` empty). Old rows cannot be
+2026-11-09, timeouts are saved with `correct` empty, and old modality names
+such as `auditory_cot` or `auditory_locaPT` are read as the current ones). Old rows cannot be
 rewritten, so every change is described, with its date and the function that
 reads both versions, in `data_format_changes.py`. Add new changes there.
 

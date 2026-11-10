@@ -122,6 +122,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.metrics.choices.add_mouse_last_choice.html">add_mouse_last_choice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.metrics.choices.add_port_where_animal_comes_from.html">add_port_where_animal_comes_from</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric.html">add_repeat_or_alternate_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.metrics.choices.add_sound_location_level.html">add_sound_location_level</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html">add_visual_stimulus_difference</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html">create_transition_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html">get_bias_evolution_df</a></li>
@@ -303,7 +304,9 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.figures.html">figures</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.figures.layouts.html">layouts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.figures.layouts.session_modalities.html">session_modalities</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.figures.layouts.session_summary.html">session_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.figures.layouts.session_summary_layout.html">session_summary_layout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../api_generated/lecilab_behavior_analysis.figures.layouts.subject_progress.html">subject_progress</a></li>
 </ul>
 </li>
@@ -554,100 +557,107 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="150"><span class="c1"># Before: stimulus_modality "auditory" (main / new_tv versions of the task) or</span>
 </span><span data-line="151"><span class="c1">#         "auditory_cot" and "auditory_local_wn" (nuo_dev version), and stages</span>
 </span><span data-line="152"><span class="c1">#         such as "TwoAFC_auditory_easy" or "TwoAFC_auditory_cot_easy".</span>
-</span><span data-line="153"><span class="c1"># After:  "auditory-cot" (cloud of tones) and "auditory-local-wn" (white noise</span>
-</span><span data-line="154"><span class="c1">#         from the side of the reward), and stages such as</span>
-</span><span data-line="155"><span class="c1">#         "TwoAFC_auditory-cot_easy".</span>
-</span><span data-line="156"><span class="c1">#</span>
-</span><span data-line="157"><span class="c1"># Why: a second auditory modality (sound location with white noise) was added,</span>
-</span><span data-line="158"><span class="c1"># so "auditory" alone became ambiguous. Hyphens are used inside modality names</span>
-</span><span data-line="159"><span class="c1"># because underscores separate the parts of a stage name:</span>
-</span><span data-line="160"><span class="c1"># TwoAFC_&lt;modality&gt;_&lt;difficulty&gt;. "visual" and "multisensory" did not change.</span>
+</span><span data-line="153"><span class="c1">#         A version used in the project frequency_vs_locationPureTone (e.g.</span>
+</span><span data-line="154"><span class="c1">#         NUO066-NUO077) called the sound location modality "auditory_locaPT"</span>
+</span><span data-line="155"><span class="c1">#         (location, pure tone; a few first trials "auditory_loca"): it is the</span>
+</span><span data-line="156"><span class="c1">#         current sound location modality, with the same auditory_stimulus</span>
+</span><span data-line="157"><span class="c1">#         (sound_db_spl...).</span>
+</span><span data-line="158"><span class="c1"># After:  "auditory-cot" (cloud of tones) and "auditory-local-wn" (white noise</span>
+</span><span data-line="159"><span class="c1">#         from the side of the reward), and stages such as</span>
+</span><span data-line="160"><span class="c1">#         "TwoAFC_auditory-cot_easy".</span>
 </span><span data-line="161"><span class="c1">#</span>
-</span><span data-line="162"><span class="c1"># How to read both: normalize the names with the functions below (done in</span>
-</span><span data-line="163"><span class="c1"># preprocessing.fill_missing_data), and compare only with the new names.</span>
-</span><span data-line="164"><span class="n">LEGACY_MODALITY_NAMES</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="165">    <span class="s2">"auditory"</span><span class="p">:</span> <span class="s2">"auditory-cot"</span><span class="p">,</span>
-</span><span data-line="166">    <span class="s2">"auditory_cot"</span><span class="p">:</span> <span class="s2">"auditory-cot"</span><span class="p">,</span>
-</span><span data-line="167">    <span class="s2">"auditory_local_wn"</span><span class="p">:</span> <span class="s2">"auditory-local-wn"</span><span class="p">,</span>
-</span><span data-line="168"><span class="p">}</span>
-</span><span data-line="169">
-</span><span data-line="170">
-<div class="viewcode-block" id="normalize_modality">
-<a class="viewcode-back" href="../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_modality.html#lecilab_behavior_analysis.data_format_changes.normalize_modality">[docs]</a>
-</span><span data-line="171"><span class="k">def</span><span class="w"> </span><span class="nf">normalize_modality</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span data-line="172"><span class="w">    </span><span class="sd">"""Returns the current name of a modality (other values are returned as they are)."""</span>
-</span><span data-line="173">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="174">        <span class="k">return</span> <span class="n">LEGACY_MODALITY_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-</span><span data-line="175">    <span class="k">return</span> <span class="n">name</span></div>
-
+</span><span data-line="162"><span class="c1"># Why: a second auditory modality (sound location with white noise) was added,</span>
+</span><span data-line="163"><span class="c1"># so "auditory" alone became ambiguous. Hyphens are used inside modality names</span>
+</span><span data-line="164"><span class="c1"># because underscores separate the parts of a stage name:</span>
+</span><span data-line="165"><span class="c1"># TwoAFC_&lt;modality&gt;_&lt;difficulty&gt;. "visual" and "multisensory" did not change.</span>
+</span><span data-line="166"><span class="c1">#</span>
+</span><span data-line="167"><span class="c1"># How to read both: normalize the names with the functions below (done in</span>
+</span><span data-line="168"><span class="c1"># preprocessing.fill_missing_data), and compare only with the new names.</span>
+</span><span data-line="169"><span class="n">LEGACY_MODALITY_NAMES</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="170">    <span class="s2">"auditory"</span><span class="p">:</span> <span class="s2">"auditory-cot"</span><span class="p">,</span>
+</span><span data-line="171">    <span class="s2">"auditory_cot"</span><span class="p">:</span> <span class="s2">"auditory-cot"</span><span class="p">,</span>
+</span><span data-line="172">    <span class="s2">"auditory_local_wn"</span><span class="p">:</span> <span class="s2">"auditory-local-wn"</span><span class="p">,</span>
+</span><span data-line="173">    <span class="s2">"auditory_locaPT"</span><span class="p">:</span> <span class="s2">"auditory-local-wn"</span><span class="p">,</span>
+</span><span data-line="174">    <span class="s2">"auditory_loca"</span><span class="p">:</span> <span class="s2">"auditory-local-wn"</span><span class="p">,</span>
+</span><span data-line="175"><span class="p">}</span>
 </span><span data-line="176">
 </span><span data-line="177">
+<div class="viewcode-block" id="normalize_modality">
+<a class="viewcode-back" href="../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_modality.html#lecilab_behavior_analysis.data_format_changes.normalize_modality">[docs]</a>
+</span><span data-line="178"><span class="k">def</span><span class="w"> </span><span class="nf">normalize_modality</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span data-line="179"><span class="w">    </span><span class="sd">"""Returns the current name of a modality (other values are returned as they are)."""</span>
+</span><span data-line="180">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="181">        <span class="k">return</span> <span class="n">LEGACY_MODALITY_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</span><span data-line="182">    <span class="k">return</span> <span class="n">name</span></div>
+
+</span><span data-line="183">
+</span><span data-line="184">
 <div class="viewcode-block" id="normalize_stage">
 <a class="viewcode-back" href="../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_stage.html#lecilab_behavior_analysis.data_format_changes.normalize_stage">[docs]</a>
-</span><span data-line="178"><span class="k">def</span><span class="w"> </span><span class="nf">normalize_stage</span><span class="p">(</span><span class="n">stage</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span data-line="179"><span class="w">    </span><span class="sd">"""Returns the current name of a training stage, e.g.</span>
-</span><span data-line="180"><span class="sd">    "TwoAFC_auditory_cot_easy" or "TwoAFC_auditory_easy" -&gt; "TwoAFC_auditory-cot_easy"."""</span>
-</span><span data-line="181">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stage</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">stage</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"TwoAFC_"</span><span class="p">):</span>
-</span><span data-line="182">        <span class="k">return</span> <span class="n">stage</span>
-</span><span data-line="183">    <span class="n">rest</span> <span class="o">=</span> <span class="n">stage</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">"TwoAFC_"</span><span class="p">)</span> <span class="p">:]</span>
-</span><span data-line="184">    <span class="k">for</span> <span class="n">difficulty</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"easy"</span><span class="p">,</span> <span class="s2">"hard"</span><span class="p">):</span>
-</span><span data-line="185">        <span class="n">suffix</span> <span class="o">=</span> <span class="s2">"_"</span> <span class="o">+</span> <span class="n">difficulty</span>
-</span><span data-line="186">        <span class="k">if</span> <span class="n">rest</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suffix</span><span class="p">):</span>
-</span><span data-line="187">            <span class="n">modality</span> <span class="o">=</span> <span class="n">rest</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">suffix</span><span class="p">)]</span>
-</span><span data-line="188">            <span class="k">return</span> <span class="s2">"TwoAFC_"</span> <span class="o">+</span> <span class="n">normalize_modality</span><span class="p">(</span><span class="n">modality</span><span class="p">)</span> <span class="o">+</span> <span class="n">suffix</span>
-</span><span data-line="189">    <span class="k">return</span> <span class="n">stage</span></div>
+</span><span data-line="185"><span class="k">def</span><span class="w"> </span><span class="nf">normalize_stage</span><span class="p">(</span><span class="n">stage</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span data-line="186"><span class="w">    </span><span class="sd">"""Returns the current name of a training stage, e.g.</span>
+</span><span data-line="187"><span class="sd">    "TwoAFC_auditory_cot_easy" or "TwoAFC_auditory_easy" -&gt; "TwoAFC_auditory-cot_easy"."""</span>
+</span><span data-line="188">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stage</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">stage</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"TwoAFC_"</span><span class="p">):</span>
+</span><span data-line="189">        <span class="k">return</span> <span class="n">stage</span>
+</span><span data-line="190">    <span class="n">rest</span> <span class="o">=</span> <span class="n">stage</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">"TwoAFC_"</span><span class="p">)</span> <span class="p">:]</span>
+</span><span data-line="191">    <span class="k">for</span> <span class="n">difficulty</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"easy"</span><span class="p">,</span> <span class="s2">"hard"</span><span class="p">):</span>
+</span><span data-line="192">        <span class="n">suffix</span> <span class="o">=</span> <span class="s2">"_"</span> <span class="o">+</span> <span class="n">difficulty</span>
+</span><span data-line="193">        <span class="k">if</span> <span class="n">rest</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suffix</span><span class="p">):</span>
+</span><span data-line="194">            <span class="n">modality</span> <span class="o">=</span> <span class="n">rest</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">suffix</span><span class="p">)]</span>
+</span><span data-line="195">            <span class="k">return</span> <span class="s2">"TwoAFC_"</span> <span class="o">+</span> <span class="n">normalize_modality</span><span class="p">(</span><span class="n">modality</span><span class="p">)</span> <span class="o">+</span> <span class="n">suffix</span>
+</span><span data-line="196">    <span class="k">return</span> <span class="n">stage</span></div>
 
-</span><span data-line="190">
-</span><span data-line="191">
+</span><span data-line="197">
+</span><span data-line="198">
 <div class="viewcode-block" id="normalize_task_names">
 <a class="viewcode-back" href="../../api_generated/lecilab_behavior_analysis.data_format_changes.normalize_task_names.html#lecilab_behavior_analysis.data_format_changes.normalize_task_names">[docs]</a>
-</span><span data-line="192"><span class="k">def</span><span class="w"> </span><span class="nf">normalize_task_names</span><span class="p">(</span><span class="n">df_in</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-</span><span data-line="193"><span class="w">    </span><span class="sd">"""Normalizes the stimulus_modality and current_training_stage columns, if present."""</span>
-</span><span data-line="194">    <span class="n">df</span> <span class="o">=</span> <span class="n">df_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-</span><span data-line="195">    <span class="k">if</span> <span class="s2">"stimulus_modality"</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-</span><span data-line="196">        <span class="n">df</span><span class="p">[</span><span class="s2">"stimulus_modality"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"stimulus_modality"</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">normalize_modality</span><span class="p">)</span>
-</span><span data-line="197">    <span class="k">if</span> <span class="s2">"current_training_stage"</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-</span><span data-line="198">        <span class="n">df</span><span class="p">[</span><span class="s2">"current_training_stage"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"current_training_stage"</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">normalize_stage</span><span class="p">)</span>
-</span><span data-line="199">    <span class="k">return</span> <span class="n">df</span></div>
+</span><span data-line="199"><span class="k">def</span><span class="w"> </span><span class="nf">normalize_task_names</span><span class="p">(</span><span class="n">df_in</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+</span><span data-line="200"><span class="w">    </span><span class="sd">"""Normalizes the stimulus_modality and current_training_stage columns, if present."""</span>
+</span><span data-line="201">    <span class="n">df</span> <span class="o">=</span> <span class="n">df_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+</span><span data-line="202">    <span class="k">if</span> <span class="s2">"stimulus_modality"</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+</span><span data-line="203">        <span class="n">df</span><span class="p">[</span><span class="s2">"stimulus_modality"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"stimulus_modality"</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">normalize_modality</span><span class="p">)</span>
+</span><span data-line="204">    <span class="k">if</span> <span class="s2">"current_training_stage"</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+</span><span data-line="205">        <span class="n">df</span><span class="p">[</span><span class="s2">"current_training_stage"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"current_training_stage"</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">normalize_stage</span><span class="p">)</span>
+</span><span data-line="206">    <span class="k">return</span> <span class="n">df</span></div>
 
-</span><span data-line="200">
-</span><span data-line="201">
-</span><span data-line="202"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="203"><span class="c1"># 3. correct can be None (timeouts)</span>
-</span><span data-line="204"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="205"><span class="c1"># Before: correct was True or False on every trial. A trial in which the mouse</span>
-</span><span data-line="206"><span class="c1">#         did not choose a side counted as False.</span>
-</span><span data-line="207"><span class="c1"># After:  correct is</span>
-</span><span data-line="208"><span class="c1">#         - True / False: the first side poke was correct / incorrect,</span>
-</span><span data-line="209"><span class="c1">#         - False: early withdrawal from the center port that ended the trial,</span>
-</span><span data-line="210"><span class="c1">#         - None (empty in the .csv): timeout, the mouse did not choose a side.</span>
-</span><span data-line="211"><span class="c1">#</span>
-</span><span data-line="212"><span class="c1"># Why: a timeout is not a wrong choice. The task's anti-bias and the training</span>
-</span><span data-line="213"><span class="c1"># protocol (which uses the mean of correct per day) leave timeouts out.</span>
-</span><span data-line="214"><span class="c1">#</span>
-</span><span data-line="215"><span class="c1"># How the analysis treats them (decision of 2026-11-09):</span>
-</span><span data-line="216"><span class="c1"># - Session performance (correct trials / all trials, e.g. in the session</span>
-</span><span data-line="217"><span class="c1">#   summary) keeps counting timeouts as errors.</span>
-</span><span data-line="218"><span class="c1"># - Functions that take the mean of correct (e.g. get_day_performance) skip them,</span>
-</span><span data-line="219"><span class="c1">#   as the training protocol does.</span>
-</span><span data-line="220"><span class="c1"># - Plots must not fail on empty values; COUNT_TIMEOUTS_AS_ERRORS says how to</span>
-</span><span data-line="221"><span class="c1">#   treat them when a number is needed.</span>
-</span><span data-line="222"><span class="n">CORRECT_CAN_BE_NONE_SINCE</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="s2">"2026-11-09"</span><span class="p">)</span>
-</span><span data-line="223"><span class="n">COUNT_TIMEOUTS_AS_ERRORS</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span data-line="224">
-</span><span data-line="225">
+</span><span data-line="207">
+</span><span data-line="208">
+</span><span data-line="209"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="210"><span class="c1"># 3. correct can be None (timeouts)</span>
+</span><span data-line="211"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="212"><span class="c1"># Before: correct was True or False on every trial. A trial in which the mouse</span>
+</span><span data-line="213"><span class="c1">#         did not choose a side counted as False.</span>
+</span><span data-line="214"><span class="c1"># After:  correct is</span>
+</span><span data-line="215"><span class="c1">#         - True / False: the first side poke was correct / incorrect,</span>
+</span><span data-line="216"><span class="c1">#         - False: early withdrawal from the center port that ended the trial,</span>
+</span><span data-line="217"><span class="c1">#         - None (empty in the .csv): timeout, the mouse did not choose a side.</span>
+</span><span data-line="218"><span class="c1">#</span>
+</span><span data-line="219"><span class="c1"># Why: a timeout is not a wrong choice. The task's anti-bias and the training</span>
+</span><span data-line="220"><span class="c1"># protocol (which uses the mean of correct per day) leave timeouts out.</span>
+</span><span data-line="221"><span class="c1">#</span>
+</span><span data-line="222"><span class="c1"># How the analysis treats them (decision of 2026-11-09):</span>
+</span><span data-line="223"><span class="c1"># - Session performance (correct trials / all trials, e.g. in the session</span>
+</span><span data-line="224"><span class="c1">#   summary) keeps counting timeouts as errors.</span>
+</span><span data-line="225"><span class="c1"># - Functions that take the mean of correct (e.g. get_day_performance) skip them,</span>
+</span><span data-line="226"><span class="c1">#   as the training protocol does.</span>
+</span><span data-line="227"><span class="c1"># - Plots must not fail on empty values; COUNT_TIMEOUTS_AS_ERRORS says how to</span>
+</span><span data-line="228"><span class="c1">#   treat them when a number is needed.</span>
+</span><span data-line="229"><span class="n">CORRECT_CAN_BE_NONE_SINCE</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="s2">"2026-11-09"</span><span class="p">)</span>
+</span><span data-line="230"><span class="n">COUNT_TIMEOUTS_AS_ERRORS</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="231">
+</span><span data-line="232">
 <div class="viewcode-block" id="correct_as_number">
 <a class="viewcode-back" href="../../api_generated/lecilab_behavior_analysis.data_format_changes.correct_as_number.html#lecilab_behavior_analysis.data_format_changes.correct_as_number">[docs]</a>
-</span><span data-line="226"><span class="k">def</span><span class="w"> </span><span class="nf">correct_as_number</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="227"><span class="w">    </span><span class="sd">"""</span>
-</span><span data-line="228"><span class="sd">    1.0 for a correct trial, 0.0 for an incorrect one. A timeout (None / NaN) is</span>
-</span><span data-line="229"><span class="sd">    0.0 if COUNT_TIMEOUTS_AS_ERRORS, NaN otherwise. Accepts text ("True").</span>
-</span><span data-line="230"><span class="sd">    """</span>
-</span><span data-line="231">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="232">        <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"True"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"False"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
-</span><span data-line="233">    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">value</span><span class="p">)):</span>
-</span><span data-line="234">        <span class="k">return</span> <span class="mf">0.0</span> <span class="k">if</span> <span class="n">COUNT_TIMEOUTS_AS_ERRORS</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>
-</span><span data-line="235">    <span class="k">return</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+</span><span data-line="233"><span class="k">def</span><span class="w"> </span><span class="nf">correct_as_number</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="234"><span class="w">    </span><span class="sd">"""</span>
+</span><span data-line="235"><span class="sd">    1.0 for a correct trial, 0.0 for an incorrect one. A timeout (None / NaN) is</span>
+</span><span data-line="236"><span class="sd">    0.0 if COUNT_TIMEOUTS_AS_ERRORS, NaN otherwise. Accepts text ("True").</span>
+</span><span data-line="237"><span class="sd">    """</span>
+</span><span data-line="238">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="239">        <span class="n">value</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"True"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">"False"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
+</span><span data-line="240">    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">value</span><span class="p">)):</span>
+</span><span data-line="241">        <span class="k">return</span> <span class="mf">0.0</span> <span class="k">if</span> <span class="n">COUNT_TIMEOUTS_AS_ERRORS</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>
+</span><span data-line="242">    <span class="k">return</span> <span class="mf">1.0</span> <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.0</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -679,7 +689,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=2361992e"></script>
+      <script src="../../_static/documentation_options.js?v=b99ddeff"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/shibuya.js?v=50760d75"></script></body>

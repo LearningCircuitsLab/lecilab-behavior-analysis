@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="violet" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>layouts - lecilab-behavior-analysis</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="session_summary" href="lecilab_behavior_analysis.figures.layouts.session_summary.html" /><link rel="prev" title="figures" href="lecilab_behavior_analysis.figures.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>layouts - lecilab-behavior-analysis</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="session_modalities" href="lecilab_behavior_analysis.figures.layouts.session_modalities.html" /><link rel="prev" title="figures" href="lecilab_behavior_analysis.figures.html" />
       <link rel="canonical" href="https://LearningCircuitsLab.github.io/lecilab-behavior-analysis/api_generated/lecilab_behavior_analysis.figures.layouts.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"light");
@@ -122,6 +122,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_mouse_last_choice.html">add_mouse_last_choice</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_port_where_animal_comes_from.html">add_port_where_animal_comes_from</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_repeat_or_alternate_numeric.html">add_repeat_or_alternate_numeric</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_sound_location_level.html">add_sound_location_level</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.add_visual_stimulus_difference.html">add_visual_stimulus_difference</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.create_transition_matrix.html">create_transition_matrix</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.metrics.choices.get_bias_evolution_df.html">get_bias_evolution_df</a></li>
@@ -303,7 +304,9 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l2 current"><a class="reference internal" href="lecilab_behavior_analysis.figures.html">figures</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">layouts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_modalities.html">session_modalities</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary.html">session_summary</a></li>
+<li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary_layout.html">session_summary_layout</a></li>
 <li class="toctree-l4"><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.subject_progress.html">subject_progress</a></li>
 </ul>
 </li>
@@ -438,8 +441,14 @@ not be drawn, so that a report can show them instead of failing.</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary.html#lecilab_behavior_analysis.figures.layouts.session_summary" title="lecilab_behavior_analysis.figures.layouts.session_summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">session_summary</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_modalities.html#lecilab_behavior_analysis.figures.layouts.session_modalities" title="lecilab_behavior_analysis.figures.layouts.session_modalities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">session_modalities</span></code></a></p></td>
+<td><p>Stimulus modalities of the trials (not habituation) of a prepared dataframe, in MODALITY_ORDER (others after, alphabetically).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary.html#lecilab_behavior_analysis.figures.layouts.session_summary" title="lecilab_behavior_analysis.figures.layouts.session_summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">session_summary</span></code></a></p></td>
 <td><p>Summary of some trials of one subject, usually one day.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.session_summary_layout.html#lecilab_behavior_analysis.figures.layouts.session_summary_layout" title="lecilab_behavior_analysis.figures.layouts.session_summary_layout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">session_summary_layout</span></code></a></p></td>
+<td><p>Layout of the session summary with one psychometric panel per modality (several in multisensory sessions).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.figures.layouts.subject_progress.html#lecilab_behavior_analysis.figures.layouts.subject_progress" title="lecilab_behavior_analysis.figures.layouts.subject_progress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subject_progress</span></code></a></p></td>
 <td><p>Training history of one subject.</p></td>
@@ -461,10 +470,10 @@ not be drawn, so that a report can show them instead of failing.</p>
         <span>Previous</span><div class="title">figures</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="lecilab_behavior_analysis.figures.layouts.session_summary.html">
+    <a href="lecilab_behavior_analysis.figures.layouts.session_modalities.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">session_summary</div>
+        <div class="title">session_modalities</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>
@@ -492,7 +501,7 @@ not be drawn, so that a report can show them instead of failing.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=2361992e"></script>
+      <script src="../_static/documentation_options.js?v=b99ddeff"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/shibuya.js?v=50760d75"></script></body>
