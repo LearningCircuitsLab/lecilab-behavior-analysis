@@ -159,9 +159,9 @@ def _psychometric_axes(fig):
     return [ax for ax in fig.axes if ax.get_title().startswith("choices on")]
 
 
-def _sound_location_day(raw_trials, modality="auditory_locaPT", with_level=True):
+def _sound_location_day(raw_trials, modality="auditory_locaPT", with_level=True, date="2026-01-05"):
     """A day of real trials made into sound location trials (old name), with medium and hard trials."""
-    day = raw_trials[raw_trials["date"].dt.strftime("%Y-%m-%d") == "2026-01-05"].copy()
+    day = raw_trials[raw_trials["date"].dt.strftime("%Y-%m-%d") == date].copy()
     rng = np.random.default_rng(0)
     level = rng.uniform(40, 70, len(day))
     day["stimulus_modality"] = modality
@@ -221,3 +221,15 @@ def test_first_sound_location_name_is_read_as_the_current_one():
 
     assert normalize_modality("auditory_loca") == "auditory-local-wn"
     assert normalize_stage("TwoAFC_auditory_loca_easy") == "TwoAFC_auditory-local-wn_easy"
+
+
+def test_sound_location_psychometric_has_three_points_per_side(raw_trials):
+    from lecilab_behavior_analysis.metrics.choices import two_sided_bin_edges
+
+    edges = two_sided_bin_edges(pd.Series([-70, -55, -40, 40, 52, 70]), 3)
+    assert len(edges) == 8  # 3 bins per side, and the gap between them
+    assert edges[3] < -39 and edges[4] > 39
+    fig = fm.session_summary_figure(_sound_location_day(raw_trials, date="2025-10-15"))  # 291 trials
+    ax = _psychometric_axes(fig)[0]
+    points = [line for line in ax.lines if line.get_marker() == "o"]
+    assert len(points) == 1 and len(points[0].get_xdata()) == 6

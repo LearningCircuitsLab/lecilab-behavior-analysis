@@ -529,3 +529,21 @@ def add_sound_location_level(df_in: pd.DataFrame) -> pd.DataFrame:
     sign = side.map({"left": 1.0, "right": -1.0})
     df["sound_location_db"] = level * sign
     return df
+
+
+def two_sided_bin_edges(values: pd.Series, per_side: int = 3) -> np.ndarray:
+    """
+    Bin edges for a signed stimulus with a gap around 0 (e.g. sound levels,
+    never close to 0 dB): per_side bins of equal width over the range of the
+    negative values and per_side over the range of the positive ones, so that
+    no bin falls in the gap. Only the side(s) with values get bins.
+    """
+    values = pd.Series(values, dtype=float).dropna()
+    edges = []
+    for side in (values[values < 0], values[values > 0]):
+        if len(side):
+            low, high = side.min(), side.max()
+            if high - low < 1e-9:  # a single value: one narrow bin
+                low, high = low - 0.5, high + 0.5
+            edges.extend(np.linspace(low - 1e-6, high + 1e-6, per_side + 1))
+    return np.unique(np.array(edges))

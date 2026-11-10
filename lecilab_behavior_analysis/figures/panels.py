@@ -21,6 +21,7 @@ from lecilab_behavior_analysis.metrics.choices import (
     get_bias_evolution_df,
     get_performance_by_difficulty_ratio,
     points_to_lines_for_bias_evolution,
+    two_sided_bin_edges,
 )
 from lecilab_behavior_analysis.metrics.engagement import add_engagement_column, get_box_usage_df
 from lecilab_behavior_analysis.metrics.occupancy import get_occupancy_heatmap, get_start_and_end_of_sessions_df
@@ -288,13 +289,16 @@ def psychometric(modality: str):
             psych = get_performance_by_difficulty_ratio(df)
             plots.psychometric_plot(psych, x=x, y="first_choice_numeric", ax=ax, valueType=value_type)
         elif sound_location is not None:
-            # loudness of the sound, positive on the left
+            # loudness of the sound, positive on the left; no sound is close to
+            # 0 dB, so each side gets its own bins: 3 points per side
+            levels = sound_location.dropna(subset=["sound_location_db"])
             plots.psychometric_plot(
-                sound_location.dropna(subset=["sound_location_db"]),
+                levels,
                 x="sound_location_db",
                 y="first_choice_numeric",
                 ax=ax,
                 valueType="continue",
+                bins=two_sided_bin_edges(levels["sound_location_db"], per_side=3),
             )
             ax.set_xlabel("Sound level (dB SPL, + left / - right)")
         else:
