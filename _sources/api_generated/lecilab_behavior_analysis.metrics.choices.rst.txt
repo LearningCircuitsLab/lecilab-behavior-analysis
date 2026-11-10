@@ -34,6 +34,7 @@ choices
       parameters_for_fit
       points_to_lines_for_bias_evolution
       previous_impact_on_time_kernel
+      two_sided_bin_edges
    
 
    

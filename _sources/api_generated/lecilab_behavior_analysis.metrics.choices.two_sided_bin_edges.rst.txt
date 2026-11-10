@@ -1,0 +1,6 @@
+two\_sided\_bin\_edges
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: two_sided_bin_edges
