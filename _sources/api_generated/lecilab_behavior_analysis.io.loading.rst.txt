@@ -21,6 +21,7 @@ loading
       load_example_data
       load_project_logs
       load_project_trials
+      load_session_dates
       load_setup_logs
       load_subject_trials
       read_csv_with_specific_number_of_columns

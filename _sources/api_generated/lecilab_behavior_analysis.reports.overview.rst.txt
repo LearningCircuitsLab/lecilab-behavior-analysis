@@ -20,6 +20,7 @@ overview
       cohort_trials_and_performance_figure
       daily_trials_and_performance
       failed_cells
+      group_trials
       last_days
       last_days_table
       never_raises

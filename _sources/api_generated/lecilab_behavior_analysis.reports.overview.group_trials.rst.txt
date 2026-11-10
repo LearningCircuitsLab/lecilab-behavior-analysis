@@ -1,0 +1,6 @@
+group\_trials
+=============
+
+.. currentmodule:: lecilab_behavior_analysis.reports.overview
+
+.. autofunction:: group_trials

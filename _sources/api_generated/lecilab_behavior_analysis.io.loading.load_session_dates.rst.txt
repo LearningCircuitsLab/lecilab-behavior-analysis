@@ -1,0 +1,6 @@
+load\_session\_dates
+====================
+
+.. currentmodule:: lecilab_behavior_analysis.io.loading
+
+.. autofunction:: load_session_dates
