@@ -35,6 +35,11 @@ village (`system_name`). A village that is not listed, such as a new one, is
 read in the newest format; when a village with old data is updated, add the
 moment it was updated to that list.
 
+Trials recorded with the deprecated `use_sound_location` option (a cloud of
+tones played from the side of the reward, project COT_unilateral_sound) are
+read as the modality `auditory-local-cot`: their cue was where the sound came
+from, not its frequency.
+
 Performance counts timeouts as errors everywhere (`correct_as_number`).
 
 ## Setups

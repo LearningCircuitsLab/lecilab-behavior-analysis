@@ -481,11 +481,13 @@ NEW_TASK_CODE_SINCE (e.g. a new village) is read in the newest format.</p></li>
 <li><p>Modality and stage names: “auditory” / “auditory_cot” -&gt; “auditory-cot”,
 “auditory_local_wn” -&gt; “auditory-local-wn”.</p></li>
 <li><p>correct: can be None (timeouts).</p></li>
+<li><p>use_sound_location: cloud of tones from the side of the reward (an older,
+now deprecated option) is read as the modality “auditory-local-cot”.</p></li>
 </ol>
-<p>All three come from the same revision of the task (branch hmv_claude of
+<p>The first three come from the same revision of the task (branch hmv_claude of
 auditory-task-python), which reorganised how stimuli are handled. Each
 village started running it on a different day: see NEW_TASK_CODE_SINCE.
-Only the first change needs that date (the other two are read from the values
+Only the first change needs that date (the others are read from the values
 themselves).</p>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
@@ -510,7 +512,7 @@ themselves).</p>
 <td><p>Returns the current name of a training stage, e.g. &quot;TwoAFC_auditory_cot_easy&quot; or &quot;TwoAFC_auditory_easy&quot; -&gt; &quot;TwoAFC_auditory-cot_easy&quot;.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_task_names.html#lecilab_behavior_analysis.data_format_changes.normalize_task_names" title="lecilab_behavior_analysis.data_format_changes.normalize_task_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_task_names</span></code></a></p></td>
-<td><p>Normalizes the stimulus_modality and current_training_stage columns, if present.</p></td>
+<td><p>Normalizes the stimulus_modality and current_training_stage columns, if present, and names the trials of use_sound_location (see section 4).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.uses_new_task_code.html#lecilab_behavior_analysis.data_format_changes.uses_new_task_code" title="lecilab_behavior_analysis.data_format_changes.uses_new_task_code"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uses_new_task_code</span></code></a></p></td>
 <td><p>True if a trial saved on this date by this village (its system_name) comes from the new task code, i.e. uses the new formats.</p></td>
@@ -567,7 +569,7 @@ themselves).</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=7a74b16d"></script>
+      <script src="../_static/documentation_options.js?v=f04d5d32"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/shibuya.js?v=50760d75"></script></body>
