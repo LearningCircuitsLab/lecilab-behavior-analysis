@@ -66,6 +66,8 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="0"><ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../data.html">Data and its formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../figures.html">Figures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reports.html">Daily reports</a></li>
@@ -464,7 +466,9 @@ data-aria-dark="Switch to auto color mode">
 <dl class="py function">
 <dt class="sig sig-object py" id="lecilab_behavior_analysis.plots.timing.mean_and_ci_by_day_plot">
 <span class="sig-name descname"><span class="pre">mean_and_ci_by_day_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daily</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Axes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Axes</span></span></span><a class="reference internal" href="../_modules/lecilab_behavior_analysis/plots/timing.html#mean_and_ci_by_day_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lecilab_behavior_analysis.plots.timing.mean_and_ci_by_day_plot" title="Link to this definition">#</a></dt>
-<dd><p>Mean (line) and 5-95 percentiles (shade) of item per day.</p>
+<dd><p>Mean (line, a dot per day) and 5-95 percentiles (shade) of item per day.
+Lines break over days without data; a day without data before and after
+it (which a line cannot show) is drawn as a dot with an error bar.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>daily</strong> – one row per day, with columns day (datetime), &lt;item&gt;_mean,
@@ -518,7 +522,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=cddc1664"></script>
+      <script src="../_static/documentation_options.js?v=5cc810fa"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/shibuya.js?v=50760d75"></script></body>

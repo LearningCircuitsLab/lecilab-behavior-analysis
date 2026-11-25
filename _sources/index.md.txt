@@ -29,6 +29,8 @@ It is used by:
 :hidden:
 
 getting_started
+tutorial
+gallery
 data
 figures
 reports

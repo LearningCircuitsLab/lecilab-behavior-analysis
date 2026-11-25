@@ -66,6 +66,8 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="0"><ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../gallery.html">Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data.html">Data and its formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../figures.html">Figures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reports.html">Daily reports</a></li>
@@ -672,7 +674,7 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="224">    <span class="n">dfbps</span><span class="p">[</span><span class="n">groupby</span><span class="p">]</span> <span class="o">=</span> <span class="n">dfbps</span><span class="p">[</span><span class="n">groupby</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span><span data-line="225">    <span class="c1"># add the two dataframes together</span>
 </span><span data-line="226">    <span class="n">df_bias_pivot_merged</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">dfbps</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="227">    <span class="n">df_bias_pivot_merged</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="227">    <span class="n">df_bias_pivot_merged</span> <span class="o">=</span> <span class="n">df_bias_pivot_merged</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
 </span><span data-line="228">
 </span><span data-line="229">    <span class="k">return</span> <span class="n">df_bias_pivot_merged</span></div>
 
@@ -1143,7 +1145,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../../_static/documentation_options.js?v=cddc1664"></script>
+      <script src="../../../_static/documentation_options.js?v=5cc810fa"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../_static/shibuya.js?v=50760d75"></script></body>
