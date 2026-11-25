@@ -43,11 +43,13 @@ Current changes
 2. Modality and stage names: "auditory" / "auditory_cot" -> "auditory-cot",
    "auditory_local_wn" -> "auditory-local-wn".
 3. correct: can be None (timeouts).
+4. use_sound_location: cloud of tones from the side of the reward (an older,
+   now deprecated option) is read as the modality "auditory-local-cot".
 
-All three come from the same revision of the task (branch hmv_claude of
+The first three come from the same revision of the task (branch hmv_claude of
 auditory-task-python), which reorganised how stimuli are handled. Each
 village started running it on a different day: see NEW_TASK_CODE_SINCE.
-Only the first change needs that date (the other two are read from the values
+Only the first change needs that date (the others are read from the values
 themselves).
 """
 
@@ -248,10 +250,18 @@ def normalize_stage(stage: Any) -> Any:
 
 
 def normalize_task_names(df_in: pd.DataFrame) -> pd.DataFrame:
-    """Normalizes the stimulus_modality and current_training_stage columns, if present."""
+    """
+    Normalizes the stimulus_modality and current_training_stage columns, if
+    present, and names the trials of use_sound_location (see section 4).
+    """
     df = df_in.copy()
     if "stimulus_modality" in df.columns:
         df["stimulus_modality"] = df["stimulus_modality"].apply(normalize_modality)
+        if "use_sound_location" in df.columns:
+            located = df["use_sound_location"].apply(_is_true)
+            if located.any():
+                df["stimulus_modality"] = df["stimulus_modality"].astype(object)
+                df.loc[located, "stimulus_modality"] = SOUND_LOCATION_COT
     if "current_training_stage" in df.columns:
         df["current_training_stage"] = df["current_training_stage"].apply(normalize_stage)
     return df
@@ -290,3 +300,36 @@ def correct_as_number(value: Any) -> float:
     if value is None or (isinstance(value, float) and pd.isna(value)):
         return 0.0 if COUNT_TIMEOUTS_AS_ERRORS else float("nan")
     return 1.0 if bool(value) else 0.0
+
+
+# ---------------------------------------------------------------------------
+# 4. use_sound_location: cloud of tones from the side of the reward
+# ---------------------------------------------------------------------------
+# What: an option of the main branch of the task (2026-07-31, "option to follow
+# where the sound comes from"), saved in the column use_sound_location. When
+# True, the cloud of tones of an auditory trial was played only from the
+# speaker on the side of the reward, with a random dominant frequency: the cue
+# was where the sound came from, not its frequency. Those trials were saved as
+# stimulus_modality "auditory" (read as "auditory-cot").
+#
+# Data: the project COT_unilateral_sound (ACV023-ACV033, village06,
+# 2026-08-11 to 2026-09-07, Manual_training), about 108,600 trials; in all of
+# them the sound came from the side of the reward.
+#
+# The option is deprecated (the new task code does not have it; its sound
+# location modality is "auditory-local-wn", white noise).
+#
+# How to read it: the column marks each trial, so no date is needed. Trials
+# with use_sound_location True are read as the modality "auditory-local-cot"
+# (cloud of tones from one side), so that they are not analysed as a cloud of
+# tones whose frequency is the cue. Done in normalize_task_names.
+SOUND_LOCATION_COT = "auditory-local-cot"
+
+
+def _is_true(value: Any) -> bool:
+    """True for True (also numpy's) or "True" (as read from the .csv); False for anything else (False, empty...)."""
+    if isinstance(value, str):
+        return value.strip() == "True"
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return False
+    return bool(value == True)  # noqa: E712 (also numpy booleans)

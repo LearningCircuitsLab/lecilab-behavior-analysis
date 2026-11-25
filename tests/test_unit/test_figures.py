@@ -234,3 +234,14 @@ def test_sound_location_psychometric_has_three_points_per_side(raw_trials):
     ax = _psychometric_axes(fig)[0]
     points = [line for line in ax.lines if line.get_marker() == "o"]
     assert len(points) == 1 and len(points[0].get_xdata()) == 6
+
+
+def test_session_summary_with_use_sound_location(raw_trials):
+    """Cloud of tones from the side of the reward: its own psychometric panel, which does not fail."""
+    df = raw_trials[raw_trials.date.dt.strftime("%Y-%m-%d") == "2025-10-15"].copy()
+    df["use_sound_location"] = df["stimulus_modality"] == "auditory"
+    fig = fm.session_summary_figure(df)
+    assert _problems(fig) == []
+    titles = [ax.get_title() for ax in fig.axes]
+    assert "choices on auditory-local-cot trials" in titles
+    assert "choices on auditory-cot trials" not in titles

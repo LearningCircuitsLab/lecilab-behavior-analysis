@@ -238,3 +238,44 @@ def test_live_plots_accept_timeouts():
     plots.correct_left_and_right_plot(df, ax)
     plots.number_of_correct_responses_plot(df, ax)
     plt.close(fig)
+
+
+# 4. use_sound_location ------------------------------------------------------
+@pytest.mark.parametrize(
+    "use_sound_location, expected",
+    [
+        (True, "auditory-local-cot"),
+        ("True", "auditory-local-cot"),
+        (np.True_, "auditory-local-cot"),
+        (False, "auditory-cot"),
+        ("False", "auditory-cot"),
+        (np.nan, "auditory-cot"),
+        (None, "auditory-cot"),
+    ],
+)
+def test_use_sound_location_trials_are_sound_location(use_sound_location, expected):
+    df = pd.DataFrame({"stimulus_modality": ["auditory"], "use_sound_location": [use_sound_location]})
+    assert dfc.normalize_task_names(df)["stimulus_modality"].tolist() == [expected]
+
+
+def test_use_sound_location_only_changes_its_rows():
+    df = pd.DataFrame(
+        {
+            "stimulus_modality": ["auditory", "auditory", "visual", "auditory_cot"],
+            "use_sound_location": ["True", "False", "False", None],
+            "current_training_stage": ["Manual_training", "TwoAFC_auditory_easy", "TwoAFC_visual_easy", "x"],
+        }
+    )
+    out = dfc.normalize_task_names(df)
+    assert out["stimulus_modality"].tolist() == ["auditory-local-cot", "auditory-cot", "visual", "auditory-cot"]
+    assert out["current_training_stage"].tolist() == [
+        "Manual_training",
+        "TwoAFC_auditory-cot_easy",
+        "TwoAFC_visual_easy",
+        "x",
+    ]
+
+
+def test_without_use_sound_location_column():
+    df = pd.DataFrame({"stimulus_modality": ["auditory"]})
+    assert dfc.normalize_task_names(df)["stimulus_modality"].tolist() == ["auditory-cot"]
