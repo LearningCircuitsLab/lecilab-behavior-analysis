@@ -30,7 +30,7 @@ versions, in `data_format_changes.py`. Add new changes there.
 
 Each village started running the new task code on a different day
 (`NEW_TASK_CODE_SINCE` in that file: village06 on 2026-11-09, villages 01, 02,
-04 and 05 on 2026-11-25). Each row is read according to its date and its
+04 and 05 on 2026-11-25 at 14:00). Each row is read according to its date and its
 village (`system_name`). A village that is not listed, such as a new one, is
 read in the newest format; when a village with old data is updated, add the
 moment it was updated to that list.
