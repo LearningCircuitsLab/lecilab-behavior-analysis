@@ -25,12 +25,14 @@ choices
       create_transition_matrix
       get_bias_evolution_df
       get_choice_before
+      get_choices_by_difficulty_matrix
       get_left_auditory_stim
       get_left_choice
       get_performance_by_difficulty_diff
       get_performance_by_difficulty_ratio
       get_time_kernel_impact
       get_triangle_polar_plot_df
+      matrix_row_label
       parameters_for_fit
       points_to_lines_for_bias_evolution
       previous_impact_on_time_kernel

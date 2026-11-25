@@ -1,0 +1,6 @@
+setting\_colors
+===============
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: setting_colors

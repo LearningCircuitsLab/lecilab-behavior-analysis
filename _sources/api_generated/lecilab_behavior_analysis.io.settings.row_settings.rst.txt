@@ -1,0 +1,6 @@
+row\_settings
+=============
+
+.. currentmodule:: lecilab_behavior_analysis.io.settings
+
+.. autofunction:: row_settings

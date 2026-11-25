@@ -48,3 +48,44 @@ A project can train its subjects in several boxes. `io.loading.find_setups`
 lists the folders of a project with an `events.csv` or a
 `sessions_summary.csv`, and `load_project_logs` reads all of them together
 (sorted by date, without the rows repeated in several files).
+
+## Session settings
+
+The village saves the settings of every session (training stage,
+difficulties, punishment, reward...) in the `settings` column of each
+setup's `sessions_summary.csv`, and in a `.json` file next to the session
+(`sessions/<subject>/<subject>_<task>_<YYYYMMDD_HHMMSS>.json`). A session's
+settings and trials are matched by subject and date (the start of the
+session).
+
+```python
+from lecilab_behavior_analysis.io import settings
+from lecilab_behavior_analysis.io.loading import load_project_logs
+
+_, summary, _ = load_project_logs("COT_cannula_GAD2_data")
+table = settings.session_settings_table(summary, "NUO057")  # one row per session
+settings.changing_settings(table)  # the settings that changed at some point
+settings.print_session_settings("COT_cannula_GAD2_data", "NUO057", "2026-04-09 04:01:23")
+```
+
+`print_session_settings` lists the changes since the previous session first:
+
+```text
+NUO057, session of 2026-04-09 04:01:23
+3 changed since the previous session (*)
+* current_training_stage   TwoAFC_visual_hard   (was TwoAFC_visual_easy)
+* hard_trials_on           True   (was False)
+* medium_trials_on         True   (was False)
+  ambiguous_beginning_time 0.05
+  ...
+```
+
+`get_session_settings` looks for one session in the summaries, then in its
+`.json` file, and finally copies that file from the cluster (rsync over
+ssh) if this computer can reach it.
+
+To see how the settings change through training, together with the choices,
+`metrics.choices.get_choices_by_difficulty_matrix` gives the proportion of
+left choices by correct side and difficulty in each session, and
+`plots.training_matrix_plot` draws it with some settings as rows above it
+(`io.settings.settings_for_sessions`).

@@ -1,0 +1,6 @@
+matrix\_row\_label
+==================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: matrix_row_label

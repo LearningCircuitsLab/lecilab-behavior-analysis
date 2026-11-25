@@ -1,0 +1,6 @@
+get\_choices\_by\_difficulty\_matrix
+====================================
+
+.. currentmodule:: lecilab_behavior_analysis.metrics.choices
+
+.. autofunction:: get_choices_by_difficulty_matrix

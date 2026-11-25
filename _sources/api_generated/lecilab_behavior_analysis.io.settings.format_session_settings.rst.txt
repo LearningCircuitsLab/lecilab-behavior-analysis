@@ -1,0 +1,6 @@
+format\_session\_settings
+=========================
+
+.. currentmodule:: lecilab_behavior_analysis.io.settings
+
+.. autofunction:: format_session_settings

@@ -1,0 +1,6 @@
+setting\_change\_labels
+=======================
+
+.. currentmodule:: lecilab_behavior_analysis.plots.training
+
+.. autofunction:: setting_change_labels

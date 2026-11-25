@@ -1,0 +1,6 @@
+session\_file\_stem
+===================
+
+.. currentmodule:: lecilab_behavior_analysis.io.settings
+
+.. autofunction:: session_file_stem

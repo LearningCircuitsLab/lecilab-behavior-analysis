@@ -1,0 +1,6 @@
+get\_session\_settings
+======================
+
+.. currentmodule:: lecilab_behavior_analysis.io.settings
+
+.. autofunction:: get_session_settings

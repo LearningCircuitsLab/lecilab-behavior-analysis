@@ -37,4 +37,5 @@
 
    loading
    server
+   settings
 

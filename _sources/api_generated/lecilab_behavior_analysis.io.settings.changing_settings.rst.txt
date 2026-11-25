@@ -1,0 +1,6 @@
+changing\_settings
+==================
+
+.. currentmodule:: lecilab_behavior_analysis.io.settings
+
+.. autofunction:: changing_settings

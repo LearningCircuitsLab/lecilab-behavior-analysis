@@ -1,0 +1,6 @@
+fetch\_session\_settings\_file
+==============================
+
+.. currentmodule:: lecilab_behavior_analysis.io.settings
+
+.. autofunction:: fetch_session_settings_file

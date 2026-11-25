@@ -1,0 +1,40 @@
+settings
+========
+
+.. automodule:: lecilab_behavior_analysis.io.settings
+
+   
+   
+   
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :template: custom_base_template.rst
+      :recursive:
+      :nosignatures:
+   
+      changed_settings
+      changing_settings
+      fetch_session_settings_file
+      format_session_settings
+      get_session_settings
+      print_session_settings
+      row_settings
+      session_file_stem
+      session_settings_table
+      settings_for_sessions
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,6 @@
+settings\_for\_sessions
+=======================
+
+.. currentmodule:: lecilab_behavior_analysis.io.settings
+
+.. autofunction:: settings_for_sessions
