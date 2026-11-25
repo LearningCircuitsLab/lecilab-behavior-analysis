@@ -224,7 +224,7 @@ def points_to_lines_for_bias_evolution(df: pd.DataFrame, groupby: str) -> pd.Dat
     dfbps[groupby] = dfbps[groupby].shift(1)
     # add the two dataframes together
     df_bias_pivot_merged = pd.concat([df, dfbps], ignore_index=True)
-    df_bias_pivot_merged.dropna(inplace=True)
+    df_bias_pivot_merged = df_bias_pivot_merged.dropna()
 
     return df_bias_pivot_merged
 

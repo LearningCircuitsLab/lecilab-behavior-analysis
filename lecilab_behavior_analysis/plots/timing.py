@@ -309,7 +309,9 @@ def mean_and_ci_by_day_plot(
     daily: pd.DataFrame, item: str, ax: plt.Axes, color: str = "black", ylog: bool = False, label: Optional[str] = None
 ) -> plt.Axes:
     """
-    Mean (line) and 5-95 percentiles (shade) of item per day.
+    Mean (line, a dot per day) and 5-95 percentiles (shade) of item per day.
+    Lines break over days without data; a day without data before and after
+    it (which a line cannot show) is drawn as a dot with an error bar.
 
     Args:
         daily: one row per day, with columns day (datetime), <item>_mean,
@@ -319,8 +321,13 @@ def mean_and_ci_by_day_plot(
     # one row per calendar day, so that lines break where there is no data
     daily = daily.sort_values("day").set_index("day")
     daily = daily[~daily.index.duplicated()].asfreq("D").reset_index()
-    ax.plot(daily["day"], daily[f"{item}_mean"], color=color, linewidth=1.5)
+    mean = daily[f"{item}_mean"]
+    ax.plot(daily["day"], mean, color=color, linewidth=1.5, marker="o", markersize=2.5)
     ax.fill_between(daily["day"], daily[f"{item}_bot95"], daily[f"{item}_top95"], color=color, alpha=0.2, linewidth=0)
+    isolated = mean.notna() & mean.shift(1).isna() & mean.shift(-1).isna()
+    if isolated.any():
+        rows = daily[isolated]
+        ax.vlines(rows["day"], rows[f"{item}_bot95"], rows[f"{item}_top95"], color=color, alpha=0.4, linewidth=2)
     ax.set_ylabel(label or item.replace("_", " "), color=color)
     if ylog:
         ax.set_yscale("log")

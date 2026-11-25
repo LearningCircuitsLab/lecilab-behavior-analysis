@@ -245,3 +245,27 @@ def test_session_summary_with_use_sound_location(raw_trials):
     titles = [ax.get_title() for ax in fig.axes]
     assert "choices on auditory-local-cot trials" in titles
     assert "choices on auditory-cot trials" not in titles
+
+
+def test_mean_and_ci_by_day_shows_isolated_days():
+    """A day without data before and after it is still drawn (a dot and an error bar)."""
+    from matplotlib import pyplot as plt
+
+    from lecilab_behavior_analysis.plots import mean_and_ci_by_day_plot
+
+    daily = pd.DataFrame(
+        {
+            "day": pd.to_datetime(["2025-01-01", "2025-01-02", "2025-01-10"]),
+            "x_mean": [1.0, 2.0, 3.0],
+            "x_bot95": [0.5, 1.5, 2.5],
+            "x_top95": [1.5, 2.5, 3.5],
+        }
+    )
+    fig, ax = plt.subplots()
+    mean_and_ci_by_day_plot(daily, "x", ax=ax)
+    line = ax.get_lines()[0]
+    assert line.get_marker() == "o"
+    assert np.isfinite(np.asarray(line.get_ydata(), dtype=float)).sum() == 3  # the three days have a point
+    error_bars = [c for c in ax.collections if c.__class__.__name__ == "LineCollection"]
+    assert len(error_bars) == 1 and len(error_bars[0].get_segments()) == 1  # only the isolated day
+    plt.close(fig)

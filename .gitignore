@@ -89,3 +89,8 @@ example_data/
 docs/build/
 docs/source/api_generated/
 docs/source/_static/examples/
+# written by docs/source/make_examples.py at each build
+docs/source/gallery.md
+
+# marimo session cache
+__marimo__/

@@ -80,6 +80,103 @@ def main() -> None:
     fig, problems = render(layout, FigureData(df, perf_window=100))
     save(fig, "custom_layout")
 
+    make_gallery(df)
+    export_tutorial()
+
+
+GALLERY_PAGE = Path(__file__).resolve().parent / "gallery.md"
+GALLERY_INTRO = """# Gallery
+
+Every plot of the package, with the code that draws it. The images are drawn
+from the example data in `tests/data` (one mouse, NUO003) by the current code
+each time the documentation is built: the code under each image is the code
+that drew it.
+
+Each example uses three inputs. With your data:
+
+```python
+from lecilab_behavior_analysis.io.loading import load_project_logs, load_project_trials
+
+# the trials of a mouse, prepared for analysis (and its performance through trials)
+trials = load_project_trials("COT_cannula_data", ["NUO003"])
+# its trials of one day
+day = trials[trials["year_month_day"] == "2025-10-15"]
+# the sessions summaries of the project's setups (with the settings of each session)
+_, summary, _ = load_project_logs("COT_cannula_data")
+```
+
+See also the [tutorial](tutorial.md), which goes through these step by step.
+"""
+
+
+def example_code(function) -> str:
+    """The body of an example function, without its def line and its final return."""
+    import inspect
+    import textwrap
+
+    lines = inspect.getsource(function).splitlines()
+    start = next(i for i, line in enumerate(lines) if line.startswith("def ")) + 1
+    while not lines[start].rstrip().endswith(":") and lines[start - 1].rstrip().endswith(","):
+        start += 1  # a def line split over several lines
+    body = textwrap.dedent("\n".join(lines[start:])).strip().splitlines()
+    if body and body[-1].startswith("return fig"):
+        body = body[:-1]
+    elif body and body[-1].startswith("return "):
+        body[-1] = "fig = " + body[-1][len("return ") :]
+    return "\n".join(body).strip()
+
+
+def make_gallery(trials: pd.DataFrame) -> None:
+    """Runs every example of gallery_examples.py and writes gallery.md with their images and code."""
+    import gallery_examples
+    import matplotlib.pyplot as plt
+
+    summary = pd.read_csv(REPO / "tests" / "data" / "NUO003_sessions_summary.csv", sep=";")
+    day = trials[trials["year_month_day"] == gallery_examples.TRAINING_DAY]
+    sections: dict = {}
+    for item in gallery_examples.EXAMPLES:
+        name = item.function.__name__.removesuffix("_example")
+        try:
+            fig = item.function(trials, day, summary)
+            if item.interactive:
+                fig.write_html(OUT / f"{name}.html", include_plotlyjs="cdn", full_html=True)
+                image = (
+                    f'<iframe src="_static/examples/{name}.html" width="100%" height="480" frameborder="0"></iframe>'
+                )
+            else:
+                fig.savefig(OUT / f"{name}.png", dpi=80, bbox_inches="tight")
+                plt.close(fig)
+                image = f"![{item.title}](_static/examples/{name}.png)"
+        except Exception as error:  # shown on the page; the tests run every example
+            image = f":::{{warning}}\nThis example failed: {type(error).__name__}: {error}\n:::"
+        entry = f"### {item.title}\n\n{item.description}\n\n{image}\n\n```python\n{example_code(item.function)}\n```\n"
+        sections.setdefault(item.section, []).append(entry)
+    page = [GALLERY_INTRO]
+    for section, entries in sections.items():
+        page.append(f"## {section}\n")
+        page.extend(entries)
+    GALLERY_PAGE.write_text("\n".join(page))
+
+
+def export_tutorial() -> None:
+    """The tutorial notebook (notebooks/tutorial.py), run and saved as HTML for tutorial.md."""
+    import shutil
+    import subprocess
+
+    target = OUT / "tutorial.html"
+    marimo = shutil.which("marimo")
+    if marimo is None:
+        target.write_text("<p>The tutorial could not be built here (marimo is not installed).</p>")
+        return
+    result = subprocess.run(
+        [marimo, "export", "html", str(REPO / "notebooks" / "tutorial.py"), "-o", str(target)],
+        capture_output=True,
+        text=True,
+        timeout=900,
+    )
+    if result.returncode != 0 or not target.exists():
+        target.write_text(f"<p>The tutorial could not be built:</p><pre>{result.stderr[-2000:]}</pre>")
+
 
 if __name__ == "__main__":
     main()

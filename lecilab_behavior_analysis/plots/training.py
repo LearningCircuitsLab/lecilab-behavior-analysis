@@ -1,5 +1,6 @@
 """Plots of the training history: calendar, trials and water per day, text summaries."""
 
+import warnings
 from typing import List, Optional
 
 import calplot
@@ -440,9 +441,12 @@ def calendar_plot(daily_trials: pd.Series, axes: List[plt.Axes], cmap: str = "vi
         raise ValueError(f"calendar_plot needs one axis per year ({len(years)})")
     vmax = daily_trials.max()
     for ax, year in zip(axes, years):
-        calplot.yearplot(
-            daily_trials, year=year, ax=ax, vmin=0, vmax=vmax, cmap=cmap, linewidth=0.5, dayticks=[0, 2, 4, 6]
-        )
+        with warnings.catch_warnings():
+            # calplot uses DatetimeIndex.dayofweek, deprecated in pandas 3
+            warnings.filterwarnings("ignore", message=".*dayofweek is deprecated.*")
+            calplot.yearplot(
+                daily_trials, year=year, ax=ax, vmin=0, vmax=vmax, cmap=cmap, linewidth=0.5, dayticks=[0, 2, 4, 6]
+            )
         ax.set_ylabel(str(year))
         ax.tick_params(labelsize=6)
     from matplotlib.cm import ScalarMappable

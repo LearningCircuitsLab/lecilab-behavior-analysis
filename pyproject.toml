@@ -42,6 +42,7 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
+  "marimo",
   "pytest",
   "pytest-cov",
   "coverage",
@@ -87,6 +88,7 @@ ignore = [
   "docs/source/",
   "*.ipynb",
   "To do.txt",
+  "notebooks/*",
 ]
 
 
