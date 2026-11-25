@@ -58,4 +58,8 @@ from lecilab_behavior_analysis.plots.training import (
     summary_text_plot,
     summary_matrix_plot,
     plot_table_from_df,
+    setting_change_labels,
+    setting_colors,
+    setting_values_to_colors,
+    training_matrix_plot,
 )

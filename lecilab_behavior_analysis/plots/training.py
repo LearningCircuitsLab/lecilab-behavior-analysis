@@ -224,6 +224,153 @@ def summary_matrix_plot(
     return ax
 
 
+# colours of the setting rows: True / False, and one per category (in order of appearance)
+SETTING_TRUE_COLOR, SETTING_FALSE_COLOR, SETTING_MISSING_COLOR = "#4c72b0", "#dde3ec", "#f2f2f2"
+SETTING_CATEGORY_COLORS = (
+    "#8dd3c7",
+    "#fdb462",
+    "#bebada",
+    "#fb8072",
+    "#80b1d3",
+    "#b3de69",
+    "#fccde5",
+    "#bc80bd",
+    "#ccebc5",
+    "#ffed6f",
+)
+# numeric settings with more distinct values than this are not labelled at each change
+MAX_LABELLED_NUMERIC_VALUES = 6
+
+
+def setting_values_to_colors(values: pd.Series) -> tuple:
+    """
+    How to colour one setting across sessions.
+
+    Returns (codes, labels, kind):
+
+    - kind: "bool" (True / False), "numeric" or "category" (anything else),
+    - codes: per session, 1 / 0 (bool), the value scaled from the lowest (0)
+      to the highest (1) (numeric), or the index of the value in order of
+      appearance (category); NaN where the setting is missing,
+    - labels: the text of each value ("" if missing).
+    """
+    values = pd.Series(values).reset_index(drop=True)
+    labels = values.map(lambda v: "" if v is None or (isinstance(v, float) and np.isnan(v)) else str(v))
+    present = labels != ""
+    codes = pd.Series(np.nan, index=values.index)
+    texts = labels[present]
+    if present.any() and texts.isin(["True", "False"]).all():
+        codes[present] = (texts == "True").astype(float)
+        return codes.to_numpy(dtype=float), labels.tolist(), "bool"
+    numbers = pd.to_numeric(values[present], errors="coerce")
+    if present.any() and numbers.notna().all():
+        low, high = numbers.min(), numbers.max()
+        codes[present] = 0.5 if high == low else (numbers - low) / (high - low)
+        return codes.to_numpy(dtype=float), labels.tolist(), "numeric"
+    order = list(dict.fromkeys(texts))
+    codes[present] = texts.map(order.index).astype(float)
+    return codes.to_numpy(dtype=float), labels.tolist(), "category"
+
+
+def setting_colors(codes: np.ndarray, kind: str) -> list:
+    """Colour (hex) of each session of a setting row, from setting_values_to_colors."""
+    from matplotlib.colors import to_hex
+
+    colors = []
+    viridis = plt.get_cmap("viridis")
+    for code in codes:
+        if np.isnan(code):
+            colors.append(SETTING_MISSING_COLOR)
+        elif kind == "bool":
+            colors.append(SETTING_TRUE_COLOR if code == 1 else SETTING_FALSE_COLOR)
+        elif kind == "numeric":
+            colors.append(to_hex(viridis(0.15 + 0.8 * code)))
+        else:
+            colors.append(SETTING_CATEGORY_COLORS[int(code) % len(SETTING_CATEGORY_COLORS)])
+    return colors
+
+
+def setting_change_labels(labels: list, kind: str, min_gap: int = 0) -> list:
+    """
+    Indexes of the sessions where the value of a setting row is written
+    (where it changes). min_gap: leave out a label closer than this number
+    of sessions to the previous one (labels that would overlap).
+    """
+    if kind == "numeric" and len({label for label in labels if label}) > MAX_LABELLED_NUMERIC_VALUES:
+        return []
+    changes = [i for i, label in enumerate(labels) if label and (i == 0 or label != labels[i - 1])]
+    kept: list = []
+    for i in changes:
+        if not kept or i - kept[-1] >= min_gap:
+            kept.append(i)
+    return kept
+
+
+def training_matrix_plot(
+    p_left: pd.DataFrame,
+    sessions: pd.DataFrame,
+    settings: Optional[pd.DataFrame] = None,
+    highlight_day: Optional[str] = None,
+    ax: plt.Axes = None,
+) -> plt.Axes:
+    """
+    Choices by side and difficulty in each session (colour: proportion of
+    left choices, from metrics.choices.get_choices_by_difficulty_matrix),
+    with some settings of each session in rows above it (from
+    io.settings.settings_for_sessions; each row coloured by its own values,
+    the value written where it changes). highlight_day (YYYY-MM-DD) frames
+    the sessions of that day.
+
+    Returns the axes of the matrix.
+    """
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+    if ax is None:
+        ax = plt.gca()
+    n_sessions = p_left.shape[1]
+    image = ax.imshow(
+        p_left.to_numpy(dtype=float), aspect="auto", cmap="coolwarm", vmin=0, vmax=1, interpolation="nearest"
+    )
+    ax.set_yticks(range(len(p_left.index)), list(p_left.index))
+    ax.set_ylabel("correct side, difficulty")
+    plt.colorbar(image, ax=ax, label="P(left choice)", fraction=0.03, pad=0.01)
+
+    # one label at the first session of each day (at most ~15)
+    days = sessions["day"].tolist() if "day" in sessions else []
+    firsts = [i for i, day in enumerate(days) if i == 0 or day != days[i - 1]]
+    step = max(1, len(firsts) // 15)
+    ax.set_xticks(
+        [firsts[i] for i in range(0, len(firsts), step)], [days[firsts[i]] for i in range(0, len(firsts), step)]
+    )
+    ax.tick_params(axis="x", labelrotation=45)
+    ax.set_xlabel("session (first session of each day)")
+
+    axes = [ax]
+    if settings is not None and len(settings.index):
+        divider = make_axes_locatable(ax)
+        top = divider.append_axes("top", size=f"{12 * len(settings.index)}%", pad=0.08, sharex=ax)
+        from matplotlib.colors import to_rgba
+
+        rgba = np.ones((len(settings.index), n_sessions, 4))
+        for row, name in enumerate(settings.index):
+            codes, labels, kind = setting_values_to_colors(settings.loc[name])
+            rgba[row] = [to_rgba(color) for color in setting_colors(codes, kind)]
+            # the value where it changes
+            for col in setting_change_labels(labels, kind, min_gap=max(1, n_sessions // 40)):
+                top.text(col, row, labels[col], fontsize=6, va="center", ha="left", clip_on=True)
+        top.imshow(rgba, aspect="auto", interpolation="nearest")
+        top.set_yticks(range(len(settings.index)), list(settings.index), fontsize=8)
+        top.tick_params(axis="x", labelbottom=False)
+        axes.append(top)
+
+    if highlight_day is not None and highlight_day in days:
+        columns = [i for i, day in enumerate(days) if day == highlight_day]
+        for a in axes:
+            a.axvspan(columns[0] - 0.5, columns[-1] + 0.5, fill=False, edgecolor="black", linewidth=1.5)
+    ax.set_xlim(-0.5, n_sessions - 0.5)
+    return ax
+
+
 def plot_table_from_df(df: pd.DataFrame, **kwargs) -> go.Figure:
     # Create table
     fig = go.Figure(

@@ -549,3 +549,88 @@ def two_sided_bin_edges(values: pd.Series, per_side: int = 3) -> np.ndarray:
                 low, high = low - 0.5, high + 0.5
             edges.extend(np.linspace(low - 1e-6, high + 1e-6, per_side + 1))
     return np.unique(np.array(edges))
+
+
+# ---------------------------------------------------------------------------
+# Choices by side and difficulty, session by session (training matrix)
+# ---------------------------------------------------------------------------
+# rows of the matrix, from top to bottom: (correct side, difficulty)
+MATRIX_ROWS = (
+    ("left", "easy"),
+    ("left", "medium"),
+    ("left", "hard"),
+    ("right", "hard"),
+    ("right", "medium"),
+    ("right", "easy"),
+)
+
+
+def matrix_row_label(side: str, difficulty: str) -> str:
+    return f"{side} {difficulty}"
+
+
+def get_choices_by_difficulty_matrix(df: pd.DataFrame) -> tuple:
+    """
+    The proportion of left choices (first choice) by correct side and
+    difficulty in each session: a psychometric curve per session, to show
+    as colours (see MATRIX_ROWS).
+
+    Args:
+        df: prepared trials of one subject (preprocessing.prepare), with
+            session, date, correct_side, difficulty and first_choice.
+
+    Returns:
+        (p_left, n_trials, sessions):
+
+        - p_left: one row per side and difficulty ("left easy" ... "right
+          easy"), one column per session (its date); NaN where the session
+          had no such trials (or only trials without a choice),
+        - n_trials: trials with a choice in each cell,
+        - sessions: one row per session (same order as the columns), with
+          date, day (YYYY-MM-DD), session, current_training_stage,
+          stimulus_modality (several joined by "+"), n_trials and performance
+          (% correct, timeouts count as errors).
+
+        Trials without a known side or difficulty (e.g. habituation) count
+        in n_trials and performance of their session but not in the matrix.
+    """
+    column_checker(df, required_columns={"session", "date", "correct_side", "difficulty", "first_choice"})
+    labels = [matrix_row_label(side, difficulty) for side, difficulty in MATRIX_ROWS]
+    if df.empty:
+        empty = pd.DataFrame(index=labels, dtype=float)
+        return empty, empty.copy(), pd.DataFrame()
+    trials = df.sort_values(["date", "trial"] if "trial" in df.columns else ["date"], kind="stable").copy()
+    trials["_column"] = pd.to_datetime(trials["date"])
+    trials["_row"] = [
+        matrix_row_label(side, difficulty) for side, difficulty in zip(trials["correct_side"], trials["difficulty"])
+    ]
+    trials["_left"] = trials["first_choice"].apply(transform_side_choice_to_numeric)
+
+    in_matrix = trials[trials["_row"].isin(labels) & trials["_left"].notna()]
+    grouped = in_matrix.groupby(["_row", "_column"])["_left"]
+    columns = pd.Index(sorted(trials["_column"].unique()), name="date")
+    p_left = grouped.mean().unstack("_column").reindex(index=labels, columns=columns)
+    n_trials = grouped.size().unstack("_column").reindex(index=labels, columns=columns).fillna(0).astype(int)
+    p_left.index.name = n_trials.index.name = None
+
+    by_session = trials.groupby("_column", sort=True)
+    sessions = pd.DataFrame(
+        {
+            "date": columns,
+            "day": columns.strftime("%Y-%m-%d"),
+            "session": by_session["session"].first().values,
+            "current_training_stage": by_session["current_training_stage"].first().values
+            if "current_training_stage" in trials
+            else None,
+            "stimulus_modality": by_session["stimulus_modality"]
+            .agg(lambda s: "+".join(sorted(map(str, s.dropna().unique()))))
+            .values
+            if "stimulus_modality" in trials
+            else None,
+            "n_trials": by_session.size().values,
+            "performance": by_session["correct"].agg(lambda s: s.apply(dfc.correct_as_number).mean() * 100).values
+            if "correct" in trials
+            else np.nan,
+        }
+    )
+    return p_left, n_trials, sessions
