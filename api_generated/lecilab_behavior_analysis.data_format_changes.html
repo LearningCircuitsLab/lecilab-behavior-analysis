@@ -113,6 +113,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_modality.html">normalize_modality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_stage.html">normalize_stage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_task_names.html">normalize_task_names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.uses_new_task_code.html">uses_new_task_code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right.html">visual_stimulus_is_left_right</a></li>
 </ul>
 </li>
@@ -467,25 +468,31 @@ the same before using stimulus_modality or current_training_stage.</p></li>
 <li><p>Functions that may be called directly on raw data and need one specific
 modality normalize it themselves (e.g. common._get_single_modality).</p></li>
 <li><p>Columns whose meaning changed (visual_stimulus) are always read through the
-functions in this file, which use the date of each trial.</p></li>
+functions in this file, which use the date and the village (system_name)
+of each trial.</p></li>
+<li><p>The default is always the newest format: data of a village that is not in
+NEW_TASK_CODE_SINCE (e.g. a new village) is read in the newest format.</p></li>
 </ul>
 </section>
 <section id="current-changes">
 <h2>Current changes<a class="headerlink" href="#current-changes" title="Link to this heading">#</a></h2>
 <ol class="arabic simple">
-<li><p>visual_stimulus: (correct, incorrect) -&gt; (left, right), from 2026-11-09.</p></li>
+<li><p>visual_stimulus: (correct, incorrect) -&gt; (left, right).</p></li>
 <li><p>Modality and stage names: “auditory” / “auditory_cot” -&gt; “auditory-cot”,
-“auditory_local_wn” -&gt; “auditory-local-wn”, from 2026-11-09.</p></li>
-<li><p>correct: can be None (timeouts), from 2026-11-09.</p></li>
+“auditory_local_wn” -&gt; “auditory-local-wn”.</p></li>
+<li><p>correct: can be None (timeouts).</p></li>
 </ol>
 <p>All three come from the same revision of the task (branch hmv_claude of
-auditory-task-python), which reorganised how stimuli are handled.</p>
+auditory-task-python), which reorganised how stimuli are handled. Each
+village started running it on a different day: see NEW_TASK_CODE_SINCE.
+Only the first change needs that date (the other two are read from the values
+themselves).</p>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.add_left_right_brightness.html#lecilab_behavior_analysis.data_format_changes.add_left_right_brightness" title="lecilab_behavior_analysis.data_format_changes.add_left_right_brightness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_left_right_brightness</span></code></a></p></td>
-<td><p>Adds the columns left_brightness and right_brightness (NaN if the trial had no light stimulus), reading visual_stimulus in either format.</p></td>
+<td><p>Adds the columns left_brightness and right_brightness (NaN if the trial had no light stimulus), reading visual_stimulus in either format (from the date and the system_name of each row).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.correct_as_number.html#lecilab_behavior_analysis.data_format_changes.correct_as_number" title="lecilab_behavior_analysis.data_format_changes.correct_as_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">correct_as_number</span></code></a></p></td>
 <td><p>1.0 for a correct trial, 0.0 for an incorrect one.</p></td>
@@ -505,8 +512,11 @@ auditory-task-python), which reorganised how stimuli are handled.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_task_names.html#lecilab_behavior_analysis.data_format_changes.normalize_task_names" title="lecilab_behavior_analysis.data_format_changes.normalize_task_names"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_task_names</span></code></a></p></td>
 <td><p>Normalizes the stimulus_modality and current_training_stage columns, if present.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right.html#lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right" title="lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visual_stimulus_is_left_right</span></code></a></p></td>
-<td><p>True if a trial recorded on this date saved visual_stimulus as (left, right).</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.uses_new_task_code.html#lecilab_behavior_analysis.data_format_changes.uses_new_task_code" title="lecilab_behavior_analysis.data_format_changes.uses_new_task_code"><code class="xref py py-obj docutils literal notranslate"><span class="pre">uses_new_task_code</span></code></a></p></td>
+<td><p>True if a trial saved on this date by this village (its system_name) comes from the new task code, i.e. uses the new formats.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right.html#lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right" title="lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right"><code class="xref py py-obj docutils literal notranslate"><span class="pre">visual_stimulus_is_left_right</span></code></a></p></td>
+<td><p>True if a trial saved on this date by this village saved visual_stimulus as (left, right).</p></td>
 </tr>
 </tbody>
 </table>
@@ -557,7 +567,7 @@ auditory-task-python), which reorganised how stimuli are handled.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=8f8f97a1"></script>
+      <script src="../_static/documentation_options.js?v=7a74b16d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/shibuya.js?v=50760d75"></script></body>

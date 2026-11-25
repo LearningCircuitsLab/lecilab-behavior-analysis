@@ -23,6 +23,7 @@
       normalize_modality
       normalize_stage
       normalize_task_names
+      uses_new_task_code
       visual_stimulus_is_left_right
    
 

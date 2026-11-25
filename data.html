@@ -113,6 +113,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="api_generated/lecilab_behavior_analysis.data_format_changes.normalize_modality.html">normalize_modality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api_generated/lecilab_behavior_analysis.data_format_changes.normalize_stage.html">normalize_stage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api_generated/lecilab_behavior_analysis.data_format_changes.normalize_task_names.html">normalize_task_names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api_generated/lecilab_behavior_analysis.data_format_changes.uses_new_task_code.html">uses_new_task_code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="api_generated/lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right.html">visual_stimulus_is_left_right</a></li>
 </ul>
 </li>
@@ -472,11 +473,17 @@ column above. <code class="docutils literal notranslate"><span class="pre">prepa
 <section id="format-changes">
 <h2>Format changes<a class="headerlink" href="#format-changes" title="Link to this heading">#</a></h2>
 <p>The tasks have changed what some columns mean over time (for example,
-<code class="docutils literal notranslate"><span class="pre">visual_stimulus</span></code> went from (correct, incorrect) to (left, right) on
-2026-11-09, timeouts are saved with <code class="docutils literal notranslate"><span class="pre">correct</span></code> empty, and old modality names
-such as <code class="docutils literal notranslate"><span class="pre">auditory_cot</span></code> or <code class="docutils literal notranslate"><span class="pre">auditory_locaPT</span></code> are read as the current ones). Old rows cannot be
-rewritten, so every change is described, with its date and the function that
-reads both versions, in <code class="docutils literal notranslate"><span class="pre">data_format_changes.py</span></code>. Add new changes there.</p>
+<code class="docutils literal notranslate"><span class="pre">visual_stimulus</span></code> went from (correct, incorrect) to (left, right), timeouts
+are saved with <code class="docutils literal notranslate"><span class="pre">correct</span></code> empty, and old modality names such as <code class="docutils literal notranslate"><span class="pre">auditory_cot</span></code>
+or <code class="docutils literal notranslate"><span class="pre">auditory_locaPT</span></code> are read as the current ones). Old rows cannot be
+rewritten, so every change is described, with the function that reads both
+versions, in <code class="docutils literal notranslate"><span class="pre">data_format_changes.py</span></code>. Add new changes there.</p>
+<p>Each village started running the new task code on a different day
+(<code class="docutils literal notranslate"><span class="pre">NEW_TASK_CODE_SINCE</span></code> in that file: village06 on 2026-11-09, villages 01, 02,
+04 and 05 on 2026-11-25). Each row is read according to its date and its
+village (<code class="docutils literal notranslate"><span class="pre">system_name</span></code>). A village that is not listed, such as a new one, is
+read in the newest format; when a village with old data is updated, add the
+moment it was updated to that list.</p>
 <p>Performance counts timeouts as errors everywhere (<code class="docutils literal notranslate"><span class="pre">correct_as_number</span></code>).</p>
 </section>
 <section id="setups">
@@ -531,7 +538,7 @@ lists the folders of a project with an <code class="docutils literal notranslate
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=8f8f97a1"></script>
+      <script src="_static/documentation_options.js?v=7a74b16d"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/shibuya.js?v=50760d75"></script></body>

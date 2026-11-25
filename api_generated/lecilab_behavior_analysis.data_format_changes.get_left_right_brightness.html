@@ -113,6 +113,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_modality.html">normalize_modality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_stage.html">normalize_stage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_task_names.html">normalize_task_names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.uses_new_task_code.html">uses_new_task_code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right.html">visual_stimulus_is_left_right</a></li>
 </ul>
 </li>
@@ -439,7 +440,7 @@ data-aria-dark="Switch to auto color mode">
 <h1>get_left_right_brightness<a class="headerlink" href="#get-left-right-brightness" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="lecilab_behavior_analysis.data_format_changes.get_left_right_brightness">
-<span class="sig-name descname"><span class="pre">get_left_right_brightness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">visual_stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_side</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/lecilab_behavior_analysis/data_format_changes.html#get_left_right_brightness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lecilab_behavior_analysis.data_format_changes.get_left_right_brightness" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_left_right_brightness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">visual_stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_side</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">village</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/lecilab_behavior_analysis/data_format_changes.html#get_left_right_brightness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lecilab_behavior_analysis.data_format_changes.get_left_right_brightness" title="Link to this definition">#</a></dt>
 <dd><p>Returns (left, right) brightness of the side ports for one trial, whatever
 the format it was saved in. None if the trial had no light stimulus.</p>
 <dl class="field-list simple">
@@ -447,7 +448,8 @@ the format it was saved in. None if the trial had no light stimulus.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>visual_stimulus</strong> – the value of the visual_stimulus column (text or pair).</p></li>
 <li><p><strong>correct_side</strong> – “left” or “right” (needed to read old rows).</p></li>
-<li><p><strong>date</strong> – the date of the trial (decides the format).</p></li>
+<li><p><strong>date</strong> – the date of the trial (decides the format, with the village).</p></li>
+<li><p><strong>village</strong> – the system_name of the trial (see NEW_TASK_CODE_SINCE).</p></li>
 </ul>
 </dd>
 </dl>
@@ -498,7 +500,7 @@ the format it was saved in. None if the trial had no light stimulus.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=8f8f97a1"></script>
+      <script src="../_static/documentation_options.js?v=7a74b16d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/shibuya.js?v=50760d75"></script></body>

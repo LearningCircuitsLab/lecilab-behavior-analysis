@@ -1,0 +1,6 @@
+uses\_new\_task\_code
+=====================
+
+.. currentmodule:: lecilab_behavior_analysis.data_format_changes
+
+.. autofunction:: uses_new_task_code

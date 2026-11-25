@@ -113,6 +113,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_modality.html">normalize_modality</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_stage.html">normalize_stage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.normalize_task_names.html">normalize_task_names</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.uses_new_task_code.html">uses_new_task_code</a></li>
 <li class="toctree-l3"><a class="reference internal" href="lecilab_behavior_analysis.data_format_changes.visual_stimulus_is_left_right.html">visual_stimulus_is_left_right</a></li>
 </ul>
 </li>
@@ -441,7 +442,8 @@ data-aria-dark="Switch to auto color mode">
 <dt class="sig sig-object py" id="lecilab_behavior_analysis.data_format_changes.add_left_right_brightness">
 <span class="sig-name descname"><span class="pre">add_left_right_brightness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/lecilab_behavior_analysis/data_format_changes.html#add_left_right_brightness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#lecilab_behavior_analysis.data_format_changes.add_left_right_brightness" title="Link to this definition">#</a></dt>
 <dd><p>Adds the columns left_brightness and right_brightness (NaN if the trial had
-no light stimulus), reading visual_stimulus in either format.</p>
+no light stimulus), reading visual_stimulus in either format (from the
+date and the system_name of each row).</p>
 </dd></dl>
 
 </section>
@@ -489,7 +491,7 @@ no light stimulus), reading visual_stimulus in either format.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=8f8f97a1"></script>
+      <script src="../_static/documentation_options.js?v=7a74b16d"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/shibuya.js?v=50760d75"></script></body>
