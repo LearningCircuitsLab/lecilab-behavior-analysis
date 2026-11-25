@@ -22,11 +22,18 @@ column above. `prepare` only adds what is missing.
 ## Format changes
 
 The tasks have changed what some columns mean over time (for example,
-`visual_stimulus` went from (correct, incorrect) to (left, right) on
-2026-11-09, timeouts are saved with `correct` empty, and old modality names
-such as `auditory_cot` or `auditory_locaPT` are read as the current ones). Old rows cannot be
-rewritten, so every change is described, with its date and the function that
-reads both versions, in `data_format_changes.py`. Add new changes there.
+`visual_stimulus` went from (correct, incorrect) to (left, right), timeouts
+are saved with `correct` empty, and old modality names such as `auditory_cot`
+or `auditory_locaPT` are read as the current ones). Old rows cannot be
+rewritten, so every change is described, with the function that reads both
+versions, in `data_format_changes.py`. Add new changes there.
+
+Each village started running the new task code on a different day
+(`NEW_TASK_CODE_SINCE` in that file: village06 on 2026-11-09, villages 01, 02,
+04 and 05 on 2026-11-25). Each row is read according to its date and its
+village (`system_name`). A village that is not listed, such as a new one, is
+read in the newest format; when a village with old data is updated, add the
+moment it was updated to that list.
 
 Performance counts timeouts as errors everywhere (`correct_as_number`).
 

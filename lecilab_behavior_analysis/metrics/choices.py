@@ -262,7 +262,9 @@ def add_visual_stimulus_difference(df_in: pd.DataFrame) -> pd.DataFrame:
     # (visual_stimulus is read in either format, see data_format_changes.py)
     df["visual_stim_difference"] = df.apply(
         lambda row: _difference_correct_minus_incorrect(
-            dfc.get_correct_incorrect_brightness(row["visual_stimulus"], row["correct_side"], row["date"])
+            dfc.get_correct_incorrect_brightness(
+                row["visual_stimulus"], row["correct_side"], row["date"], row.get("system_name")
+            )
         ),
         axis=1,
     )

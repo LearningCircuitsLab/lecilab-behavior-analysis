@@ -32,23 +32,69 @@ Rule for the rest of the package
 - Functions that may be called directly on raw data and need one specific
   modality normalize it themselves (e.g. common._get_single_modality).
 - Columns whose meaning changed (visual_stimulus) are always read through the
-  functions in this file, which use the date of each trial.
+  functions in this file, which use the date and the village (system_name)
+  of each trial.
+- The default is always the newest format: data of a village that is not in
+  NEW_TASK_CODE_SINCE (e.g. a new village) is read in the newest format.
 
 Current changes
 ---------------
-1. visual_stimulus: (correct, incorrect) -> (left, right), from 2026-11-09.
+1. visual_stimulus: (correct, incorrect) -> (left, right).
 2. Modality and stage names: "auditory" / "auditory_cot" -> "auditory-cot",
-   "auditory_local_wn" -> "auditory-local-wn", from 2026-11-09.
-3. correct: can be None (timeouts), from 2026-11-09.
+   "auditory_local_wn" -> "auditory-local-wn".
+3. correct: can be None (timeouts).
 
 All three come from the same revision of the task (branch hmv_claude of
-auditory-task-python), which reorganised how stimuli are handled.
+auditory-task-python), which reorganised how stimuli are handled. Each
+village started running it on a different day: see NEW_TASK_CODE_SINCE.
+Only the first change needs that date (the other two are read from the values
+themselves).
 """
 
 import ast
 from typing import Any, Optional, Tuple
 
 import pandas as pd
+
+# ---------------------------------------------------------------------------
+# When each village started running the new task code
+# ---------------------------------------------------------------------------
+# Rows saved by a village from this moment on use the new formats, and earlier
+# rows the old ones. The value is a date ("2026-11-25", from midnight) or a
+# date and time ("2026-11-25 15:30", if a village was updated during the day
+# and had sessions before the update).
+#
+# - A village that is not here (e.g. a new village) is read in the newest
+#   format: add a village only if it has data saved by the old task code.
+# - No village ran the new code before the earliest date here, so earlier rows
+#   are read in the old format whatever their village (also rows without
+#   system_name).
+# - Rows after it without system_name are read in the newest format.
+#
+# When a village is updated, add it here with the moment it was updated.
+NEW_TASK_CODE_SINCE = {
+    "village06": "2026-11-09",
+    "village01": "2026-11-25",
+    "village02": "2026-11-25",
+    "village04": "2026-11-25",
+    "village05": "2026-11-25",
+}
+FIRST_NEW_TASK_CODE = min(pd.Timestamp(since) for since in NEW_TASK_CODE_SINCE.values())
+
+
+def uses_new_task_code(date: Any, village: Any = None) -> bool:
+    """
+    True if a trial saved on this date by this village (its system_name)
+    comes from the new task code, i.e. uses the new formats.
+    """
+    date = pd.Timestamp(date)
+    if date < FIRST_NEW_TASK_CODE:
+        return False
+    since = NEW_TASK_CODE_SINCE.get(village) if isinstance(village, str) else None
+    if since is None:  # a village that is not listed, or no village: newest format
+        return True
+    return date >= pd.Timestamp(since)
+
 
 # ---------------------------------------------------------------------------
 # 1. visual_stimulus: (correct, incorrect) -> (left, right)
@@ -63,11 +109,10 @@ import pandas as pd
 # side, so "correct" and "incorrect" port stop making sense for it. Saving the
 # brightness by side is valid for every trial, informative or not.
 #
-# How to tell old and new rows apart: the date of the trial. No column marks the
-# format, so rows recorded from this date on (inclusive) are read as
-# (left, right), and earlier rows as (correct, incorrect).
-# Note: a session recorded on this date with the older task would be misread.
-VISUAL_STIMULUS_LEFT_RIGHT_SINCE = pd.Timestamp("2026-11-09")
+# How to tell old and new rows apart: the date and the village of the trial
+# (see NEW_TASK_CODE_SINCE). No column marks the format. Pass the village
+# (system_name) of the trial: without it, rows after FIRST_NEW_TASK_CODE are
+# read in the newest format.
 
 
 def _parse_pair(value: Any) -> Optional[Tuple[float, float]]:
@@ -86,12 +131,14 @@ def _parse_pair(value: Any) -> Optional[Tuple[float, float]]:
     return float(first), float(second)
 
 
-def visual_stimulus_is_left_right(date: Any) -> bool:
-    """True if a trial recorded on this date saved visual_stimulus as (left, right)."""
-    return pd.Timestamp(date) >= VISUAL_STIMULUS_LEFT_RIGHT_SINCE
+def visual_stimulus_is_left_right(date: Any, village: Any = None) -> bool:
+    """True if a trial saved on this date by this village saved visual_stimulus as (left, right)."""
+    return uses_new_task_code(date, village)
 
 
-def get_left_right_brightness(visual_stimulus: Any, correct_side: str, date: Any) -> Optional[Tuple[float, float]]:
+def get_left_right_brightness(
+    visual_stimulus: Any, correct_side: str, date: Any, village: Any = None
+) -> Optional[Tuple[float, float]]:
     """
     Returns (left, right) brightness of the side ports for one trial, whatever
     the format it was saved in. None if the trial had no light stimulus.
@@ -99,12 +146,13 @@ def get_left_right_brightness(visual_stimulus: Any, correct_side: str, date: Any
     Args:
         visual_stimulus: the value of the visual_stimulus column (text or pair).
         correct_side: "left" or "right" (needed to read old rows).
-        date: the date of the trial (decides the format).
+        date: the date of the trial (decides the format, with the village).
+        village: the system_name of the trial (see NEW_TASK_CODE_SINCE).
     """
     pair = _parse_pair(visual_stimulus)
     if pair is None:
         return None
-    if visual_stimulus_is_left_right(date):
+    if visual_stimulus_is_left_right(date, village):
         return pair
     # old rows: (correct, incorrect)
     correct_brightness, incorrect_brightness = pair
@@ -114,13 +162,13 @@ def get_left_right_brightness(visual_stimulus: Any, correct_side: str, date: Any
 
 
 def get_correct_incorrect_brightness(
-    visual_stimulus: Any, correct_side: str, date: Any
+    visual_stimulus: Any, correct_side: str, date: Any, village: Any = None
 ) -> Optional[Tuple[float, float]]:
     """
     Returns (correct port, incorrect port) brightness for one trial, whatever the
     format it was saved in. None if the trial had no light stimulus.
     """
-    left_right = get_left_right_brightness(visual_stimulus, correct_side, date)
+    left_right = get_left_right_brightness(visual_stimulus, correct_side, date, village)
     if left_right is None:
         return None
     left, right = left_right
@@ -132,11 +180,14 @@ def get_correct_incorrect_brightness(
 def add_left_right_brightness(df_in: pd.DataFrame) -> pd.DataFrame:
     """
     Adds the columns left_brightness and right_brightness (NaN if the trial had
-    no light stimulus), reading visual_stimulus in either format.
+    no light stimulus), reading visual_stimulus in either format (from the
+    date and the system_name of each row).
     """
     df = df_in.copy()
     pairs = df.apply(
-        lambda row: get_left_right_brightness(row["visual_stimulus"], row["correct_side"], row["date"]),
+        lambda row: get_left_right_brightness(
+            row["visual_stimulus"], row["correct_side"], row["date"], row.get("system_name")
+        ),
         axis=1,
     )
     df["left_brightness"] = pairs.apply(lambda p: p[0] if p is not None else float("nan"))
@@ -226,7 +277,6 @@ def normalize_task_names(df_in: pd.DataFrame) -> pd.DataFrame:
 #   as the training protocol does.
 # - Plots must not fail on empty values; COUNT_TIMEOUTS_AS_ERRORS says how to
 #   treat them when a number is needed.
-CORRECT_CAN_BE_NONE_SINCE = pd.Timestamp("2026-11-09")
 COUNT_TIMEOUTS_AS_ERRORS = True
 
 

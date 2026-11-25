@@ -44,8 +44,70 @@ def test_get_left_right_brightness(visual_stimulus, correct_side, date, expected
 
 
 def test_change_date_is_inclusive():
-    assert dfc.visual_stimulus_is_left_right("2026-11-09 00:00:00")
-    assert not dfc.visual_stimulus_is_left_right("2026-11-08 23:59:59")
+    assert dfc.visual_stimulus_is_left_right("2026-11-09 00:00:00", "village06")
+    assert not dfc.visual_stimulus_is_left_right("2026-11-08 23:59:59", "village06")
+    assert dfc.visual_stimulus_is_left_right("2026-11-25 00:00:00", "village02")
+    assert not dfc.visual_stimulus_is_left_right("2026-11-24 23:59:59", "village02")
+
+
+@pytest.mark.parametrize(
+    "date, village, new_format",
+    [
+        # village06 runs the new code since 2026-11-09
+        ("2026-11-10 10:00", "village06", True),
+        # the other villages since 2026-11-25
+        ("2026-11-10 10:00", "village01", False),
+        ("2026-11-10 10:00", "village02", False),
+        ("2026-11-24 23:00", "village04", False),
+        ("2026-11-25 10:00", "village05", True),
+        ("2026-12-01 10:00", "village02", True),
+        # a village that is not listed (e.g. a new one): the newest format
+        ("2026-11-10 10:00", "village09", True),
+        # rows without village: the newest format
+        ("2026-11-10 10:00", None, True),
+        ("2026-11-10 10:00", float("nan"), True),
+        # nobody ran the new code before 2026-11-09
+        ("2026-11-08 10:00", "village06", False),
+        ("2026-11-08 10:00", "village09", False),
+        ("2026-11-08 10:00", None, False),
+    ],
+)
+def test_new_task_code_by_village(date, village, new_format):
+    assert dfc.uses_new_task_code(date, village) is new_format
+
+
+def test_every_listed_village_has_a_valid_date():
+    for village, since in dfc.NEW_TASK_CODE_SINCE.items():
+        assert village.startswith("village") and pd.Timestamp(since) >= dfc.FIRST_NEW_TASK_CODE
+
+
+def test_left_right_brightness_uses_the_village_of_each_row():
+    """The same day: village06 saved (left, right), village02 still (correct, incorrect)."""
+    df = pd.DataFrame(
+        {
+            "visual_stimulus": ["(0.1, 0.6)", "(0.6, 0.1)"],
+            "correct_side": ["right", "right"],
+            "date": pd.to_datetime(["2026-11-20 10:00", "2026-11-20 10:00"]),
+            "system_name": ["village06", "village02"],
+        }
+    )
+    out = dfc.add_left_right_brightness(df)
+    # both trials: the right port (correct) was the brighter one
+    assert out["left_brightness"].tolist() == [0.1, 0.1]
+    assert out["right_brightness"].tolist() == [0.6, 0.6]
+    # the correct port is the brighter one when read through the other function too
+    for _, row in df.iterrows():
+        assert dfc.get_correct_incorrect_brightness(
+            row["visual_stimulus"], row["correct_side"], row["date"], row["system_name"]
+        ) == (0.6, 0.1)
+
+
+def test_left_right_brightness_without_system_name_column():
+    df = pd.DataFrame(
+        {"visual_stimulus": ["(0.1, 0.6)"], "correct_side": ["right"], "date": pd.to_datetime(["2026-11-20"])}
+    )
+    out = dfc.add_left_right_brightness(df)  # newest format
+    assert (out["left_brightness"].iloc[0], out["right_brightness"].iloc[0]) == (0.1, 0.6)
 
 
 def test_get_correct_incorrect_brightness():

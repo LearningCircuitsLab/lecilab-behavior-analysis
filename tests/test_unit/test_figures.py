@@ -60,9 +60,10 @@ def test_session_summary_from_raw_data(raw_trials, day):
 
 
 def _new_format_day(raw_trials: pd.DataFrame) -> pd.DataFrame:
-    """A visual hard / auditory day converted to the format saved since 2026-11-09."""
+    """A visual hard / auditory day converted to the format of the new task code
+    (dated after every village started running it, see data_format_changes)."""
     df = raw_trials[raw_trials.date.dt.strftime("%Y-%m-%d") == "2025-10-15"].copy()
-    df["date"] = df["date"] + (pd.Timestamp("2026-11-10") - pd.Timestamp("2025-10-15"))
+    df["date"] = df["date"] + (pd.Timestamp("2026-11-26") - pd.Timestamp("2025-10-15"))
     df["stimulus_modality"] = df["stimulus_modality"].replace({"auditory": "auditory-cot"})
     df["current_training_stage"] = df["current_training_stage"].str.replace("auditory", "auditory-cot")
 
