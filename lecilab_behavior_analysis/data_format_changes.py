@@ -76,10 +76,10 @@ import pandas as pd
 # When a village is updated, add it here with the moment it was updated.
 NEW_TASK_CODE_SINCE = {
     "village06": "2026-11-09",
-    "village01": "2026-11-25",
-    "village02": "2026-11-25",
-    "village04": "2026-11-25",
-    "village05": "2026-11-25",
+    "village01": "2026-11-25 14:00",
+    "village02": "2026-11-25 14:00",
+    "village04": "2026-11-25 14:00",
+    "village05": "2026-11-25 14:00",
 }
 FIRST_NEW_TASK_CODE = min(pd.Timestamp(since) for since in NEW_TASK_CODE_SINCE.values())
 

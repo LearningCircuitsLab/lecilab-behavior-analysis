@@ -46,8 +46,8 @@ def test_get_left_right_brightness(visual_stimulus, correct_side, date, expected
 def test_change_date_is_inclusive():
     assert dfc.visual_stimulus_is_left_right("2026-11-09 00:00:00", "village06")
     assert not dfc.visual_stimulus_is_left_right("2026-11-08 23:59:59", "village06")
-    assert dfc.visual_stimulus_is_left_right("2026-11-25 00:00:00", "village02")
-    assert not dfc.visual_stimulus_is_left_right("2026-11-24 23:59:59", "village02")
+    assert dfc.visual_stimulus_is_left_right("2026-11-25 14:00:00", "village02")
+    assert not dfc.visual_stimulus_is_left_right("2026-11-25 13:59:59", "village02")
 
 
 @pytest.mark.parametrize(
@@ -59,7 +59,8 @@ def test_change_date_is_inclusive():
         ("2026-11-10 10:00", "village01", False),
         ("2026-11-10 10:00", "village02", False),
         ("2026-11-24 23:00", "village04", False),
-        ("2026-11-25 10:00", "village05", True),
+        ("2026-11-25 14:00", "village05", True),
+        ("2026-11-25 13:59", "village05", False),
         ("2026-12-01 10:00", "village02", True),
         # a village that is not listed (e.g. a new one): the newest format
         ("2026-11-10 10:00", "village09", True),
