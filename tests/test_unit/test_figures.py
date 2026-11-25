@@ -248,24 +248,32 @@ def test_session_summary_with_use_sound_location(raw_trials):
 
 
 def test_mean_and_ci_by_day_shows_isolated_days():
-    """A day without data before and after it is still drawn (a dot and an error bar)."""
+    """Every day is on the line (dotted over days without data), and the shade goes through every day."""
     from matplotlib import pyplot as plt
 
     from lecilab_behavior_analysis.plots import mean_and_ci_by_day_plot
 
     daily = pd.DataFrame(
         {
-            "day": pd.to_datetime(["2025-01-01", "2025-01-02", "2025-01-10"]),
-            "x_mean": [1.0, 2.0, 3.0],
-            "x_bot95": [0.5, 1.5, 2.5],
-            "x_top95": [1.5, 2.5, 3.5],
+            "day": pd.to_datetime(["2025-01-02", "2025-01-01", "2025-01-10"]),  # unsorted, a gap before the 10th
+            "x_mean": [2.0, 1.0, 3.0],
+            "x_bot95": [1.5, 0.5, 2.5],
+            "x_top95": [2.5, 1.5, 3.5],
         }
     )
     fig, ax = plt.subplots()
     mean_and_ci_by_day_plot(daily, "x", ax=ax)
-    line = ax.get_lines()[0]
-    assert line.get_marker() == "o"
-    assert np.isfinite(np.asarray(line.get_ydata(), dtype=float)).sum() == 3  # the three days have a point
-    error_bars = [c for c in ax.collections if c.__class__.__name__ == "LineCollection"]
-    assert len(error_bars) == 1 and len(error_bars[0].get_segments()) == 1  # only the isolated day
+    through_gaps, solid = ax.get_lines()
+    assert through_gaps.get_linestyle() == ":" and list(through_gaps.get_ydata()) == [1.0, 2.0, 3.0]
+    # solid between the 1st and 2nd only (one row per calendar day: NaN over the gap)
+    assert np.isfinite(np.asarray(solid.get_ydata(), dtype=float)).sum() == 3
+    assert np.isnan(np.asarray(solid.get_ydata(), dtype=float)).sum() == 7
+    shade = ax.collections[0].get_paths()[0].vertices
+    assert shade[:, 1].min() == 0.5 and shade[:, 1].max() == 3.5  # through the isolated day
+    plt.close(fig)
+
+    one_day = daily.iloc[:1]
+    fig, ax = plt.subplots()
+    mean_and_ci_by_day_plot(one_day, "x", ax=ax)
+    assert ax.get_lines()[-1].get_marker() == "o"
     plt.close(fig)

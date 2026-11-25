@@ -309,25 +309,29 @@ def mean_and_ci_by_day_plot(
     daily: pd.DataFrame, item: str, ax: plt.Axes, color: str = "black", ylog: bool = False, label: Optional[str] = None
 ) -> plt.Axes:
     """
-    Mean (line, a dot per day) and 5-95 percentiles (shade) of item per day.
-    Lines break over days without data; a day without data before and after
-    it (which a line cannot show) is drawn as a dot with an error bar.
+    Mean (line) and 5-95 percentiles (shade) of item per day.
+
+    The line is solid between consecutive days, and dotted (thinner, lighter)
+    over days without data, so that every day is on the line, also a day
+    without data before or after it. The shade goes through every day with
+    data. A single day is drawn as a dot.
 
     Args:
         daily: one row per day, with columns day (datetime), <item>_mean,
             <item>_bot95 and <item>_top95.
     """
     column_checker(daily, required_columns={"day", f"{item}_mean", f"{item}_bot95", f"{item}_top95"})
-    # one row per calendar day, so that lines break where there is no data
-    daily = daily.sort_values("day").set_index("day")
-    daily = daily[~daily.index.duplicated()].asfreq("D").reset_index()
-    mean = daily[f"{item}_mean"]
-    ax.plot(daily["day"], mean, color=color, linewidth=1.5, marker="o", markersize=2.5)
-    ax.fill_between(daily["day"], daily[f"{item}_bot95"], daily[f"{item}_top95"], color=color, alpha=0.2, linewidth=0)
-    isolated = mean.notna() & mean.shift(1).isna() & mean.shift(-1).isna()
-    if isolated.any():
-        rows = daily[isolated]
-        ax.vlines(rows["day"], rows[f"{item}_bot95"], rows[f"{item}_top95"], color=color, alpha=0.4, linewidth=2)
+    daily = daily.sort_values("day")
+    daily = daily[~daily["day"].duplicated()].dropna(subset=[f"{item}_mean"])
+    days, mean = daily["day"], daily[f"{item}_mean"]
+    # every day with data, joined through the gaps
+    ax.plot(days, mean, color=color, linewidth=1.0, linestyle=":", alpha=0.8)
+    # solid only between consecutive days (a row per calendar day breaks the line over gaps)
+    calendar = daily.set_index("day").asfreq("D") if len(daily) else daily.set_index("day")
+    ax.plot(calendar.index, calendar[f"{item}_mean"], color=color, linewidth=1.5)
+    ax.fill_between(days, daily[f"{item}_bot95"], daily[f"{item}_top95"], color=color, alpha=0.2, linewidth=0)
+    if len(daily) == 1:
+        ax.plot(days, mean, color=color, marker="o", markersize=4, linestyle="none")
     ax.set_ylabel(label or item.replace("_", " "), color=color)
     if ylog:
         ax.set_yscale("log")

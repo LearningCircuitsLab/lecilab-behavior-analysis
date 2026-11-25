@@ -91,6 +91,7 @@ docs/source/api_generated/
 docs/source/_static/examples/
 # written by docs/source/make_examples.py at each build
 docs/source/gallery.md
+docs/source/gallery/
 
 # marimo session cache
 __marimo__/

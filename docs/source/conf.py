@@ -31,6 +31,8 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_sitemap",
     "myst_parser",
+    # the names in the code of the gallery link to their documentation
+    "sphinx_codeautolink",
 ]
 myst_enable_extensions = ["colon_fence", "deflist", "linkify", "html_image"]
 myst_heading_anchors = 3
@@ -45,6 +47,7 @@ source_suffix = {".rst": "restructuredtext", ".md": "markdown"}
 html_theme = "shibuya"
 html_title = "lecilab-behavior-analysis"
 html_static_path = ["_static"]
+html_css_files = ["gallery.css"]
 html_theme_options = {
     "color_mode": "light",
     "github_url": "https://github.com/LearningCircuitsLab/lecilab-behavior-analysis",
