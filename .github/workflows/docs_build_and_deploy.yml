@@ -1,7 +1,8 @@
 name: Build Sphinx docs and deploy to GitHub Pages
 
 # Builds the documentation on every push to main, on pull requests (as a
-# check that it still builds) and by manual dispatch. On pushes to main, the
+# check that it still builds) and by manual dispatch. On pushes to main and on
+# manual runs on main (e.g. after a GitHub outage that skipped a push), the
 # site is moved to the gh-pages branch, which GitHub Pages publishes at
 # https://learningcircuitslab.github.io/lecilab-behavior-analysis/
 # The example figures are drawn from tests/data by the current code at every
@@ -53,7 +54,7 @@ jobs:
     needs: build_sphinx_docs
     permissions:
       contents: write
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: neuroinformatics-unit/actions/deploy_sphinx_docs@v2
