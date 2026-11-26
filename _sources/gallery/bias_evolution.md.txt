@@ -1,0 +1,29 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Bias evolution
+
+Repeat / alternate and left / right bias through training.
+
+<div class="gallery-figure"><img src="../_static/examples/bias_evolution.png" alt="Bias evolution"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.choices import get_bias_evolution_df, points_to_lines_for_bias_evolution
+from lecilab_behavior_analysis.plots import plot_decision_evolution_triangle
+
+df = trials[["subject", "total_trial", "roa_choice_numeric"]].copy()
+group_size = max(len(df) // 40, 1)
+df["trial_group"] = df["total_trial"] // group_size * group_size
+evolution = points_to_lines_for_bias_evolution(
+    get_bias_evolution_df(df, groupby="trial_group"), groupby="trial_group"
+)
+fig, ax = plt.subplots(figsize=(4, 4))
+plot_decision_evolution_triangle(evolution, ax=ax, hue="trial_group")
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

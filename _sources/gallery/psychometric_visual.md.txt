@@ -1,0 +1,25 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Psychometric curve: visual
+
+Left choices against the brightness ratio of the ports (positive: left brighter), with a lapse logistic fit.
+
+<div class="gallery-figure"><img src="../_static/examples/psychometric_visual.png" alt="Psychometric curve: visual"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.choices import get_performance_by_difficulty_ratio
+from lecilab_behavior_analysis.plots import psychometric_plot
+
+visual = day[(day["stimulus_modality"] == "visual") & (day["task"] != "Habituation")]
+df = get_performance_by_difficulty_ratio(visual)
+fig, ax = plt.subplots(figsize=(4, 3.5))
+psychometric_plot(df, x="visual_stimulus_ratio", y="first_choice_numeric", ax=ax, valueType="discrete")
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

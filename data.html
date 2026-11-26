@@ -8,7 +8,9 @@
     setColorMode(localStorage._theme||"light");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
     <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-codeautolink.css?v=b2176991" />
     <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery.css?v=4b1a2560" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -458,7 +460,7 @@ data-aria-dark="Switch to auto color mode">
 <h2>Preparing the trials<a class="headerlink" href="#preparing-the-trials" title="Link to this heading">#</a></h2>
 <p>Each trial row has the task settings, the states and the events of the
 trial (<code class="docutils literal notranslate"><span class="pre">Port1In</span></code>, <code class="docutils literal notranslate"><span class="pre">STATE_stimulus_state_START</span></code>…, saved as text such as
-<code class="docutils literal notranslate"><span class="pre">&quot;[1.2,</span> <span class="pre">3.4]&quot;</span></code>). <code class="docutils literal notranslate"><span class="pre">preprocessing.prepare</span></code> turns them into the columns every
+<code class="docutils literal notranslate"><span class="pre">"[1.2,</span> <span class="pre">3.4]"</span></code>). <code class="docutils literal notranslate"><span class="pre">preprocessing.prepare</span></code> turns them into the columns every
 analysis uses:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
@@ -527,13 +529,13 @@ setup’s <code class="docutils literal notranslate"><span class="pre">sessions_
 (<code class="docutils literal notranslate"><span class="pre">sessions/&lt;subject&gt;/&lt;subject&gt;_&lt;task&gt;_&lt;YYYYMMDD_HHMMSS&gt;.json</span></code>). A session’s
 settings and trials are matched by subject and date (the start of the
 session).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">settings</span>
-</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.io.loading</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_project_logs</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.io.html#module-lecilab_behavior_analysis.io"><span class="nn">lecilab_behavior_analysis.io</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.io.settings.html#module-lecilab_behavior_analysis.io.settings" title="lecilab_behavior_analysis.io.settings"><span class="n">settings</span></a>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.io.loading.html#module-lecilab_behavior_analysis.io.loading"><span class="nn">lecilab_behavior_analysis.io.loading</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.io.loading.load_project_logs.html#lecilab_behavior_analysis.io.loading.load_project_logs" title="lecilab_behavior_analysis.io.loading.load_project_logs"><span class="n">load_project_logs</span></a>
 </span><span data-line="3">
-</span><span data-line="4"><span class="n">_</span><span class="p">,</span> <span class="n">summary</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">load_project_logs</span><span class="p">(</span><span class="s2">"COT_cannula_GAD2_data"</span><span class="p">)</span>
-</span><span data-line="5"><span class="n">table</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">session_settings_table</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="s2">"NUO057"</span><span class="p">)</span>  <span class="c1"># one row per session</span>
-</span><span data-line="6"><span class="n">settings</span><span class="o">.</span><span class="n">changing_settings</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>  <span class="c1"># the settings that changed at some point</span>
-</span><span data-line="7"><span class="n">settings</span><span class="o">.</span><span class="n">print_session_settings</span><span class="p">(</span><span class="s2">"COT_cannula_GAD2_data"</span><span class="p">,</span> <span class="s2">"NUO057"</span><span class="p">,</span> <span class="s2">"2026-04-09 04:01:23"</span><span class="p">)</span>
+</span><span data-line="4"><span class="n">_</span><span class="p">,</span> <span class="n">summary</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.io.loading.load_project_logs.html#lecilab_behavior_analysis.io.loading.load_project_logs" title="lecilab_behavior_analysis.io.loading.load_project_logs"><span class="n">load_project_logs</span></a><span class="p">(</span><span class="s2">"COT_cannula_GAD2_data"</span><span class="p">)</span>
+</span><span data-line="5"><span class="n">table</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.io.settings.session_settings_table.html#lecilab_behavior_analysis.io.settings.session_settings_table" title="lecilab_behavior_analysis.io.settings.session_settings_table"><span class="n">settings</span><span class="o">.</span><span class="n">session_settings_table</span></a><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="s2">"NUO057"</span><span class="p">)</span>  <span class="c1"># one row per session</span>
+</span><span data-line="6"><a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.io.settings.changing_settings.html#lecilab_behavior_analysis.io.settings.changing_settings" title="lecilab_behavior_analysis.io.settings.changing_settings"><span class="n">settings</span><span class="o">.</span><span class="n">changing_settings</span></a><span class="p">(</span><span class="n">table</span><span class="p">)</span>  <span class="c1"># the settings that changed at some point</span>
+</span><span data-line="7"><a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.io.settings.print_session_settings.html#lecilab_behavior_analysis.io.settings.print_session_settings" title="lecilab_behavior_analysis.io.settings.print_session_settings"><span class="n">settings</span><span class="o">.</span><span class="n">print_session_settings</span></a><span class="p">(</span><span class="s2">"COT_cannula_GAD2_data"</span><span class="p">,</span> <span class="s2">"NUO057"</span><span class="p">,</span> <span class="s2">"2026-04-09 04:01:23"</span><span class="p">)</span>
 </span></pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">print_session_settings</span></code> lists the changes since the previous session first:</p>
@@ -600,7 +602,7 @@ left choices by correct side and difficulty in each session, and
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=5cc810fa"></script>
+      <script src="_static/documentation_options.js?v=9da5638f"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/shibuya.js?v=50760d75"></script></body>

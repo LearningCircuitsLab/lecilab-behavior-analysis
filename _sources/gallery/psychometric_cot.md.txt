@@ -1,0 +1,26 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Psychometric curve: cloud of tones
+
+Left choices against the evidence of the cloud of tones (6 bins), with a lapse logistic fit.
+
+<div class="gallery-figure"><img src="../_static/examples/psychometric_cot.png" alt="Psychometric curve: cloud of tones"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.choices import get_performance_by_difficulty_ratio
+from lecilab_behavior_analysis.plots import psychometric_plot
+
+cot_day = trials[trials["year_month_day"] == "2025-11-11"]  # cloud of tones, easy to hard
+cot = cot_day[cot_day["stimulus_modality"] == "auditory-cot"]
+df = get_performance_by_difficulty_ratio(cot)
+fig, ax = plt.subplots(figsize=(4, 3.5))
+psychometric_plot(df, x="total_evidence_strength", y="first_choice_numeric", ax=ax, valueType="continue")
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

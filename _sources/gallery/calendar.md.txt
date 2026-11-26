@@ -1,0 +1,25 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Calendar of trials
+
+Trials per day, as a calendar.
+
+<div class="gallery-figure"><img src="../_static/examples/calendar.png" alt="Calendar of trials"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.plots import calendar_plot
+
+daily = trials.groupby("year_month_day").size()
+daily.index = pd.to_datetime(daily.index)
+years = daily.index.year.nunique()
+fig, axes = plt.subplots(years, 1, figsize=(10, 1.6 * years), squeeze=False)
+calendar_plot(daily, list(axes[:, 0]))  # one row per year
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

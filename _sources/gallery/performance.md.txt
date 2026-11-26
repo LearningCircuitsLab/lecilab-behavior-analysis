@@ -1,0 +1,24 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Performance through training
+
+Performance (rolling window) through all trials.
+
+<div class="gallery-figure"><img src="../_static/examples/performance.png" alt="Performance through training"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.performance import get_performance_through_trials
+from lecilab_behavior_analysis.plots import performance_vs_trials_plot
+
+df = get_performance_through_trials(trials, window=100)
+fig, ax = plt.subplots(figsize=(8, 3))
+performance_vs_trials_plot(df, ax=ax, legend=True)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

@@ -1,0 +1,31 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Performance by trial type
+
+Performance in trials where the correct side repeats or alternates, and by side.
+
+<div class="gallery-figure"><img src="../_static/examples/performance_by_decision.png" alt="Performance by trial type"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+import lecilab_behavior_analysis.data_format_changes as dfc
+from lecilab_behavior_analysis.metrics.performance import (
+    get_performance_by_decision_df,
+    get_performance_through_trials,
+    get_repeat_or_alternate_performance,
+)
+from lecilab_behavior_analysis.plots import performance_by_decision_plot
+
+df = get_performance_through_trials(trials, window=100)
+df["correct"] = df["correct"].apply(dfc.correct_as_number)  # timeouts count as errors
+df = get_performance_by_decision_df(get_repeat_or_alternate_performance(df))
+fig, ax = plt.subplots(figsize=(6, 3))
+performance_by_decision_plot(df, ax=ax)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

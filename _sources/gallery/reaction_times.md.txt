@@ -1,0 +1,29 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Reaction times by day
+
+Reaction time and time between trials, mean and 95% CI.
+
+<div class="gallery-figure"><img src="../_static/examples/reaction_times.png" alt="Reaction times by day"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.timing import get_reaction_times_by_date_df
+from lecilab_behavior_analysis.plots import mean_and_ci_by_day_plot
+
+daily = get_reaction_times_by_date_df(trials)
+daily["day"] = pd.to_datetime(daily["year_month_day"])
+fig, ax = plt.subplots(figsize=(8, 3))
+mean_and_ci_by_day_plot(daily, "reaction_time", ax=ax, color="tab:blue", ylog=True, label="reaction time (s)")
+ax2 = ax.twinx()
+mean_and_ci_by_day_plot(
+    daily, "time_between_trials", ax=ax2, color="tab:orange", ylog=True, label="time between trials (s)"
+)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

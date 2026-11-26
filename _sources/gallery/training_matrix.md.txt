@@ -1,0 +1,29 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Settings and choices, session by session
+
+The proportion of left choices by correct side and difficulty in each session (a psychometric curve per session, as colours), with some settings of each session above it. One day is framed.
+
+<div class="gallery-figure"><img src="../_static/examples/training_matrix.png" alt="Settings and choices, session by session"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.io.settings import session_settings_table, settings_for_sessions
+from lecilab_behavior_analysis.metrics.choices import get_choices_by_difficulty_matrix
+from lecilab_behavior_analysis.plots import training_matrix_plot
+
+p_left, n_trials, sessions = get_choices_by_difficulty_matrix(trials)
+table = session_settings_table(summary, "NUO003")  # the settings of each session
+settings = settings_for_sessions(
+    table, p_left.columns, ["current_training_stage", "punishment", "hard_trials_on", "reward_amount_ml"]
+)
+fig, ax = plt.subplots(figsize=(10, 4.5))
+training_matrix_plot(p_left, sessions, settings, highlight_day="2025-10-15", ax=ax)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

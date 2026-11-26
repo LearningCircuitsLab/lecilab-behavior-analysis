@@ -1,0 +1,26 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Time of day of training
+
+When the mouse was in the box, as a 24-hour clock.
+
+<div class="gallery-figure"><img src="../_static/examples/training_times.png" alt="Time of day of training"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.occupancy import get_occupancy_heatmap, get_start_and_end_of_sessions_df
+from lecilab_behavior_analysis.plots import plot_training_times_clock_heatmap
+
+occupancy = get_start_and_end_of_sessions_df(trials)
+heatmap = get_occupancy_heatmap(occupancy, window_size=30)
+fig = plt.figure(figsize=(4, 4))
+ax = fig.add_subplot(projection="polar")
+plot_training_times_clock_heatmap(heatmap, ax=ax)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

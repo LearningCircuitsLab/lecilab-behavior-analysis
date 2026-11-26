@@ -1,0 +1,25 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# When each trial started
+
+Trial number against the time since the session started.
+
+<div class="gallery-figure"><img src="../_static/examples/trial_start.png" alt="When each trial started"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.timing import adjust_trials_and_time_of_start_to_first_session
+from lecilab_behavior_analysis.metrics.trial_events import add_time_from_session_start
+from lecilab_behavior_analysis.plots import plot_trial_time_of_start
+
+df = adjust_trials_and_time_of_start_to_first_session(add_time_from_session_start(day.copy()))
+fig, ax = plt.subplots(figsize=(6, 3))
+plot_trial_time_of_start(df, ax=ax)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

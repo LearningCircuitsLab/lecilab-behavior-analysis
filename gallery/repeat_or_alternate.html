@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Repeat or alternate - lecilab-behavior-analysis</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
+      <link rel="canonical" href="https://LearningCircuitsLab.github.io/lecilab-behavior-analysis/gallery/repeat_or_alternate.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"light");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-codeautolink.css?v=b2176991" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/gallery.css?v=4b1a2560" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+
+<style>
+  .sy-content { max-width: 1100px; }
+</style>
+
+
+  
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://LearningCircuitsLab.github.io/lecilab-behavior-analysis/gallery/repeat_or_alternate.html"/>
+  <meta property="og:title" content="Repeat or alternate"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>lecilab-behavior-analysis</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="../getting_started.html">Getting started</a></li><li class="link"><a href="../figures.html">Figures</a></li><li class="link"><a href="../api_index.html">API</a></li><li class="link">
+          <a href="https://learningcircuitslab.github.io/village-report-generator/documentation/">
+            <span>Daily reports</span></a>
+        </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/LearningCircuitsLab/lecilab-behavior-analysis" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div><div class="sy-container mx-auto body">
+    <main class="sy-content mx-auto pt-12 px-6 xl:px-12 break-words">
+      <article class="yue" role="main">
+        <section id="repeat-or-alternate">
+<h1>Repeat or alternate<a class="headerlink" href="#repeat-or-alternate" title="Link to this heading">#</a></h1>
+<p>Performance in trials where the correct side repeats the previous one, or alternates.</p>
+<div class="gallery-figure"><img alt="Repeat or alternate" src="../_static/examples/repeat_or_alternate.png"/></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+</span><span data-line="2">
+</span><span data-line="3"><span class="kn">import</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.data_format_changes.html#module-lecilab_behavior_analysis.data_format_changes"><span class="nn">lecilab_behavior_analysis.data_format_changes</span></a><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dfc</span>
+</span><span data-line="4"><span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.metrics.performance.html#module-lecilab_behavior_analysis.metrics.performance"><span class="nn">lecilab_behavior_analysis.metrics.performance</span></a><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span data-line="5">    <a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.metrics.performance.get_performance_through_trials.html#lecilab_behavior_analysis.metrics.performance.get_performance_through_trials" title="lecilab_behavior_analysis.metrics.performance.get_performance_through_trials"><span class="n">get_performance_through_trials</span></a><span class="p">,</span>
+</span><span data-line="6">    <a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_performance.html#lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_performance" title="lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_performance"><span class="n">get_repeat_or_alternate_performance</span></a><span class="p">,</span>
+</span><span data-line="7">    <a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_series.html#lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_series" title="lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_series"><span class="n">get_repeat_or_alternate_series</span></a><span class="p">,</span>
+</span><span data-line="8"><span class="p">)</span>
+</span><span data-line="9"><span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.plots.html#module-lecilab_behavior_analysis.plots"><span class="nn">lecilab_behavior_analysis.plots</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.plots.performance.repeat_or_alternate_performance_plot.html#lecilab_behavior_analysis.plots.performance.repeat_or_alternate_performance_plot" title="lecilab_behavior_analysis.plots.performance.repeat_or_alternate_performance_plot"><span class="n">repeat_or_alternate_performance_plot</span></a>
+</span><span data-line="10">
+</span><span data-line="11"><span class="n">df</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.metrics.performance.get_performance_through_trials.html#lecilab_behavior_analysis.metrics.performance.get_performance_through_trials" title="lecilab_behavior_analysis.metrics.performance.get_performance_through_trials"><span class="n">get_performance_through_trials</span></a><span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</span><span data-line="12"><span class="n">df</span><span class="p">[</span><span class="s2">"correct"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"correct"</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.data_format_changes.correct_as_number.html#lecilab_behavior_analysis.data_format_changes.correct_as_number" title="lecilab_behavior_analysis.data_format_changes.correct_as_number"><span class="n">dfc</span><span class="o">.</span><span class="n">correct_as_number</span></a><span class="p">)</span>
+</span><span data-line="13"><span class="n">df</span><span class="p">[</span><span class="s2">"repeat_or_alternate"</span><span class="p">]</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_series.html#lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_series" title="lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_series"><span class="n">get_repeat_or_alternate_series</span></a><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">correct_side</span><span class="p">)</span>
+</span><span data-line="14"><span class="n">df</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_performance.html#lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_performance" title="lecilab_behavior_analysis.metrics.performance.get_repeat_or_alternate_performance"><span class="n">get_repeat_or_alternate_performance</span></a><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</span><span data-line="15"><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</span><span data-line="16"><a class="sphinx-codeautolink-a" href="../api_generated/lecilab_behavior_analysis.plots.performance.repeat_or_alternate_performance_plot.html#lecilab_behavior_analysis.plots.performance.repeat_or_alternate_performance_plot" title="lecilab_behavior_analysis.plots.performance.repeat_or_alternate_performance_plot"><span class="n">repeat_or_alternate_performance_plot</span></a><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">trials</span></code>, <code class="docutils literal notranslate"><span class="pre">day</span></code> and <code class="docutils literal notranslate"><span class="pre">summary</span></code> are <a class="reference internal" href="../gallery.html#the-inputs-of-the-examples"><span class="std std-ref">the inputs of the examples</span></a>. <a class="reference internal" href="../gallery.html"><span class="std std-doc">Back to the gallery</span></a></p>
+</section>
+
+      </article>
+      
+<button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button>
+
+
+    </main>
+  </div><footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2022, Learning Circuits Lab</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/LearningCircuitsLab/lecilab-behavior-analysis" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=9da5638f"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

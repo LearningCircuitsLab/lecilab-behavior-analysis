@@ -1,0 +1,22 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Correct responses by side
+
+Correct and incorrect trials on each side.
+
+<div class="gallery-figure"><img src="../_static/examples/correct_responses.png" alt="Correct responses by side"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.plots import number_of_correct_responses_plot
+
+fig, ax = plt.subplots(figsize=(3, 3))
+number_of_correct_responses_plot(day, ax)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

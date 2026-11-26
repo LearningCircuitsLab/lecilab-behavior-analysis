@@ -1,0 +1,29 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Choices by side and difficulty
+
+Left choices for each correct side and difficulty (when there is no stimulus value to plot against).
+
+<div class="gallery-figure"><img src="../_static/examples/choice_by_difficulty.png" alt="Choices by side and difficulty"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.trial_events import (
+    side_and_difficulty_to_numeric,
+    transform_side_choice_to_numeric,
+)
+from lecilab_behavior_analysis.plots import choice_by_difficulty_plot
+
+df = day[day["task"] != "Habituation"].copy()
+df["first_choice_numeric"] = df["first_choice"].apply(transform_side_choice_to_numeric)
+df["side_difficulty"] = df.apply(side_and_difficulty_to_numeric, axis=1)
+fig, ax = plt.subplots(figsize=(4, 3.5))
+choice_by_difficulty_plot(df, ax=ax)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

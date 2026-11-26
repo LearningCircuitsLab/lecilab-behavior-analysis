@@ -1,13 +1,49 @@
+---
+layout: simple
+content_max_width: 1240px
+---
+
 # Gallery
 
-Every plot of the package, with the code that draws it. The images are drawn
-from the example data in `tests/data` (one mouse, NUO003) by the current code
-each time the documentation is built: the code under each image is the code
-that drew it.
+Every plot of the package. Hover over a figure to see what it shows, and
+click it to see the code that draws it (the names in the code link to their
+documentation). The figures are drawn from the example data in `tests/data`
+(one mouse, NUO003) by the current code each time this documentation is
+built.
 
-Each example uses three inputs. With your data:
+<div class="gallery-grid">
+<a class="gallery-item large" href="gallery/subject_progress.html"><img src="_static/examples/subject_progress.png" alt="Training history" loading="lazy"><div class="gallery-overlay"><strong>Training history</strong><span>Everything about how a mouse trained, in one figure.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item large" href="gallery/session_summary.html"><img src="_static/examples/session_summary.png" alt="Session summary" loading="lazy"><div class="gallery-overlay"><strong>Session summary</strong><span>One day of a mouse: performance, choices, center port, timing.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/calendar.html"><img src="_static/examples/calendar.png" alt="Calendar of trials" loading="lazy"><div class="gallery-overlay"><strong>Calendar of trials</strong><span>Trials per day, as a calendar.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/trials_and_water.html"><img src="_static/examples/trials_and_water.png" alt="Trials and water per day" loading="lazy"><div class="gallery-overlay"><strong>Trials and water per day</strong><span>Trials of each session, by training stage, and water.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item " href="gallery/training_times.html"><img src="_static/examples/training_times.png" alt="Time of day of training" loading="lazy"><div class="gallery-overlay"><strong>Time of day of training</strong><span>When the mouse was in the box, as a 24-hour clock.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/performance.html"><img src="_static/examples/performance.png" alt="Performance through training" loading="lazy"><div class="gallery-overlay"><strong>Performance through training</strong><span>Performance (rolling window) through all trials.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/performance_by_decision.html"><img src="_static/examples/performance_by_decision.png" alt="Performance by trial type" loading="lazy"><div class="gallery-overlay"><strong>Performance by trial type</strong><span>Performance in trials where the correct side repeats or alternates, and by side.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/center_port.html"><img src="_static/examples/center_port.png" alt="Center port by day" loading="lazy"><div class="gallery-overlay"><strong>Center port by day</strong><span>Center pokes per trial and center hold time, mean and 95% CI.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/reaction_times.html"><img src="_static/examples/reaction_times.png" alt="Reaction times by day" loading="lazy"><div class="gallery-overlay"><strong>Reaction times by day</strong><span>Reaction time and time between trials, mean and 95% CI.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/training_matrix.html"><img src="_static/examples/training_matrix.png" alt="Settings and choices, session by session" loading="lazy"><div class="gallery-overlay"><strong>Settings and choices, session by session</strong><span>The proportion of left choices by correct side and difficulty in each session (a psychometric curve per session, as colours), with some settings of each session above it. One day is framed.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/session_performance.html"><img src="_static/examples/session_performance.png" alt="Performance through the session" loading="lazy"><div class="gallery-overlay"><strong>Performance through the session</strong><span>Rolling performance, a dashed line at each session.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item " href="gallery/correct_responses.html"><img src="_static/examples/correct_responses.png" alt="Correct responses by side" loading="lazy"><div class="gallery-overlay"><strong>Correct responses by side</strong><span>Correct and incorrect trials on each side.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/repeat_or_alternate.html"><img src="_static/examples/repeat_or_alternate.png" alt="Repeat or alternate" loading="lazy"><div class="gallery-overlay"><strong>Repeat or alternate</strong><span>Performance in trials where the correct side repeats the previous one, or alternates.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/center_histograms.html"><img src="_static/examples/center_histograms.png" alt="Center pokes and hold time" loading="lazy"><div class="gallery-overlay"><strong>Center pokes and hold time</strong><span>Histograms of the center pokes per trial and their duration.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/trial_start.html"><img src="_static/examples/trial_start.png" alt="When each trial started" loading="lazy"><div class="gallery-overlay"><strong>When each trial started</strong><span>Trial number against the time since the session started.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/session_timing.html"><img src="_static/examples/session_timing.png" alt="Reaction time and time between trials" loading="lazy"><div class="gallery-overlay"><strong>Reaction time and time between trials</strong><span>Trial by trial through the session, with their distributions on the sides.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item " href="gallery/psychometric_visual.html"><img src="_static/examples/psychometric_visual.png" alt="Psychometric curve: visual" loading="lazy"><div class="gallery-overlay"><strong>Psychometric curve: visual</strong><span>Left choices against the brightness ratio of the ports (positive: left brighter), with a lapse logistic fit.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item " href="gallery/psychometric_cot.html"><img src="_static/examples/psychometric_cot.png" alt="Psychometric curve: cloud of tones" loading="lazy"><div class="gallery-overlay"><strong>Psychometric curve: cloud of tones</strong><span>Left choices against the evidence of the cloud of tones (6 bins), with a lapse logistic fit.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item " href="gallery/choice_by_difficulty.html"><img src="_static/examples/choice_by_difficulty.png" alt="Choices by side and difficulty" loading="lazy"><div class="gallery-overlay"><strong>Choices by side and difficulty</strong><span>Left choices for each correct side and difficulty (when there is no stimulus value to plot against).</span><em>Click to see the code</em></div></a>
+<a class="gallery-item " href="gallery/bias_evolution.html"><img src="_static/examples/bias_evolution.png" alt="Bias evolution" loading="lazy"><div class="gallery-overlay"><strong>Bias evolution</strong><span>Repeat / alternate and left / right bias through training.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/performance_overview.html"><img src="_static/examples/performance_overview.png" alt="Performance of every mouse" loading="lazy"><span class="gallery-badge">interactive</span><div class="gallery-overlay"><strong>Performance of every mouse</strong><span>Performance through trials of every mouse of a project (interactive; long histories are grouped).</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/cohort.html"><img src="_static/examples/cohort.png" alt="Trials and performance per day" loading="lazy"><div class="gallery-overlay"><strong>Trials and performance per day</strong><span>Trials and performance of each mouse, day by day.</span><em>Click to see the code</em></div></a>
+<a class="gallery-item wide" href="gallery/box_occupancy.html"><img src="_static/examples/box_occupancy.png" alt="Box occupancy" loading="lazy"><div class="gallery-overlay"><strong>Box occupancy</strong><span>When the box was used, day by day.</span><em>Click to see the code</em></div></a>
+</div>
+
+## The inputs of the examples
+
+Every example draws from three inputs. With your data:
 
 ```python
+import pandas as pd
+
 from lecilab_behavior_analysis.io.loading import load_project_logs, load_project_trials
 
 # the trials of a mouse, prepared for analysis (and its performance through trials)
@@ -18,428 +54,4 @@ day = trials[trials["year_month_day"] == "2025-10-15"]
 _, summary, _ = load_project_logs("COT_cannula_data")
 ```
 
-See also the [tutorial](tutorial.md), which goes through these step by step.
-
-## Ready-made figures
-
-### Training history
-
-Everything about how a mouse trained, in one figure.
-
-![Training history](_static/examples/subject_progress.png)
-
-```python
-from lecilab_behavior_analysis.figures import subject_progress
-
-fig, problems = subject_progress(trials, perf_window=100)
-```
-
-### Session summary
-
-One day of a mouse: performance, choices, center port, timing.
-
-![Session summary](_static/examples/session_summary.png)
-
-```python
-from lecilab_behavior_analysis.figures import session_summary
-
-fig, problems = session_summary(day, perf_window=50)
-```
-
-## Training history
-
-### Calendar of trials
-
-Trials per day, as a calendar.
-
-![Calendar of trials](_static/examples/calendar.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.plots import calendar_plot
-
-daily = trials.groupby("year_month_day").size()
-daily.index = pd.to_datetime(daily.index)
-years = daily.index.year.nunique()
-fig, axes = plt.subplots(years, 1, figsize=(10, 1.6 * years), squeeze=False)
-calendar_plot(daily, list(axes[:, 0]))  # one row per year
-```
-
-### Trials and water per day
-
-Trials of each session, by training stage, and water.
-
-![Trials and water per day](_static/examples/trials_and_water.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.plots import trials_by_day_stacked_plot, water_by_day_plot
-
-sessions = (
-    trials.groupby(["year_month_day", "session", "current_training_stage"], sort=False)
-    .size()
-    .reset_index(name="trials")
-)
-sessions["day"] = pd.to_datetime(sessions["year_month_day"])
-water = trials.groupby("year_month_day")["water"].sum()
-water.index = pd.to_datetime(water.index)
-fig, ax = plt.subplots(figsize=(8, 3))
-trials_by_day_stacked_plot(sessions, ax=ax)
-water_by_day_plot(water.sort_index(), ax)
-```
-
-### Time of day of training
-
-When the mouse was in the box, as a 24-hour clock.
-
-![Time of day of training](_static/examples/training_times.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.occupancy import get_occupancy_heatmap, get_start_and_end_of_sessions_df
-from lecilab_behavior_analysis.plots import plot_training_times_clock_heatmap
-
-occupancy = get_start_and_end_of_sessions_df(trials)
-heatmap = get_occupancy_heatmap(occupancy, window_size=30)
-fig = plt.figure(figsize=(4, 4))
-ax = fig.add_subplot(projection="polar")
-plot_training_times_clock_heatmap(heatmap, ax=ax)
-```
-
-### Performance through training
-
-Performance (rolling window) through all trials.
-
-![Performance through training](_static/examples/performance.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.performance import get_performance_through_trials
-from lecilab_behavior_analysis.plots import performance_vs_trials_plot
-
-df = get_performance_through_trials(trials, window=100)
-fig, ax = plt.subplots(figsize=(8, 3))
-performance_vs_trials_plot(df, ax=ax, legend=True)
-```
-
-### Performance by trial type
-
-Performance in trials where the correct side repeats or alternates, and by side.
-
-![Performance by trial type](_static/examples/performance_by_decision.png)
-
-```python
-from matplotlib import pyplot as plt
-
-import lecilab_behavior_analysis.data_format_changes as dfc
-from lecilab_behavior_analysis.metrics.performance import (
-    get_performance_by_decision_df,
-    get_performance_through_trials,
-    get_repeat_or_alternate_performance,
-)
-from lecilab_behavior_analysis.plots import performance_by_decision_plot
-
-df = get_performance_through_trials(trials, window=100)
-df["correct"] = df["correct"].apply(dfc.correct_as_number)  # timeouts count as errors
-df = get_performance_by_decision_df(get_repeat_or_alternate_performance(df))
-fig, ax = plt.subplots(figsize=(6, 3))
-performance_by_decision_plot(df, ax=ax)
-```
-
-### Center port by day
-
-Center pokes per trial and center hold time, mean and 95% CI.
-
-![Center port by day](_static/examples/center_port.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.timing import get_center_hold_df
-from lecilab_behavior_analysis.plots import mean_and_ci_by_day_plot
-
-daily = get_center_hold_df(trials)
-daily["day"] = pd.to_datetime(daily["year_month_day"])
-fig, ax = plt.subplots(figsize=(8, 3))
-mean_and_ci_by_day_plot(daily, "number_of_pokes", ax=ax, color="tab:green", label="center pokes per trial")
-ax2 = ax.twinx()
-mean_and_ci_by_day_plot(daily, "hold_time", ax=ax2, color="tab:red", label="center hold time (s)")
-```
-
-### Reaction times by day
-
-Reaction time and time between trials, mean and 95% CI.
-
-![Reaction times by day](_static/examples/reaction_times.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.timing import get_reaction_times_by_date_df
-from lecilab_behavior_analysis.plots import mean_and_ci_by_day_plot
-
-daily = get_reaction_times_by_date_df(trials)
-daily["day"] = pd.to_datetime(daily["year_month_day"])
-fig, ax = plt.subplots(figsize=(8, 3))
-mean_and_ci_by_day_plot(daily, "reaction_time", ax=ax, color="tab:blue", ylog=True, label="reaction time (s)")
-ax2 = ax.twinx()
-mean_and_ci_by_day_plot(
-    daily, "time_between_trials", ax=ax2, color="tab:orange", ylog=True, label="time between trials (s)"
-)
-```
-
-### Settings and choices, session by session
-
-The proportion of left choices by correct side and difficulty in each session (a psychometric curve per session, as colours), with some settings of each session above it. One day is framed.
-
-![Settings and choices, session by session](_static/examples/training_matrix.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.io.settings import session_settings_table, settings_for_sessions
-from lecilab_behavior_analysis.metrics.choices import get_choices_by_difficulty_matrix
-from lecilab_behavior_analysis.plots import training_matrix_plot
-
-p_left, n_trials, sessions = get_choices_by_difficulty_matrix(trials)
-table = session_settings_table(summary, "NUO003")  # the settings of each session
-settings = settings_for_sessions(
-    table, p_left.columns, ["current_training_stage", "punishment", "hard_trials_on", "reward_amount_ml"]
-)
-fig, ax = plt.subplots(figsize=(10, 4.5))
-training_matrix_plot(p_left, sessions, settings, highlight_day="2025-10-15", ax=ax)
-```
-
-## One session
-
-### Performance through the session
-
-Rolling performance, a dashed line at each session.
-
-![Performance through the session](_static/examples/session_performance.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.performance import get_performance_through_trials
-from lecilab_behavior_analysis.plots import performance_vs_trials_plot
-
-df = get_performance_through_trials(day, window=50)
-starts = df[df["session"] != df["session"].shift(1)].index
-fig, ax = plt.subplots(figsize=(8, 3))
-performance_vs_trials_plot(df, ax, legend=True, session_changes=starts, hue="current_training_stage")
-```
-
-### Correct responses by side
-
-Correct and incorrect trials on each side.
-
-![Correct responses by side](_static/examples/correct_responses.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.plots import number_of_correct_responses_plot
-
-fig, ax = plt.subplots(figsize=(3, 3))
-number_of_correct_responses_plot(day, ax)
-```
-
-### Repeat or alternate
-
-Performance in trials where the correct side repeats the previous one, or alternates.
-
-![Repeat or alternate](_static/examples/repeat_or_alternate.png)
-
-```python
-from matplotlib import pyplot as plt
-
-import lecilab_behavior_analysis.data_format_changes as dfc
-from lecilab_behavior_analysis.metrics.performance import (
-    get_performance_through_trials,
-    get_repeat_or_alternate_performance,
-    get_repeat_or_alternate_series,
-)
-from lecilab_behavior_analysis.plots import repeat_or_alternate_performance_plot
-
-df = get_performance_through_trials(day, window=50)
-df["correct"] = df["correct"].apply(dfc.correct_as_number)
-df["repeat_or_alternate"] = get_repeat_or_alternate_series(df.correct_side)
-df = get_repeat_or_alternate_performance(df, window=50)
-fig, ax = plt.subplots(figsize=(8, 3))
-repeat_or_alternate_performance_plot(df, ax)
-```
-
-### Center pokes and hold time
-
-Histograms of the center pokes per trial and their duration.
-
-![Center pokes and hold time](_static/examples/center_histograms.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.plots import plot_number_of_pokes_histogram, plot_port_holding_time_histogram
-
-fig, (left, right) = plt.subplots(1, 2, figsize=(7, 3))
-plot_number_of_pokes_histogram(day, port_number=2, ax=left)
-plot_port_holding_time_histogram(day, port_number=2, ax=right)
-```
-
-### When each trial started
-
-Trial number against the time since the session started.
-
-![When each trial started](_static/examples/trial_start.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.timing import adjust_trials_and_time_of_start_to_first_session
-from lecilab_behavior_analysis.metrics.trial_events import add_time_from_session_start
-from lecilab_behavior_analysis.plots import plot_trial_time_of_start
-
-df = adjust_trials_and_time_of_start_to_first_session(add_time_from_session_start(day.copy()))
-fig, ax = plt.subplots(figsize=(6, 3))
-plot_trial_time_of_start(df, ax=ax)
-```
-
-### Reaction time and time between trials
-
-Trial by trial through the session, with their distributions on the sides.
-
-![Reaction time and time between trials](_static/examples/session_timing.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.plots import time_between_trials_and_reaction_time_plot
-
-fig, axes = plt.subplots(1, 3, figsize=(9, 3), gridspec_kw={"width_ratios": [1, 6, 1], "wspace": 0})
-time_between_trials_and_reaction_time_plot(day, axes)
-```
-
-## Choices and psychometric curves
-
-### Psychometric curve: visual
-
-Left choices against the brightness ratio of the ports (positive: left brighter), with a lapse logistic fit.
-
-![Psychometric curve: visual](_static/examples/psychometric_visual.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.choices import get_performance_by_difficulty_ratio
-from lecilab_behavior_analysis.plots import psychometric_plot
-
-visual = day[(day["stimulus_modality"] == "visual") & (day["task"] != "Habituation")]
-df = get_performance_by_difficulty_ratio(visual)
-fig, ax = plt.subplots(figsize=(4, 3.5))
-psychometric_plot(df, x="visual_stimulus_ratio", y="first_choice_numeric", ax=ax, valueType="discrete")
-```
-
-### Psychometric curve: cloud of tones
-
-Left choices against the evidence of the cloud of tones (6 bins), with a lapse logistic fit.
-
-![Psychometric curve: cloud of tones](_static/examples/psychometric_cot.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.choices import get_performance_by_difficulty_ratio
-from lecilab_behavior_analysis.plots import psychometric_plot
-
-cot_day = trials[trials["year_month_day"] == "2025-11-11"]  # cloud of tones, easy to hard
-cot = cot_day[cot_day["stimulus_modality"] == "auditory-cot"]
-df = get_performance_by_difficulty_ratio(cot)
-fig, ax = plt.subplots(figsize=(4, 3.5))
-psychometric_plot(df, x="total_evidence_strength", y="first_choice_numeric", ax=ax, valueType="continue")
-```
-
-### Choices by side and difficulty
-
-Left choices for each correct side and difficulty (when there is no stimulus value to plot against).
-
-![Choices by side and difficulty](_static/examples/choice_by_difficulty.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.trial_events import (
-    side_and_difficulty_to_numeric,
-    transform_side_choice_to_numeric,
-)
-from lecilab_behavior_analysis.plots import choice_by_difficulty_plot
-
-df = day[day["task"] != "Habituation"].copy()
-df["first_choice_numeric"] = df["first_choice"].apply(transform_side_choice_to_numeric)
-df["side_difficulty"] = df.apply(side_and_difficulty_to_numeric, axis=1)
-fig, ax = plt.subplots(figsize=(4, 3.5))
-choice_by_difficulty_plot(df, ax=ax)
-```
-
-### Bias evolution
-
-Repeat / alternate and left / right bias through training.
-
-![Bias evolution](_static/examples/bias_evolution.png)
-
-```python
-from matplotlib import pyplot as plt
-
-from lecilab_behavior_analysis.metrics.choices import get_bias_evolution_df, points_to_lines_for_bias_evolution
-from lecilab_behavior_analysis.plots import plot_decision_evolution_triangle
-
-df = trials[["subject", "total_trial", "roa_choice_numeric"]].copy()
-group_size = max(len(df) // 40, 1)
-df["trial_group"] = df["total_trial"] // group_size * group_size
-evolution = points_to_lines_for_bias_evolution(
-    get_bias_evolution_df(df, groupby="trial_group"), groupby="trial_group"
-)
-fig, ax = plt.subplots(figsize=(4, 4))
-plot_decision_evolution_triangle(evolution, ax=ax, hue="trial_group")
-```
-
-## Project overview
-
-### Performance of every mouse
-
-Performance through trials of every mouse of a project (interactive; long histories are grouped).
-
-<iframe src="_static/examples/performance_overview.html" width="100%" height="480" frameborder="0"></iframe>
-
-```python
-from lecilab_behavior_analysis.reports import overview
-
-fig = overview.performance_over_trials_figure(trials, window=50, max_points=1000)
-```
-
-### Trials and performance per day
-
-Trials and performance of each mouse, day by day.
-
-![Trials and performance per day](_static/examples/cohort.png)
-
-```python
-from lecilab_behavior_analysis.reports import overview
-
-fig = overview.cohort_trials_and_performance_figure(trials)
-```
-
-### Box occupancy
-
-When the box was used, day by day.
-
-![Box occupancy](_static/examples/box_occupancy.png)
-
-```python
-from lecilab_behavior_analysis.reports import overview
-
-fig = overview.box_occupancy_figure(trials)
-```
+The [tutorial](tutorial.md) goes through these step by step.

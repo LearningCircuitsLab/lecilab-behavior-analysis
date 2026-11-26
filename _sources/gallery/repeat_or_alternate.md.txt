@@ -1,0 +1,32 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Repeat or alternate
+
+Performance in trials where the correct side repeats the previous one, or alternates.
+
+<div class="gallery-figure"><img src="../_static/examples/repeat_or_alternate.png" alt="Repeat or alternate"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+import lecilab_behavior_analysis.data_format_changes as dfc
+from lecilab_behavior_analysis.metrics.performance import (
+    get_performance_through_trials,
+    get_repeat_or_alternate_performance,
+    get_repeat_or_alternate_series,
+)
+from lecilab_behavior_analysis.plots import repeat_or_alternate_performance_plot
+
+df = get_performance_through_trials(day, window=50)
+df["correct"] = df["correct"].apply(dfc.correct_as_number)
+df["repeat_or_alternate"] = get_repeat_or_alternate_series(df.correct_side)
+df = get_repeat_or_alternate_performance(df, window=50)
+fig, ax = plt.subplots(figsize=(8, 3))
+repeat_or_alternate_performance_plot(df, ax)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

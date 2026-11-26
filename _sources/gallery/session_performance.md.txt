@@ -1,0 +1,25 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Performance through the session
+
+Rolling performance, a dashed line at each session.
+
+<div class="gallery-figure"><img src="../_static/examples/session_performance.png" alt="Performance through the session"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.performance import get_performance_through_trials
+from lecilab_behavior_analysis.plots import performance_vs_trials_plot
+
+df = get_performance_through_trials(day, window=50)
+starts = df[df["session"] != df["session"].shift(1)].index
+fig, ax = plt.subplots(figsize=(8, 3))
+performance_vs_trials_plot(df, ax, legend=True, session_changes=starts, hue="current_training_stage")
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

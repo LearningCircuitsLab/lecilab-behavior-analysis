@@ -1,0 +1,19 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Session summary
+
+One day of a mouse: performance, choices, center port, timing.
+
+<div class="gallery-figure"><img src="../_static/examples/session_summary.png" alt="Session summary"></div>
+
+```python
+from lecilab_behavior_analysis.figures import session_summary
+
+fig, problems = session_summary(day, perf_window=50)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

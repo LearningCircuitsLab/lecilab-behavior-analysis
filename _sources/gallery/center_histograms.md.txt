@@ -1,0 +1,23 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Center pokes and hold time
+
+Histograms of the center pokes per trial and their duration.
+
+<div class="gallery-figure"><img src="../_static/examples/center_histograms.png" alt="Center pokes and hold time"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.plots import plot_number_of_pokes_histogram, plot_port_holding_time_histogram
+
+fig, (left, right) = plt.subplots(1, 2, figsize=(7, 3))
+plot_number_of_pokes_histogram(day, port_number=2, ax=left)
+plot_port_holding_time_histogram(day, port_number=2, ax=right)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

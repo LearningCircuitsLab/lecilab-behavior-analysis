@@ -1,0 +1,27 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Center port by day
+
+Center pokes per trial and center hold time, mean and 95% CI.
+
+<div class="gallery-figure"><img src="../_static/examples/center_port.png" alt="Center port by day"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.metrics.timing import get_center_hold_df
+from lecilab_behavior_analysis.plots import mean_and_ci_by_day_plot
+
+daily = get_center_hold_df(trials)
+daily["day"] = pd.to_datetime(daily["year_month_day"])
+fig, ax = plt.subplots(figsize=(8, 3))
+mean_and_ci_by_day_plot(daily, "number_of_pokes", ax=ax, color="tab:green", label="center pokes per trial")
+ax2 = ax.twinx()
+mean_and_ci_by_day_plot(daily, "hold_time", ax=ax2, color="tab:red", label="center hold time (s)")
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

@@ -1,0 +1,31 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Trials and water per day
+
+Trials of each session, by training stage, and water.
+
+<div class="gallery-figure"><img src="../_static/examples/trials_and_water.png" alt="Trials and water per day"></div>
+
+```python
+from matplotlib import pyplot as plt
+
+from lecilab_behavior_analysis.plots import trials_by_day_stacked_plot, water_by_day_plot
+
+sessions = (
+    trials.groupby(["year_month_day", "session", "current_training_stage"], sort=False)
+    .size()
+    .reset_index(name="trials")
+)
+sessions["day"] = pd.to_datetime(sessions["year_month_day"])
+water = trials.groupby("year_month_day")["water"].sum()
+water.index = pd.to_datetime(water.index)
+fig, ax = plt.subplots(figsize=(8, 3))
+trials_by_day_stacked_plot(sessions, ax=ax)
+water_by_day_plot(water.sort_index(), ax)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)

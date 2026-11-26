@@ -8,7 +8,9 @@
     setColorMode(localStorage._theme||"light");
   </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
     <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-codeautolink.css?v=b2176991" />
     <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="_static/gallery.css?v=4b1a2560" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -461,7 +463,7 @@ time the documentation is built.</p>
 trials, training times, performance, trials and water per day, performance
 by trial type, bias, center port, reaction times and engagement (needs the
 events).</p>
-<p><img alt="Subject progress" src="_images/subject_progress.png" /></p>
+<p><img alt="Subject progress" src="_images/subject_progress.png"/></p>
 </section>
 <section id="summary-of-a-session">
 <h2>Summary of a session<a class="headerlink" href="#summary-of-a-session" title="Link to this heading">#</a></h2>
@@ -470,7 +472,7 @@ psychometric panel per stimulus modality of the trials (two in multisensory
 sessions); with only one, the performance by repeat / alternate on its left
 is wider. Sound location trials (<code class="docutils literal notranslate"><span class="pre">auditory-local-wn</span></code>) are plotted against the
 sound level, positive for sounds on the left.</p>
-<p><img alt="Session summary" src="_images/session_summary.png" /></p>
+<p><img alt="Session summary" src="_images/session_summary.png"/></p>
 </section>
 <section id="panels-and-layouts">
 <h2>Panels and layouts<a class="headerlink" href="#panels-and-layouts" title="Link to this heading">#</a></h2>
@@ -478,8 +480,8 @@ sound level, positive for sounds on the left.</p>
 is a small function that draws one plot on the axes it is given, and lists
 the columns it needs:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.figures</span><span class="w"> </span><span class="kn">import</span> <span class="n">FigureData</span><span class="p">,</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">NotApplicable</span><span class="p">,</span> <span class="n">Row</span><span class="p">,</span> <span class="n">panel</span><span class="p">,</span> <span class="n">render</span>
-</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">lecilab_behavior_analysis.figures</span><span class="w"> </span><span class="kn">import</span> <span class="n">panels</span> <span class="k">as</span> <span class="n">p</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.figures.html#module-lecilab_behavior_analysis.figures"><span class="nn">lecilab_behavior_analysis.figures</span></a><span class="w"> </span><span class="kn">import</span> <span class="n">FigureData</span><span class="p">,</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">NotApplicable</span><span class="p">,</span> <span class="n">Row</span><span class="p">,</span> <span class="n">panel</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.figures.render.html#module-lecilab_behavior_analysis.figures.render" title="lecilab_behavior_analysis.figures.render"><span class="n">render</span></a>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.figures.html#module-lecilab_behavior_analysis.figures"><span class="nn">lecilab_behavior_analysis.figures</span></a><span class="w"> </span><span class="kn">import</span> <a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.figures.panels.html#module-lecilab_behavior_analysis.figures.panels" title="lecilab_behavior_analysis.figures.panels"><span class="n">panels</span></a> <span class="k">as</span> <span class="n">p</span>
 </span><span data-line="4">
 </span><span data-line="5"><span class="nd">@panel</span><span class="p">(</span><span class="s2">"trials per day"</span><span class="p">,</span> <span class="n">needs</span><span class="o">=</span><span class="p">{</span><span class="s2">"year_month_day"</span><span class="p">})</span>
 </span><span data-line="6"><span class="k">def</span><span class="w"> </span><span class="nf">trials_per_day</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
@@ -500,10 +502,10 @@ the columns it needs:</p>
 </span><span data-line="21"><span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">([</span><span class="n">Row</span><span class="p">([(</span><span class="n">p</span><span class="o">.</span><span class="n">subject_summary</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">trials_per_day</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]),</span>
 </span><span data-line="22">                 <span class="n">Row</span><span class="p">([(</span><span class="n">broken</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">optogenetics</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">subject_performance</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])],</span>
 </span><span data-line="23">                <span class="n">width</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
-</span><span data-line="24"><span class="n">fig</span><span class="p">,</span> <span class="n">problems</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">FigureData</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">perf_window</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
+</span><span data-line="24"><span class="n">fig</span><span class="p">,</span> <span class="n">problems</span> <span class="o">=</span> <a class="sphinx-codeautolink-a" href="api_generated/lecilab_behavior_analysis.figures.render.html#module-lecilab_behavior_analysis.figures.render" title="lecilab_behavior_analysis.figures.render"><span class="n">render</span></a><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">FigureData</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">perf_window</span><span class="o">=</span><span class="mi">100</span><span class="p">))</span>
 </span></pre></div>
 </div>
-<p><img alt="A layout with a panel that fails" src="_images/custom_layout.png" /></p>
+<p><img alt="A layout with a panel that fails" src="_images/custom_layout.png"/></p>
 <p><code class="docutils literal notranslate"><span class="pre">render</span></code> never stops because of one panel:</p>
 <ul class="simple">
 <li><p>a panel that raises shows a red <em>Could not generate …</em> box, the error is
@@ -511,7 +513,7 @@ logged, and it is returned in <code class="docutils literal notranslate"><span c
 <li><p>a panel that needs a column the data does not have does the same, without
 running;</p></li>
 <li><p>a panel with nothing to show for this data raises
-<code class="docutils literal notranslate"><span class="pre">NotApplicable(&quot;message&quot;)</span></code>, which shows the message in grey (not a problem).</p></li>
+<code class="docutils literal notranslate"><span class="pre">NotApplicable("message")</span></code>, which shows the message in grey (not a problem).</p></li>
 </ul>
 <p>To add a plot to the standard figures, write the panel in <code class="docutils literal notranslate"><span class="pre">figures/panels.py</span></code>
 and add it to a row in <code class="docutils literal notranslate"><span class="pre">figures/layouts.py</span></code>. Panels that need the same table
@@ -563,7 +565,7 @@ use several axes with <code class="docutils literal notranslate"><span class="pr
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=5cc810fa"></script>
+      <script src="_static/documentation_options.js?v=9da5638f"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/shibuya.js?v=50760d75"></script></body>

@@ -1,0 +1,19 @@
+---
+orphan: true
+layout: simple
+content_max_width: 1100px
+---
+
+# Box occupancy
+
+When the box was used, day by day.
+
+<div class="gallery-figure"><img src="../_static/examples/box_occupancy.png" alt="Box occupancy"></div>
+
+```python
+from lecilab_behavior_analysis.reports import overview
+
+fig = overview.box_occupancy_figure(trials)
+```
+
+`trials`, `day` and `summary` are [the inputs of the examples](../gallery.md#the-inputs-of-the-examples). [Back to the gallery](../gallery.md)
